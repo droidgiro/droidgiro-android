@@ -264,7 +264,7 @@ public final class CaptureActivity extends ListActivity implements SurfaceHolder
     if (keyCode == KeyEvent.KEYCODE_SEARCH) {
       handler.sendEmptyMessage(R.id.restart_preview);
     }
-      return true;
+      return super.onKeyDown(keyCode, event);
   }
 
   public void surfaceCreated(SurfaceHolder holder) {
