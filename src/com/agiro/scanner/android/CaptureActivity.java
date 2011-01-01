@@ -280,11 +280,11 @@ public final class CaptureActivity extends ListActivity implements SurfaceHolder
   public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
   }
 
-  public void handleDecode(HashMap resultMap, Bitmap debug_bmp) {
+  public void handleDecode(HashMap resultMap, Bitmap debugBmp) {
 //    inactivityTimer.onActivity();
 //    playBeepSoundAndVibrate();
     ImageView debugImageView = (ImageView) findViewById(R.id.debug_image_view);
-    debugImageView.setImageBitmap(debug_bmp);
+    debugImageView.setImageBitmap(debugBmp);
     if (resultMap.containsKey("reference")) {
         String str = resultMap.get("reference").toString();
         if (StringDecoder.isValidCC(str)) {
