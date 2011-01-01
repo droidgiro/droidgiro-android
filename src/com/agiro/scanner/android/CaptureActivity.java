@@ -23,7 +23,7 @@ package com.agiro.scanner.android;
 
 import com.google.zxing.client.android.camera.CameraManager;
 
-//import android.app.Activity;
+// TODO the import list really need some sorting and removing
 import android.app.ListActivity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -163,6 +163,7 @@ public final class CaptureActivity extends ListActivity implements SurfaceHolder
     window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     setContentView(R.layout.capture);
 
+    //TODO: all the button and listadapter things should probably be elsewhere
     this.eraseButton = (Button)this.findViewById(R.id.erase);
     this.eraseButton.setOnClickListener(new OnClickListener() {
       @Override
@@ -285,6 +286,7 @@ public final class CaptureActivity extends ListActivity implements SurfaceHolder
 //    playBeepSoundAndVibrate();
     ImageView debugImageView = (ImageView) findViewById(R.id.debug_image_view);
     debugImageView.setImageBitmap(debugBmp);
+    //TODO: the isValidCC checking should be optional
     if (resultMap.containsKey("reference")) {
         String str = resultMap.get("reference").toString();
         if (StringDecoder.isValidCC(str)) {
@@ -374,6 +376,7 @@ public final class CaptureActivity extends ListActivity implements SurfaceHolder
     viewfinderView.drawViewfinder();
   }
 
+  //TODO: all this should be done in a database probably
   private void populateList(String reference, String amount, String account,
   String debug) {
     list.clear();

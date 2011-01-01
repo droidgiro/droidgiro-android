@@ -24,7 +24,10 @@ import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.util.Log;
 
-// this class is crap
+/**
+* This class is some kind of test/placeholder. A histogram should be used to
+* determine contrast values.
+*/
 public final class Normalizer {
 
     private static final String TAG = "Normalizer:";

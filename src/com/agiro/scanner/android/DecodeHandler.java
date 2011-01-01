@@ -55,8 +55,7 @@ final class DecodeHandler extends Handler {
   }
 
   /**
-   * Decode the data within the viewfinder rectangle, and time how long it took. For efficiency,
-   * reuse the same reader objects from one decode to the next.
+   * Decode the data within the viewfinder rectangle, and time how long it took.
    *
    * @param data   The YUV preview frame.
    * @param width  The width of the preview frame.
@@ -71,12 +70,12 @@ final class DecodeHandler extends Handler {
 
     if (rawResult != null) {
       HashMap resultMap = StringDecoder.parseString(rawResult);
-      Bitmap debug_bmp = BitmapParser.getDebugBitmap();
+      Bitmap debugBmp = BitmapParser.getDebugBitmap();
       long end = System.currentTimeMillis();
-      Log.d(TAG, "Found barcode (" + (end - start) + " ms):\n" + "123");
+      Log.d(TAG, "Found result (" + (end - start) + " ms):\n" + rawResult);
       Message message = Message.obtain(activity.getHandler(), R.id.decode_succeeded, resultMap);
       Bundle bundle = new Bundle();
-      bundle.putParcelable(DecodeThread.BARCODE_BITMAP, debug_bmp);
+      bundle.putParcelable(DecodeThread.DEBUG_BITMAP, debugBmp);
       message.setData(bundle);
       //Log.d(TAG, "Sending decode succeeded message...");
       message.sendToTarget();

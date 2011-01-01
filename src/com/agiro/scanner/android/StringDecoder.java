@@ -30,6 +30,9 @@ import java.util.Iterator;
 import java.util.ListIterator;
 import android.util.Log;
 
+/**
+* Supposed to parse and map the string from the scanner.
+*/
 public final class StringDecoder {
 
   private static final String TAG = "StringDecoder:";

@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2008 ZXing authors
  *
- * Parts of the file was modified by aGiro authors 
+ * Parts of the file was modified by aGiro authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import java.util.Vector;
 /**
  * This class handles all the messaging which comprises the state machine for capture.
  *
- * @author dswitkin@google.com (Daniel Switkin)
+ * @author dswitkin@google.com (Daniel Switkin) (original author)
  */
 public final class CaptureActivityHandler extends Handler {
 
@@ -55,7 +55,6 @@ public final class CaptureActivityHandler extends Handler {
   CaptureActivityHandler(CaptureActivity activity) {
     this.activity = activity;
     decodeThread = new DecodeThread(activity);
-//        new ViewfinderResultPointCallback(activity.getViewfinderView()));
     decodeThread.start();
     state = State.SUCCESS;
 
@@ -83,9 +82,9 @@ public final class CaptureActivityHandler extends Handler {
         Log.d(TAG, "Got decode succeeded message");
         state = State.SUCCESS;
         Bundle bundle = message.getData();
-        Bitmap barcode = bundle == null ? null :
-            (Bitmap) bundle.getParcelable(DecodeThread.BARCODE_BITMAP);
-        activity.handleDecode((HashMap) message.obj, barcode);
+        Bitmap debugBmp = bundle == null ? null :
+            (Bitmap) bundle.getParcelable(DecodeThread.DEBUG_BITMAP);
+        activity.handleDecode((HashMap) message.obj, debugBmp);
         break;
       case R.id.decode_failed:
         state = State.PREVIEW;

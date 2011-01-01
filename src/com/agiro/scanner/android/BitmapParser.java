@@ -25,7 +25,7 @@ import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.Log;
-import android.content.Context; ////
+import android.content.Context;
 
 import android.content.res.Resources;
 
@@ -35,6 +35,16 @@ import java.util.Arrays;
 import java.util.ListIterator;
 import java.lang.StringBuffer;
 
+/**
+* This class is supposed to decode the provided camera bitmap. It finds black
+* continuous pixels, adds them as rects in a list, resizes them to match a
+* reference bitmap with a known character and compares them pixel for pixel.
+* The most matching character bitmap is translated to a string.
+* This feels too procedural, but I'm not sure how to do it otherwise.
+*
+* Also this should probably be converted to use something like BinaryBitmap like
+* the zxing barcode scanner does.
+*/
 public final class BitmapParser {
 
     private static final String TAG = "BitmapParser:";
@@ -61,7 +71,7 @@ public final class BitmapParser {
         return rawResult;
     }
 
-    // needs to be done elsewhere, not sure how
+    // The reference character bitmaps. This should be done elsewhere, not sure how
     public static List<Bitmap> resList;
     public static void createResList(Context context) {
         resList = new ArrayList<Bitmap>();
