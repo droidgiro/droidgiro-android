@@ -18,19 +18,17 @@
 
 package com.agiro.scanner.android;
 
-import com.google.zxing.client.android.camera.CameraManager;
-import com.google.zxing.PlanarYUVLuminanceSource;
+import java.util.HashMap;
 
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
-import android.graphics.Bitmap;
-import java.util.HashMap;
 
-import java.util.Hashtable;
-import java.lang.Thread;
+import com.agiro.scanner.android.camera.CameraManager;
+import com.google.zxing.PlanarYUVLuminanceSource;
 
 final class DecodeHandler extends Handler {
 

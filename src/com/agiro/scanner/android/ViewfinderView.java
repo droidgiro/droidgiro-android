@@ -21,19 +21,15 @@
 
 package com.agiro.scanner.android;
 
-import com.google.zxing.client.android.camera.CameraManager;
-
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
 
-import java.util.Collection;
-import java.util.HashSet;
+import com.agiro.scanner.android.camera.CameraManager;
 
 /**
  * This view is overlaid on top of the camera preview. It adds the viewfinder rectangle and partial

@@ -16,6 +16,8 @@
 
 package com.google.zxing.client.android.camera;
 
+import java.util.regex.Pattern;
+
 import android.content.Context;
 import android.graphics.Point;
 import android.hardware.Camera;
@@ -24,9 +26,9 @@ import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
 
-import java.util.regex.Pattern;
+import com.agiro.scanner.android.camera.CameraManager;
 
-final class CameraConfigurationManager {
+public final class CameraConfigurationManager {
 
   private static final String TAG = CameraConfigurationManager.class.getSimpleName();
 
@@ -41,14 +43,14 @@ final class CameraConfigurationManager {
   private int previewFormat;
   private String previewFormatString;
 
-  CameraConfigurationManager(Context context) {
+  public CameraConfigurationManager(Context context) {
     this.context = context;
   }
 
   /**
    * Reads, one time, values from the camera that are needed by the app.
    */
-  void initFromCameraParameters(Camera camera) {
+  public void initFromCameraParameters(Camera camera) {
     Camera.Parameters parameters = camera.getParameters();
     previewFormat = parameters.getPreviewFormat();
     previewFormatString = parameters.get("preview-format");
@@ -67,7 +69,7 @@ final class CameraConfigurationManager {
    * LuminanceSource subclass. In the future we may want to force YUV420SP as it's the smallest,
    * and the planar Y can be used for barcode scanning without a copy in some cases.
    */
-  void setDesiredCameraParameters(Camera camera) {
+  public void setDesiredCameraParameters(Camera camera) {
     Camera.Parameters parameters = camera.getParameters();
     Log.d(TAG, "Setting preview size: " + cameraResolution);
     parameters.setPreviewSize(cameraResolution.x, cameraResolution.y);
@@ -77,19 +79,19 @@ final class CameraConfigurationManager {
     camera.setParameters(parameters);
   }
 
-  Point getCameraResolution() {
+  public Point getCameraResolution() {
     return cameraResolution;
   }
 
-  Point getScreenResolution() {
+  public Point getScreenResolution() {
     return screenResolution;
   }
 
-  int getPreviewFormat() {
+  public int getPreviewFormat() {
     return previewFormat;
   }
 
-  String getPreviewFormatString() {
+  public String getPreviewFormatString() {
     return previewFormatString;
   }
 

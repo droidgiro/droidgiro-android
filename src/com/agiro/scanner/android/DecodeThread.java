@@ -19,13 +19,10 @@
 package com.agiro.scanner.android;
 
 //import android.content.SharedPreferences;
+import java.util.concurrent.CountDownLatch;
+
 import android.os.Handler;
 import android.os.Looper;
-//import android.preference.PreferenceManager;
-
-import java.util.Hashtable;
-//import java.util.Vector;
-import java.util.concurrent.CountDownLatch;
 
 /**
  * This thread does all the heavy lifting of decoding the images.

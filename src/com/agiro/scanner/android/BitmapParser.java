@@ -16,24 +16,16 @@
 
 package com.agiro.scanner.android;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ListIterator;
+
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.ColorMatrix;
-import android.graphics.ColorMatrixColorFilter;
-import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.Log;
-import android.content.Context;
-
-import android.content.res.Resources;
-
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.ListIterator;
-import java.lang.StringBuffer;
 
 /**
 * This class is supposed to decode the provided camera bitmap. It finds black

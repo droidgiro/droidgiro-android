@@ -21,66 +21,29 @@
 
 package com.agiro.scanner.android;
 
-import com.google.zxing.client.android.camera.CameraManager;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 
-// TODO the import list really need some sorting and removing
 import android.app.ListActivity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.res.AssetFileDescriptor;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.Rect;
-import android.media.AudioManager;
 import android.media.MediaPlayer;
-import android.media.MediaPlayer.OnCompletionListener;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
-import android.os.Vibrator;
-import android.preference.PreferenceManager;
-import android.text.ClipboardManager;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.view.View.OnClickListener;
 import android.widget.Button;
-
-import java.io.IOException;
-import java.text.DateFormat;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.Vector;
-
-import java.lang.StringBuffer;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Arrays;
+import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.SimpleAdapter;
+
+import com.agiro.scanner.android.camera.CameraManager;
 
 /**
  * The main activity. Draws the views and shows the results in them.
@@ -166,7 +129,6 @@ public final class CaptureActivity extends ListActivity implements SurfaceHolder
     //TODO: all the button and listadapter things should probably be elsewhere
     this.eraseButton = (Button)this.findViewById(R.id.erase);
     this.eraseButton.setOnClickListener(new OnClickListener() {
-      @Override
       public void onClick(View v) {
         reference = null;
         amount = null;
@@ -179,14 +141,12 @@ public final class CaptureActivity extends ListActivity implements SurfaceHolder
 
     this.sendButton = (Button)this.findViewById(R.id.send);
     this.sendButton.setOnClickListener(new OnClickListener() {
-      @Override
       public void onClick(View v) {
       }
     });
 
     this.scanButton = (Button)this.findViewById(R.id.scan);
     this.scanButton.setOnClickListener(new OnClickListener() {
-      @Override
       public void onClick(View v) {
       handler.sendEmptyMessage(R.id.restart_preview);
       }
