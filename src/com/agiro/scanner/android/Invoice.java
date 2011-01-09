@@ -39,37 +39,72 @@ public class Invoice {
 	 * /g445_allman_beskrivning_inbetalningservice.pdf
 	 */
 
-	/*
-	 * OCR PATTERN Start of string followed by H# OR followed by an optional #
-	 * (optional because the user might not have included the # left to the OCR
-	 * number) followed by 2 to 25 digits (the OCR number) followed by a # NOT
-	 * followed by two digits and # (because in that case we have read the BG/PG
-	 * account number)
-	 * 
-	 * Result: group 1 - Not used group 2 - Complete OCR number (including OCR
-	 * check digit) group 3 - OCR check digit
+	/**
+	 * OCR PATTERN
+	 * <ul>
+	 * <li>Start of string</li>
+	 * <li>followed by H# OR</li>
+	 * <li>&nbsp;&nbsp;&nbsp;&nbsp;followed by an optional #
+	 * <em>(optional because the user might not have included the # left to the OCR
+	 * number)</em></li>
+	 * <li>followed by 2 to 25 digits <em>(the OCR number)</em></li>
+	 * <li>followed by a #</li>
+	 * <li><strong>NOT</strong> followed by two digits and #
+	 * <em>(because in that case we have read the BG/PG
+	 * account number)</em></li>
+	 * </ul>
+	 * Result: <br/>
+	 * <ul>
+	 * <li>group 1 - Not used</li>
+	 * <li>group 2 - Complete OCR number (including OCR check digit)</li>
+	 * <li>group 3 - OCR check digit</li>
+	 * </ul>
 	 */
 	private static final Pattern OCR_PATTERN = Pattern
 			.compile("^(H#|#?)(\\d{1,24}(\\d))#(?!\\d{2}#)");
 
-	/*
-	 * AMOUNT PATTERN Start of string OR # followed by 1 to 8 digits (the
-	 * amount) followed by 2 digits (šre, the hundredth part of total amount)
-	 * followed by 1 digit (check) followed by a >
-	 * 
-	 * Result: group 1 - Not used group 2 - Amount in whole SEK group 3 - Amount
-	 * in šre (fractional part) group 4 - Amount check digit
+	/**
+	 * AMOUNT PATTERN
+	 * <ul>
+	 * <li>Start of string OR</li>
+	 * <li>&nbsp;&nbsp;&nbsp;&nbsp;#</li>
+	 * <li>followed by 1 to 8 digits <em>(the
+	 * amount) followed by 2 digits (šre, the fractional part of total amount)</em>
+	 * </li>
+	 * <li>followed by 1 digit <em>(check)</em></li>
+	 * <li>followed by a ></li>
+	 * </ul>
+	 * Result:<br/>
+	 * <ul>
+	 * <li>group 1 - Not used</li>
+	 * <li>group 2 - Amount in whole SEK</li>
+	 * <li>group 3 - Amount in šre (fractional part)</li>
+	 * <li>group 4 - Amount check digit</li>
+	 * </ul>
 	 */
 	private static final Pattern AMOUNT_PATTERN = Pattern
 			.compile("(^|#)(\\d{1,8})(\\d{2})(\\d)>");
 
-	/*
-	 * BG/PG NUMBER PATTERN Start of string OR > followed by 7 to 8 digits (the
-	 * BG/PG account number) followed by a # followed by 2 digits (the internal
-	 * document type) followed by a # followed by end of string
+	/**
+	 * BG/PG NUMBER PATTERN<br/>
+	 * <ul>
+	 * <li>Start of string OR</li>
+	 * <li>&nbsp;&nbsp;&nbsp;&nbsp;></li>
+	 * <li>followed by 7 to 8 digits <em>(the
+	 * BG/PG account number)</em></li>
+	 * <li>followed by a #</li>
+	 * <li>followed by 2 digits <em>(the internal
+	 * document type)</em></li>
+	 * <li>followed by a #</li>
+	 * <li>followed by end of string</li>
+	 * </ul>
 	 * 
-	 * Result: group 1 - Not used group 2 - BG/PG number group 3 - Internal
-	 * document type
+	 * Result:<br/>
+	 * <ul>
+	 * <li>group 1 - Not used</li>
+	 * <li>group 2 - BG/PG number</li>
+	 * <li>group 3 - Internal document type</li>
+	 * </ul>
 	 */
 	private static final Pattern ACCOUNT_PATTERN = Pattern
 			.compile("(^|>)(\\d{7,8})#(\\d{2})#$");
@@ -214,7 +249,8 @@ public class Invoice {
 				+ " >\t\t" + (giroAccount != null ? giroAccount : "NO GIRO")
 				+ "#"
 				+ (internalDocumentType != null ? internalDocumentType : "XX")
-				+ "#\t" + (isComplete() ? "Invoice complete" : "Invoice incomplete");
+				+ "#\t"
+				+ (isComplete() ? "Invoice complete" : "Invoice incomplete");
 	}
 
 }
