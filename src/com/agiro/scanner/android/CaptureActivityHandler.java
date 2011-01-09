@@ -18,20 +18,17 @@
 
 package com.agiro.scanner.android;
 
-import com.google.zxing.client.android.camera.CameraManager;
+import java.util.HashMap;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
-import java.lang.Thread;
-import java.util.HashMap;
 
-import java.util.Vector;
+import com.agiro.scanner.android.camera.CameraManager;
 
 /**
  * This class handles all the messaging which comprises the state machine for capture.

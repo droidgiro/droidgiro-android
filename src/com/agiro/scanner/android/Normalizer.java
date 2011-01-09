@@ -18,11 +18,9 @@ package com.agiro.scanner.android;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
-import android.util.Log;
 
 /**
 * This class is some kind of test/placeholder. A histogram should be used to

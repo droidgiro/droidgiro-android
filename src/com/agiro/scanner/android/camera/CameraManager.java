@@ -16,7 +16,9 @@
  * limitations under the License.
  */
 
-package com.google.zxing.client.android.camera;
+package com.agiro.scanner.android.camera;
+
+import java.io.IOException;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -29,9 +31,12 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.SurfaceHolder;
-import com.google.zxing.PlanarYUVLuminanceSource;
 
-import java.io.IOException;
+import com.google.zxing.PlanarYUVLuminanceSource;
+import com.google.zxing.client.android.camera.AutoFocusCallback;
+import com.google.zxing.client.android.camera.CameraConfigurationManager;
+import com.google.zxing.client.android.camera.FlashlightManager;
+import com.google.zxing.client.android.camera.PreviewCallback;
 
 /**
  * This object wraps the Camera service object and expects to be the only one talking to it. The
@@ -51,7 +56,7 @@ public final class CameraManager {
 
   private static CameraManager cameraManager;
 
-  static final int SDK_INT; // Later we can use Build.VERSION.SDK_INT
+  public static final int SDK_INT; // Later we can use Build.VERSION.SDK_INT
   static {
     int sdkInt;
     try {

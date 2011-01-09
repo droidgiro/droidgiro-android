@@ -16,18 +16,11 @@
 
 package com.agiro.scanner.android;
 
-import java.lang.StringBuffer;
-import java.lang.String;
-import java.lang.Character;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.Iterator;
-import java.util.ListIterator;
+import java.util.Map;
+import java.util.Set;
+
 import android.util.Log;
 
 /**

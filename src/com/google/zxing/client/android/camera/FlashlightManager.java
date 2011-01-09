@@ -16,11 +16,11 @@
 
 package com.google.zxing.client.android.camera;
 
-import android.os.IBinder;
-import android.util.Log;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+
+import android.os.IBinder;
+import android.util.Log;
 
 /**
  * This class is used to activate the weak light on some camera phones (not flash)
@@ -34,7 +34,7 @@ import java.lang.reflect.Method;
  * http://code.google.com/p/droidled/source/browse/trunk/src/com/droidled/demo/DroidLED.java</a>.
  * Thanks to Ryan Alford for pointing out the availability of this class.
  */
-final class FlashlightManager {
+public final class FlashlightManager {
 
   private static final String TAG = FlashlightManager.class.getSimpleName();
 
@@ -133,7 +133,7 @@ final class FlashlightManager {
     setFlashlight(true);
   }
 
-  static void disableFlashlight() {
+  public static void disableFlashlight() {
     setFlashlight(false);
   }
 
