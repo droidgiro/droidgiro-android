@@ -25,6 +25,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.graphics.BitmapFactory.Options;
 import android.util.Log;
 
 /**
@@ -66,19 +67,21 @@ public final class BitmapParser {
     // The reference character bitmaps. This should be done elsewhere, not sure how
     public static List<Bitmap> resList;
     public static void createResList(Context context) {
+        Options o = new Options();
+        o.inScaled = false;
         resList = new ArrayList<Bitmap>();
-        resList.add(BitmapFactory.decodeResource(context.getResources(), R.drawable.n0));
-        resList.add(BitmapFactory.decodeResource(context.getResources(), R.drawable.n1));
-        resList.add(BitmapFactory.decodeResource(context.getResources(), R.drawable.n2));
-        resList.add(BitmapFactory.decodeResource(context.getResources(), R.drawable.n3));
-        resList.add(BitmapFactory.decodeResource(context.getResources(), R.drawable.n4));
-        resList.add(BitmapFactory.decodeResource(context.getResources(), R.drawable.n5));
-        resList.add(BitmapFactory.decodeResource(context.getResources(), R.drawable.n6));
-        resList.add(BitmapFactory.decodeResource(context.getResources(), R.drawable.n7));
-        resList.add(BitmapFactory.decodeResource(context.getResources(), R.drawable.n8));
-        resList.add(BitmapFactory.decodeResource(context.getResources(), R.drawable.n9));
-        resList.add(BitmapFactory.decodeResource(context.getResources(), R.drawable.nsquare));
-        resList.add(BitmapFactory.decodeResource(context.getResources(), R.drawable.narrow));
+        resList.add(BitmapFactory.decodeResource(context.getResources(), R.drawable.n0, o));
+        resList.add(BitmapFactory.decodeResource(context.getResources(), R.drawable.n1, o));
+        resList.add(BitmapFactory.decodeResource(context.getResources(), R.drawable.n2, o));
+        resList.add(BitmapFactory.decodeResource(context.getResources(), R.drawable.n3, o));
+        resList.add(BitmapFactory.decodeResource(context.getResources(), R.drawable.n4, o));
+        resList.add(BitmapFactory.decodeResource(context.getResources(), R.drawable.n5, o));
+        resList.add(BitmapFactory.decodeResource(context.getResources(), R.drawable.n6, o));
+        resList.add(BitmapFactory.decodeResource(context.getResources(), R.drawable.n7, o));
+        resList.add(BitmapFactory.decodeResource(context.getResources(), R.drawable.n8, o));
+        resList.add(BitmapFactory.decodeResource(context.getResources(), R.drawable.n9, o));
+        resList.add(BitmapFactory.decodeResource(context.getResources(), R.drawable.nsquare, o));
+        resList.add(BitmapFactory.decodeResource(context.getResources(), R.drawable.narrow, o));
   }
 
     /**
