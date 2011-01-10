@@ -74,6 +74,7 @@ final class DecodeHandler extends Handler {
 		Bitmap bmp = source.renderCroppedGreyscaleBitmap();
 		ScanResult scanResult;
 		scanResult = new ScanResult(bmp);
+        scanResult.decode();
 		resultString = scanResult.getResultString();
 
 		if (resultString != null) {
