@@ -169,6 +169,10 @@ public class Invoice {
 		return amountFractional;
 	}
 
+	public String getCompleteAmount() {
+		return Integer.toString(amount) + "," + (amountFractional < 10 ? "0"+amountFractional : amountFractional);
+	}
+
 	public String getCheckDigitAmount() {
 		return checkDigitAmount;
 	}
@@ -178,6 +182,7 @@ public class Invoice {
 	}
 
 	public void setGiroAccount(String giroAccount) {
+		Log.v(TAG, "Got giro account.");
 		this.giroAccount = giroAccount;
 	}
 

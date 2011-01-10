@@ -81,7 +81,7 @@ public final class CaptureActivityHandler extends Handler {
         Bundle bundle = message.getData();
         Bitmap debugBmp = bundle == null ? null :
             (Bitmap) bundle.getParcelable(DecodeThread.DEBUG_BITMAP);
-        activity.handleDecode((HashMap) message.obj, debugBmp);
+        activity.handleDecode((Invoice) message.obj, debugBmp);
         break;
       case R.id.decode_failed:
         state = State.PREVIEW;

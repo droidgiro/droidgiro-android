@@ -21,9 +21,19 @@
 
 package com.agiro.scanner.android;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 
 import android.app.ListActivity;
 import android.graphics.Bitmap;
@@ -50,7 +60,7 @@ import com.agiro.scanner.android.camera.CameraManager;
  */
 public final class CaptureActivity extends ListActivity implements SurfaceHolder.Callback {
 
-  private static final String TAG = CaptureActivity.class.getSimpleName();
+  private static final String TAG = "aGiro.CaptureActivity";
 
   private static final long INTENT_RESULT_DURATION = 1500L;
   private static final long BULK_MODE_SCAN_DELAY_MS = 1000L;
@@ -240,36 +250,85 @@ public final class CaptureActivity extends ListActivity implements SurfaceHolder
   public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
   }
 
-  public void handleDecode(HashMap resultMap, Bitmap debugBmp) {
+  public void handleDecode(Invoice invoice, Bitmap debugBmp) {
 //    inactivityTimer.onActivity();
 //    playBeepSoundAndVibrate();
     ImageView debugImageView = (ImageView) findViewById(R.id.debug_image_view);
     debugImageView.setImageBitmap(debugBmp);
+    
+    Log.v(TAG, "Got invoice " + invoice);
+    if(invoice.isComplete()) {
+    	new Thread(new Runnable() {
+			
+			public void run() {
+	        	AppEngineClient aec = new AppEngineClient(CaptureActivity.this, "patrik.akerfeldt@gmail.com");
+	        	List<NameValuePair> params = new ArrayList<NameValuePair>();
+	        	params.add(new BasicNameValuePair("reference", "12345678"));
+	        	try {
+	        		Writer w = new StringWriter();
+					HttpResponse res = aec.makeRequest("/add", params);
+					Reader reader = new BufferedReader(new InputStreamReader(res.getEntity().getContent(), "UTF-8"));
+					int n;
+					char[] buffer = new char[1024];
+					while ((n = reader.read(buffer)) != -1) {
+					w.write(buffer, 0, n);
+					}
+					Log.e(TAG, "Got: " + w.toString());
+				} catch (Exception e) {
+					Log.e(TAG, e.getMessage(), e);
+				}					
+
+			}
+		}).start();
+    }
+    
     //TODO: the isValidCC checking should be optional
-    if (resultMap.containsKey("reference")) {
-        String str = resultMap.get("reference").toString();
-        if (StringDecoder.isValidCC(str)) {
-          reference = str;
-        }
-    }
-    if (resultMap.containsKey("amount")) {
-        String str = resultMap.get("amount").toString();
-        if (StringDecoder.isValidCC(str)) {
-            str = str.substring(0,str.length()-1);
-            str = new StringBuffer(str).insert((str.length()-2), ",").toString();
-            amount = str;
-        }
-    }
-    if (resultMap.containsKey("account")) {
-        String str = resultMap.get("account").toString();
-        if (StringDecoder.isValidCC(str)) {
-          account = str;
-        }
-    }
-    if (resultMap.containsKey("debug")) {
-        debug = resultMap.get("debug").toString();
-    }
-    populateList(reference, amount, account, debug);
+//    if (resultMap.containsKey("reference")) {
+//        String str = resultMap.get("reference").toString();
+//        if (StringDecoder.isValidCC(str)) {
+//        	new Thread(new Runnable() {
+//				
+//				public void run() {
+//		        	AppEngineClient aec = new AppEngineClient(CaptureActivity.this, "patrik.akerfeldt@gmail.com");
+//		        	List<NameValuePair> params = new ArrayList<NameValuePair>();
+//		        	params.add(new BasicNameValuePair("reference", "12345678"));
+//		        	try {
+//		        		Writer w = new StringWriter();
+//						HttpResponse res = aec.makeRequest("/add", params);
+//						Reader reader = new BufferedReader(new InputStreamReader(res.getEntity().getContent(), "UTF-8"));
+//						int n;
+//						char[] buffer = new char[1024];
+//						while ((n = reader.read(buffer)) != -1) {
+//						w.write(buffer, 0, n);
+//						}
+//						Log.e(TAG, "Got: " + w.toString());
+//					} catch (Exception e) {
+//						Log.e(TAG, e.getMessage(), e);
+//					}					
+//
+//				}
+//			}).start();
+//          reference = str;
+//        }
+//    }
+//    if (resultMap.containsKey("amount")) {
+//        String str = resultMap.get("amount").toString();
+//        if (StringDecoder.isValidCC(str)) {
+//            str = str.substring(0,str.length()-1);
+//            str = new StringBuffer(str).insert((str.length()-2), ",").toString();
+//            amount = str;
+//        }
+//    }
+//    if (resultMap.containsKey("account")) {
+//        String str = resultMap.get("account").toString();
+//        if (StringDecoder.isValidCC(str)) {
+//          account = str;
+//        }
+//    }
+//    if (resultMap.containsKey("debug")) {
+//        debug = resultMap.get("debug").toString();
+//    }
+    populateList(invoice.getReference(), invoice.getCompleteAmount(), invoice.getGiroAccount(), "NOT SUPPORTED");
     onContentChanged();
   }
 
