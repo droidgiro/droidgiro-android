@@ -250,7 +250,7 @@ public final class CaptureActivity extends ListActivity implements SurfaceHolder
   public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
   }
 
-  public void handleDecode(Invoice invoice, Bitmap debugBmp) {
+  public void handleDecode(final Invoice invoice, Bitmap debugBmp) {
 //    inactivityTimer.onActivity();
 //    playBeepSoundAndVibrate();
     ImageView debugImageView = (ImageView) findViewById(R.id.debug_image_view);
@@ -261,9 +261,9 @@ public final class CaptureActivity extends ListActivity implements SurfaceHolder
     	new Thread(new Runnable() {
 			
 			public void run() {
-	        	AppEngineClient aec = new AppEngineClient(CaptureActivity.this, "patrik.akerfeldt@gmail.com");
+	        	AppEngineClient aec = new AppEngineClient(CaptureActivity.this, "test@example.com");
 	        	List<NameValuePair> params = new ArrayList<NameValuePair>();
-	        	params.add(new BasicNameValuePair("reference", "12345678"));
+	        	params.add(new BasicNameValuePair("reference", invoice.getReference()));
 	        	try {
 	        		Writer w = new StringWriter();
 					HttpResponse res = aec.makeRequest("/add", params);
