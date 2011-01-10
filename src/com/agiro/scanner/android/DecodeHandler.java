@@ -61,16 +61,18 @@ final class DecodeHandler extends Handler {
    */
   private void decode(byte[] data, int width, int height) {
     long start = System.currentTimeMillis();
-    String rawResult = null;
+    String resultString = null;
     PlanarYUVLuminanceSource source = CameraManager.get().buildLuminanceSource(data, width, height);
     Bitmap bmp = source.renderCroppedGreyscaleBitmap();
-    rawResult = BitmapParser.decode(bmp);
+    ScanResult scanResult;
+    scanResult = new ScanResult(bmp);
+    resultString = scanResult.getResultString();
 
-    if (rawResult != null) {
-      HashMap resultMap = StringDecoder.parseString(rawResult);
-      Bitmap debugBmp = BitmapParser.getDebugBitmap();
+    if (resultString != null) {
+      HashMap resultMap = StringDecoder.parseString(resultString);
+      Bitmap debugBmp = scanResult.getDebugBitmap();
       long end = System.currentTimeMillis();
-      Log.d(TAG, "Found result (" + (end - start) + " ms):\n" + rawResult);
+      Log.d(TAG, "Found result (" + (end - start) + " ms):\n" + resultString);
       Message message = Message.obtain(activity.getHandler(), R.id.decode_succeeded, resultMap);
       Bundle bundle = new Bundle();
       bundle.putParcelable(DecodeThread.DEBUG_BITMAP, debugBmp);

@@ -61,6 +61,7 @@ public final class CaptureActivity extends ListActivity implements SurfaceHolder
 
   private CaptureActivityHandler handler;
 
+  private static ScanResources scanResources;
   private ViewfinderView viewfinderView;
   private MediaPlayer mediaPlayer;
   private boolean hasSurface;
@@ -152,10 +153,8 @@ public final class CaptureActivity extends ListActivity implements SurfaceHolder
       }
     });
 
-    // i have no idea how to do this properly
-    if (BitmapParser.resList == null) {
-        BitmapParser.createResList(this);
-    }
+    // does getResources actually always need the context from main activity?
+    scanResources = new ScanResources(this);
 
     SimpleAdapter adapter = new SimpleAdapter(this, list,
     R.layout.result_list_item,
@@ -358,4 +357,7 @@ public final class CaptureActivity extends ListActivity implements SurfaceHolder
     list.add(temp3);
     }
 
+  public static ScanResources getScanResources() {
+    return scanResources;
+  }
 }
