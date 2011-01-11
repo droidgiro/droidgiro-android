@@ -38,9 +38,12 @@ final class DecodeHandler extends Handler {
 
 	private Invoice invoice;
 
+	private Scanner scanner;
+
 	DecodeHandler(CaptureActivity activity) {
 		this.activity = activity;
 		invoice = new Invoice();
+		scanner = new Scanner();
 	}
 
 	@Override
@@ -72,14 +75,13 @@ final class DecodeHandler extends Handler {
 		PlanarYUVLuminanceSource source = CameraManager.get()
 				.buildLuminanceSource(data, width, height);
 		Bitmap bmp = source.renderCroppedGreyscaleBitmap();
-		ScanResult scanResult;
-		scanResult = new ScanResult(bmp);
-        scanResult.decode();
-		resultString = scanResult.getResultString();
+		scanner.setTargetBitmap(bmp);
+		scanner.decode();
+		resultString = scanner.getResultString();
 
 		if (resultString != null) {
 			invoice.decode(resultString);
-			Bitmap debugBmp = scanResult.getDebugBitmap();
+			Bitmap debugBmp = scanner.getDebugBitmap();
 			long end = System.currentTimeMillis();
 			Log.d(TAG, "Found result (" + (end - start) + " ms):\n"
 					+ resultString);
@@ -95,6 +97,8 @@ final class DecodeHandler extends Handler {
 					R.id.decode_failed);
 			message.sendToTarget();
 		}
+
+		scanner.clear();
 	}
 
 }
