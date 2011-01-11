@@ -40,25 +40,25 @@ public class Scanner {
 	/**
 	 * The width of the bitmap to be scanned.
 	 */
-	private static int bmpWidth;
+	protected static int bmpWidth;
 	/**
 	 * The height of the bitmap to be scanned.
 	 */
-	private static int bmpHeight;
+	protected static int bmpHeight;
 	/**
 	 * The width the scanned character bitmaps should be scaled to.
 	 * Read from the reference bitmaps.
 	 */
-	private int scaleWidth;
+	protected int scaleWidth;
 	/**
 	 * The width the scanned character bitmaps should be scaled to.
 	 * Read from the reference bitmaps.
 	 */
-	private int scaleHeight;
+	protected int scaleHeight;
 	/**
 	 * The color black in RGB images expressed as integer.
 	 */
-	private int black = -16777216;
+	protected int black = -16777216;
 	/**
 	 * The minimum amount of black pixels required for a column to be registerd.
 	 */
@@ -115,7 +115,7 @@ public class Scanner {
 	 * The minimum lenght the interpreted string must have for the scanner
 	 * to produce a result.
 	 */
-	protected int minStringLength = 4;
+	protected int minResultLength = 4;
 	/**
 	 * Image brightness expressed as fraction.
 	 */
@@ -130,7 +130,7 @@ public class Scanner {
 	 * @param width The width of the bitmap to be scanned.
 	 * @param height The height of the bitmap to be scanned.
 	 */
-	private void calculateCharSizeLimits(int width, int height) {
+	protected void calculateCharSizeLimits(int width, int height) {
 		charMinWidth = (int) ((float) width*charMinWidthFraction);
 		charMaxWidth = (int) ((float) width*charMaxWidthFraction);
 		charMinHeight = (int) ((float) height*charMinHeightFraction);
@@ -138,11 +138,11 @@ public class Scanner {
 	}
 
 	/**
-	 * @param minStringLength  The minimum lenght the interpreted string must
+	 * @param minResultLength  The minimum lenght the interpreted string must
 	 * have for the scanner to produce a result.
 	 */
-	public void setMinStringLength(int minStringLength) {
-		this.minStringLength = minStringLength;
+	public void setMinResultLength(int minResultLength) {
+		this.minResultLength = minResultLength;
 	}
 
 	/**
@@ -198,22 +198,15 @@ public class Scanner {
 	private Bitmap debugBmp = null;
 	private Bitmap referenceBmp = null;
 	private Bitmap contrastBmp = null;
-	private List<Bitmap> referenceBmps = null;
-	private List<Bitmap> scaledBmps = null;
-	private List<Rect> blackPixelCoords = null;
+	private List<Bitmap> referenceBmps;
+	private List<Bitmap> scaledBmps;
+	private List<Rect> blackPixelCoords;
 
-	public Scanner() {
-		setupScanResources();
+	public Scanner(ScanResources scanResources) {
+		setupScanResources(scanResources);
 	}
 
-	public Scanner(Bitmap bmp) {
-		setupScanResources();
-		setTargetBitmap(bmp);
-	}
-
-	private void setupScanResources() {
-		ScanResources scanResources;
-		scanResources = CaptureActivity.getScanResources();
+	private void setupScanResources(ScanResources scanResources) {
 		referenceBmps = scanResources.getReferenceList();
 		Bitmap measure = referenceBmps.get(0);
 		scaleWidth = measure.getWidth();
@@ -221,14 +214,14 @@ public class Scanner {
 	}
 
 	/**
-	 * The bitmap decoding and interpreting method.
+	 * The bitmap scanning and interpreting method.
 	 */
-	public void decode() {
+	public void scan() {
 		contrastBmp = Normalizer.scaleOnly(targetBmp, colorScale);
 		contrastBmp = Normalizer.scaleTranslate(contrastBmp,
 			colorScaleTranslate);
 		blackPixelCoords = findBlackPixels(contrastBmp);
-		if (blackPixelCoords.size() >= minStringLength) {
+		if (blackPixelCoords.size() >= minResultLength) {
 			scaledBmps = uniformBitmapList(targetBmp,
 				blackPixelCoords, scaleWidth, scaleHeight);
 			resultString = referenceCompare(scaledBmps);
@@ -241,11 +234,11 @@ public class Scanner {
 		debugBmp = null;
 		referenceBmp = null;
 		contrastBmp = null;
-		if (scaledBmps != null) {
+		try {
 			scaledBmps.clear();
-		}
-		if (blackPixelCoords != null) {
 			blackPixelCoords.clear();
+		}
+		catch ( NullPointerException e ) {
 		}
 	}
 
@@ -271,6 +264,10 @@ public class Scanner {
 	public Bitmap getTargetBitmap() {
 		return targetBmp;
 	}
+
+	/**
+	 * @param targetBmp The bitmap to be scanned.
+	 */
 	public void setTargetBitmap(Bitmap targetBmp) {
 		this.targetBmp = targetBmp;
 		bmpHeight = targetBmp.getHeight();
@@ -300,9 +297,9 @@ public class Scanner {
 	 * @param bmp The bitmap to be scanned.
 	 * @return A List of coordinates in types Rect.
 	 */
-	private List<Rect> findBlackPixels(Bitmap bmp) {
-		//TODO: allow it to stop reading if it finds no good cols
+	protected List<Rect> findBlackPixels(Bitmap bmp) {
 		//Scan columns for black pixels
+		List<Rect> coordList = new ArrayList<Rect>();
 		List<int[]> cols = new ArrayList<int[]>();
 		int lastEmpty = -2;
 		int lastFull = -2;
@@ -323,18 +320,23 @@ public class Scanner {
 			} else {
 				lastEmpty = x;
 			}
-			if ((lastFull-1 == lastEmpty)||(x == 0 && x == lastFull)){
+			if ((lastFull-1 == lastEmpty)||
+				(x == 0 && x == lastFull)){
 				lastLeft = x;
-			} else if ((lastEmpty-1 == lastFull)||(x == bmpWidth-1 && x == lastFull)){
+			} else if ((lastEmpty-1 == lastFull)||
+						(x == bmpWidth-1 && x == lastFull)){
 				lastRight = x;
 				int[] c = new int[] {lastLeft, lastRight};
 				cols.add(c);
 			}
 		}
+		//Stop if gathered cols are too few
+		if (cols.size() < minResultLength) {
+			return coordList;
+		}
 		//Scan rows of gathered cols for black pixels
 		lastEmpty = -2;
 		lastFull = -2;
-		List<Rect> coordList = new ArrayList<Rect>();
 		ListIterator<int[]> li = cols.listIterator();
 		while (li.hasNext()) {
 			int[] coords = li.next();
@@ -351,11 +353,15 @@ public class Scanner {
 				} else {
 					lastEmpty = y;
 				}
-				if ((lastFull-1 == lastEmpty)||(y == 0 && y == lastFull)){
+				if ((lastFull-1 == lastEmpty)||
+					(y == 0 && y == lastFull)) {
 					lastTop = y;
-				} else if ((lastEmpty-1 == lastFull)||(y == bmpWidth-1 && y == lastFull)){
+				} else if ((lastEmpty-1 == lastFull)||
+							(y == bmpWidth-1 && y == lastFull)) {
 					lastBottom = y;
-					Rect coordRect = new Rect(coords[0], lastTop, coords[1], lastBottom);
+					Rect coordRect = new Rect(coords[0], lastTop,
+						coords[1], lastBottom);
+					//Ignore sections of the wrong size or shape
 					if ((coordRect.width() > charMinWidth)&&
 						(coordRect.width() < charMaxWidth)&&
 						(coordRect.height() > charMinHeight)&&
@@ -382,7 +388,8 @@ public class Scanner {
 	* @param toHeight The target height to scale the bitmaps into.
 	* @return The list of scaled bitmaps.
 	*/
-	private List<Bitmap> uniformBitmapList(Bitmap bmp, List coordList, int toWidth, int toHeight) {
+	private List<Bitmap> uniformBitmapList(Bitmap bmp, List coordList,
+			int toWidth, int toHeight) {
 		List<Bitmap> bmpList = new ArrayList<Bitmap>();
 		ListIterator<Rect> li = coordList.listIterator();
 		while (li.hasNext()) {
@@ -391,9 +398,11 @@ public class Scanner {
 			pixels = new int[coordRect.height() * coordRect.width()];
 			bmp.getPixels(pixels, 0, coordRect.width(), coordRect.left,
 				coordRect.top, coordRect.width(), coordRect.height());
-			Bitmap unscaledBmp = Bitmap.createBitmap(pixels, 0, coordRect.width(),
+			Bitmap unscaledBmp =
+				Bitmap.createBitmap(pixels, 0, coordRect.width(),
 				coordRect.width(), coordRect.height(), Bitmap.Config.ARGB_8888);
-			Bitmap scaledBmp = Bitmap.createScaledBitmap(unscaledBmp, toWidth, toHeight, true);
+			Bitmap scaledBmp =
+				Bitmap.createScaledBitmap(unscaledBmp, toWidth, toHeight, true);
 			scaledBmp = Normalizer.scaleOnly(scaledBmp, colorScale);
 			scaledBmp = Normalizer.scaleTranslate(scaledBmp,
 				colorScaleTranslate);
@@ -408,9 +417,8 @@ public class Scanner {
 	* @param bmpList The list of bitmaps.
 	* @return The composed bitmap.
 	*/
-	private Bitmap composeFromBitmapList(List inbmpList) {
-		//TODO
-		List<Bitmap> bmpList = inbmpList;
+	private Bitmap composeFromBitmapList(List toCompose) {
+		List<Bitmap> bmpList = toCompose;
 		Bitmap measureBmp = bmpList.get(0);
 		int toWidth = measureBmp.getWidth();
 		int toHeight = measureBmp.getHeight();
@@ -424,7 +432,7 @@ public class Scanner {
 			Rect srcRect = new Rect(0, 0, bmp.getWidth(), bmp.getHeight());
 			Rect dstRect = new Rect(srcRect);
 			if (i != 0){
-			dstRect.offset(i*bmp.getWidth(), 0);
+				dstRect.offset(i*bmp.getWidth(), 0);
 			}
 			i++;
 			canvas.drawBitmap(bmp, srcRect, dstRect, null);

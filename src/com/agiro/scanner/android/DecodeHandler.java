@@ -35,6 +35,7 @@ final class DecodeHandler extends Handler {
 	private static final String TAG = DecodeHandler.class.getSimpleName();
 
 	private final CaptureActivity activity;
+	private ScanResources scanResources;
 
 	private Invoice invoice;
 
@@ -43,7 +44,8 @@ final class DecodeHandler extends Handler {
 	DecodeHandler(CaptureActivity activity) {
 		this.activity = activity;
 		invoice = new Invoice();
-		scanner = new Scanner();
+		scanResources = new ScanResources(activity);
+		scanner = new Scanner(scanResources);
 	}
 
 	@Override
@@ -76,7 +78,7 @@ final class DecodeHandler extends Handler {
 				.buildLuminanceSource(data, width, height);
 		Bitmap bmp = source.renderCroppedGreyscaleBitmap();
 		scanner.setTargetBitmap(bmp);
-		scanner.decode();
+		scanner.scan();
 		resultString = scanner.getResultString();
 
 		if (resultString != null) {
