@@ -1,8 +1,10 @@
 package com.agiro.scanner.android;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -13,30 +15,55 @@ import android.util.Log;
 public final class ScanResources {
 
 	private final String TAG = "aGiro.ScanResources";
-	private List<Bitmap> referenceList;
 
-	private String[] internalChars = {
-	"char48_16x24","char49_16x24","char50_16x24",
-	"char51_16x24","char52_16x24","char53_16x24",
-	"char54_16x24","char55_16x24","char56_16x24",
-	"char57_16x24","char35_16x24","char62_16x24"
+	private Map<String,Bitmap> charMap;
+
+	private Map<String,String> charIds = new HashMap<String,String>() {
+		{
+			put("#","char35_16x24");
+			put("0","char48_16x24");
+			put("1","char49_16x24");
+			put("2","char50_16x24");
+			put("3","char51_16x24");
+			put("4","char52_16x24");
+			put("5","char53_16x24");
+			put("6","char54_16x24");
+			put("7","char55_16x24");
+			put("8","char56_16x24");
+			put("9","char57_16x24");
+			put(">","char62_16x24");
+		}
 	};
 
 	public ScanResources(Context c) {
-		loadInternalChars(c);
+		loadCharsFromRes(c);
 	}
 
-	public void loadInternalChars(Context c) {
+	public ScanResources(String path) {
+		loadCharsFromExt(path);
+	}
+
+	public void loadCharsFromExt(String path) {
+	}
+
+	public void loadCharsFromRes(Context c) {
 		Options o = new Options();
 		o.inPreferredConfig = Bitmap.Config.RGB_565;
 		o.inScaled = false;
-		referenceList = new ArrayList<Bitmap>();
+		charMap = new HashMap<String,Bitmap>();
 		try {
 			Class res = R.drawable.class;
-			for (String name : internalChars) {
-				Field field = res.getField(name);
+			Set set = charIds.entrySet();
+			Iterator it = set.iterator();
+			while(it.hasNext()) {
+				Map.Entry me = (Map.Entry)it.next();
+				String cha = (String)me.getKey();
+				String id = (String)me.getValue();
+				Field field = res.getField(id);
 				int drawableId = field.getInt(null);
-				referenceList.add(BitmapFactory.decodeResource(c.getResources(), drawableId, o));
+				Bitmap chaBmp = BitmapFactory.decodeResource(
+					c.getResources(), drawableId, o);
+				charMap.put(cha, chaBmp);
 			}
 		}
 		catch (Exception e) {
@@ -44,8 +71,8 @@ public final class ScanResources {
 		}
 	}
 
-	public List<Bitmap> getReferenceList() {
-		return referenceList;
+	public Map getCharMap() {
+		return charMap;
 	}
 
 }

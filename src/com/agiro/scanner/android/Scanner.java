@@ -17,8 +17,12 @@
 package com.agiro.scanner.android;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
+import java.util.Set;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -60,7 +64,7 @@ public class Scanner {
 	 */
 	protected int black = -16777216;
 	/**
-	 * The minimum amount of black pixels required for a column to be registerd.
+	 * The minimum amount of black pixels required for a column to be registered.
 	 */
 	protected int minBlackPerCol = 2;
 	/**
@@ -198,17 +202,22 @@ public class Scanner {
 	private Bitmap debugBmp = null;
 	private Bitmap referenceBmp = null;
 	private Bitmap contrastBmp = null;
-	private List<Bitmap> referenceBmps;
 	private List<Bitmap> scaledBmps;
 	private List<Rect> blackPixelCoords;
+	private Map<String,Bitmap> charMap;
 
 	public Scanner(ScanResources scanResources) {
 		setupScanResources(scanResources);
 	}
 
+	public Scanner(ScanResources scanResources, Bitmap targetBmp) {
+		setupScanResources(scanResources);
+		this.targetBmp = targetBmp;
+	}
+
 	private void setupScanResources(ScanResources scanResources) {
-		referenceBmps = scanResources.getReferenceList();
-		Bitmap measure = referenceBmps.get(0);
+		charMap = scanResources.getCharMap();
+		Bitmap measure = charMap.get("#");
 		scaleWidth = measure.getWidth();
 		scaleHeight = measure.getHeight();
 	}
@@ -283,13 +292,13 @@ public class Scanner {
 		return debugBmp;
 	}
 
-	/**
-	 * @return A bitmap composed of all the character reference bitmaps.
-	 */
-	public Bitmap getReferenceBitmap() {
-		referenceBmp = composeFromBitmapList(referenceBmps);
-		return referenceBmp;
-	}
+//	/**
+//	 * @return A bitmap composed of all the character reference bitmaps.
+//	 */
+//	public Bitmap getReferenceBitmap() {
+//		referenceBmp = composeFromBitmapList(referenceBmps);
+//		return referenceBmp;
+//	}
 
 	/**
 	 * Scans a bitmap for continuous black pixels and lists their coordinates
@@ -442,49 +451,42 @@ public class Scanner {
 	}
 
 	/**
-	 * Compare the list found bitmaps to the reference bitmaps and
+	 * Compare the list of collected bitmaps to the reference bitmaps and
 	 * interpret the best matching reference to a string.
 	 * @param bmpList The list of bitmaps to compare.
 	 * @return The resulting string
 	 */
 	private String referenceCompare(List bmpList) {
-		//TODO: make a limit for how dissimilar the best matching is allowed
-		// to be.
+		//TODO: Make a limit for how dissimilar the best matching is allowed
+		// to be, and stop iterating if match is ~99%.
 		StringBuffer result = new StringBuffer();
 		ListIterator<Bitmap> li = bmpList.listIterator();
 		while (li.hasNext()) {
 			Bitmap bmp = li.next();
-			int bestIndex = -1;
+			String bestChar = "X";
 			int bestScore = -1;
-			ListIterator<Bitmap> rli = referenceBmps.listIterator();
-			while (rli.hasNext()) {
+			Set set = charMap.entrySet();
+			Iterator it = set.iterator();
+			while (it.hasNext()) {
 				int truePixels = 0;
-
-				Bitmap rbmp = rli.next();
-				int rbmp_i = rli.nextIndex();
+				Map.Entry me = (Map.Entry)it.next();
+				String currentChar = (String)me.getKey();
+				Bitmap currentCharBmp = (Bitmap)me.getValue();
 				for(int x = 0; x < bmp.getWidth(); ++x) {
 					for(int y = 0; y < bmp.getHeight(); ++y) {
-						int rp = rbmp.getPixel(x,y);
-						int p = bmp.getPixel(x,y);
-						if (rp == p){
+						int refPixel = currentCharBmp.getPixel(x,y);
+						int checkPixel = bmp.getPixel(x,y);
+						if (refPixel == checkPixel){
 							truePixels++;
 						}
 					}
 				}
 				if (truePixels > bestScore){
 					bestScore = truePixels;
-					bestIndex = rbmp_i;
+					bestChar = currentChar;
 				}
 			}
-			int character = bestIndex-1;
-			if (character == 10) {
-				result.append((char)35);
-			}
-			else if (character == 11) {
-				result.append((char)62);
-			} else {
-				result.append(Integer.toString(character));
-			}
+			result.append(bestChar);
 		}
 		return result.toString();
 	}
