@@ -400,7 +400,7 @@ public class Scanner {
 				coordRect.top, coordRect.width(), coordRect.height());
 			Bitmap unscaledBmp =
 				Bitmap.createBitmap(pixels, 0, coordRect.width(),
-				coordRect.width(), coordRect.height(), Bitmap.Config.ARGB_8888);
+				coordRect.width(), coordRect.height(), Bitmap.Config.RGB_565);
 			Bitmap scaledBmp =
 				Bitmap.createScaledBitmap(unscaledBmp, toWidth, toHeight, true);
 			scaledBmp = Normalizer.scaleOnly(scaledBmp, colorScale);
@@ -423,7 +423,7 @@ public class Scanner {
 		int toWidth = measureBmp.getWidth();
 		int toHeight = measureBmp.getHeight();
 		Bitmap resultBmp = Bitmap.createBitmap(toWidth * bmpList.size(),
-			toHeight, Bitmap.Config.ARGB_8888);
+			toHeight, Bitmap.Config.RGB_565);
 		Canvas canvas = new Canvas(resultBmp);
 		ListIterator<Bitmap> li = bmpList.listIterator();
 		int i = 0;

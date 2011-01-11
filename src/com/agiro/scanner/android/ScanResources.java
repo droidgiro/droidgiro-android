@@ -16,8 +16,10 @@ public final class ScanResources {
 	private List<Bitmap> referenceList;
 
 	private String[] internalChars = {
-	"n0","n1","n2","n3","n4","n5","n6",
-	"n7","n8","n9","nsquare","narrow"
+	"char48_16x24","char49_16x24","char50_16x24",
+	"char51_16x24","char52_16x24","char53_16x24",
+	"char54_16x24","char55_16x24","char56_16x24",
+	"char57_16x24","char35_16x24","char62_16x24"
 	};
 
 	public ScanResources(Context c) {
@@ -26,6 +28,7 @@ public final class ScanResources {
 
 	public void loadInternalChars(Context c) {
 		Options o = new Options();
+		o.inPreferredConfig = Bitmap.Config.RGB_565;
 		o.inScaled = false;
 		referenceList = new ArrayList<Bitmap>();
 		try {
