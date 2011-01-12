@@ -57,8 +57,8 @@ public final class ScanResources {
 		}
 	};
 
-	public ScanResources(Context c) {
-		loadCharsFromRes(c);
+	public ScanResources(Context context) {
+		loadCharsFromRes(context);
 	}
 
 	public ScanResources(String path) {
@@ -79,7 +79,7 @@ public final class ScanResources {
 	 * with a Character as key and its corresponding Bitmap as value.
 	 * @param context The application context.
 	 */
-	public void loadCharsFromRes(Context c) {
+	public void loadCharsFromRes(Context context) {
 		Options o = new Options();
 		o.inPreferredConfig = Bitmap.Config.RGB_565;
 		o.inScaled = false;
@@ -95,7 +95,7 @@ public final class ScanResources {
 				Field field = res.getField(id);
 				int drawableId = field.getInt(null);
 				Bitmap chaBmp = BitmapFactory.decodeResource(
-					c.getResources(), drawableId, o);
+					context.getResources(), drawableId, o);
 				charMap.put(cha, chaBmp);
 			}
 		}
