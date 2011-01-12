@@ -245,6 +245,9 @@ public class Scanner {
 		}
 	}
 
+	/**
+	 * Clears the scanner object for a new scan.
+	 */
 	public void clear() {
 		resultString = null;
 		targetBmp = null;
@@ -570,9 +573,9 @@ public class Scanner {
 					percentMatch = (int)(((double)matchingPixels/totalPixels)*100);
 				}
 			}
-//			Log.d(TAG, "Best matching is: "+bestChar+" at "+percentMatch+"%");
 			percentMatchMap.put(index, percentMatch);
 			result.append(bestChar);
+			index++;
 		}
 		return result.toString();
 	}
