@@ -17,12 +17,15 @@
 package com.agiro.scanner.android;
 
 import java.util.ArrayList;
+import java.text.CharacterIterator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
+import java.text.StringCharacterIterator;
+
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -44,21 +47,19 @@ public class Scanner {
 	/**
 	 * The width of the bitmap to be scanned.
 	 */
-	protected static int bmpWidth;
+	protected static int targetBmpWidth;
 	/**
 	 * The height of the bitmap to be scanned.
 	 */
-	protected static int bmpHeight;
+	protected static int targetBmpHeight;
 	/**
-	 * The width the scanned character bitmaps should be scaled to.
-	 * Read from the reference bitmaps.
+	 * The width of the reference characters.
 	 */
-	protected int scaleWidth;
+	protected int refCharWidth;
 	/**
-	 * The width the scanned character bitmaps should be scaled to.
-	 * Read from the reference bitmaps.
+	 * The height of the reference characters.
 	 */
-	protected int scaleHeight;
+	protected int refCharHeight;
 	/**
 	 * The color black in RGB images expressed as integer.
 	 */
@@ -201,10 +202,16 @@ public class Scanner {
 	private Bitmap targetBmp = null;
 	private Bitmap debugBmp = null;
 	private Bitmap referenceBmp = null;
+	private Bitmap matchingReferenceBmp = null;
+	private Bitmap contrastedDebugBmp = null;
+	private Bitmap unContrastedDebugBmp = null;
 	private Bitmap contrastBmp = null;
-	private List<Bitmap> scaledBmps;
+	private List<Bitmap> debugBmps;
+	private List<Bitmap> foundContrastedBmps;
+	private List<Bitmap> foundUnContrastedBmps;
 	private List<Rect> blackPixelCoords;
-	private Map<String,Bitmap> charMap;
+	private Map<Character,Bitmap> charMap;
+	private Map<Integer,Integer> percentMatchMap;
 
 	public Scanner(ScanResources scanResources) {
 		setupScanResources(scanResources);
@@ -217,9 +224,10 @@ public class Scanner {
 
 	private void setupScanResources(ScanResources scanResources) {
 		charMap = scanResources.getCharMap();
-		Bitmap measure = charMap.get("#");
-		scaleWidth = measure.getWidth();
-		scaleHeight = measure.getHeight();
+		//TODO
+		Bitmap measure = charMap.get((char)35);
+		refCharWidth = measure.getWidth();
+		refCharHeight = measure.getHeight();
 	}
 
 	/**
@@ -231,9 +239,9 @@ public class Scanner {
 			colorScaleTranslate);
 		blackPixelCoords = findBlackPixels(contrastBmp);
 		if (blackPixelCoords.size() >= minResultLength) {
-			scaledBmps = uniformBitmapList(targetBmp,
-				blackPixelCoords, scaleWidth, scaleHeight);
-			resultString = referenceCompare(scaledBmps);
+			foundContrastedBmps = uniformBitmapList(targetBmp,
+				blackPixelCoords, refCharWidth, refCharHeight, true);
+			resultString = referenceCompare(foundContrastedBmps, charMap);
 		}
 	}
 
@@ -242,9 +250,14 @@ public class Scanner {
 		targetBmp = null;
 		debugBmp = null;
 		referenceBmp = null;
+		matchingReferenceBmp = null;
+		contrastedDebugBmp = null;
+		unContrastedDebugBmp = null;
 		contrastBmp = null;
 		try {
-			scaledBmps.clear();
+			debugBmps.clear();
+			foundContrastedBmps.clear();
+			foundUnContrastedBmps.clear();
 			blackPixelCoords.clear();
 		}
 		catch ( NullPointerException e ) {
@@ -279,27 +292,78 @@ public class Scanner {
 	 */
 	public void setTargetBitmap(Bitmap targetBmp) {
 		this.targetBmp = targetBmp;
-		bmpHeight = targetBmp.getHeight();
-		bmpWidth = targetBmp.getWidth();
-		calculateCharSizeLimits(bmpWidth, bmpHeight);
+		targetBmpHeight = targetBmp.getHeight();
+		targetBmpWidth = targetBmp.getWidth();
+		calculateCharSizeLimits(targetBmpWidth, targetBmpHeight);
 	}
 
 	/**
-	 * @return A bitmap composed of all the character bitmaps that was found.
+	 * @return A bitmap composed of the matching reference character bitmaps,
+	 * the contrasted and the uncontrasted characters found in the scanned
+	 * bitmap.
 	 */
 	public Bitmap getDebugBitmap() {
-		debugBmp = composeFromBitmapList(scaledBmps);
+		debugBmps = new ArrayList<Bitmap>();
+		debugBmps.add(getMatchingReferenceBitmap());
+		debugBmps.add(getContrastedDebugBitmap());
+		debugBmps.add(getUnContrastedDebugBitmap());
+		debugBmp = composeFromBitmapList(debugBmps, true);
 		return debugBmp;
 	}
 
-//	/**
-//	 * @return A bitmap composed of all the character reference bitmaps.
-//	 */
-//	public Bitmap getReferenceBitmap() {
-//		referenceBmp = composeFromBitmapList(referenceBmps);
-//		return referenceBmp;
-//	}
+	/**
+	 * @return A bitmap composed of all the character bitmaps that was found,
+	 * contrasted.
+	 */
+	public Bitmap getContrastedDebugBitmap() {
+		contrastedDebugBmp = composeFromBitmapList(foundContrastedBmps, false);
+		return contrastedDebugBmp;
+	}
 
+	/**
+	 * @return A bitmap composed of all the character reference bitmaps.
+	 */
+	public Bitmap getReferenceBitmap() {
+		List<Bitmap> charList = new ArrayList<Bitmap>(charMap.values());
+		referenceBmp = composeFromBitmapList(charList, false);
+		return referenceBmp;
+	}
+
+	/**
+	 * @return A bitmap composed of all the character reference bitmaps
+	 * ordered to match the resulting string.
+	 */
+	public Bitmap getMatchingReferenceBitmap() {
+		List<Bitmap> matchingBmpList = new ArrayList<Bitmap>();
+		if (resultString != null) {
+			CharacterIterator it = new StringCharacterIterator(resultString);
+			for (char ch = it.first(); ch != CharacterIterator.DONE; ch = it.next()){
+				matchingBmpList.add(charMap.get(ch));
+			}
+			matchingReferenceBmp = composeFromBitmapList(matchingBmpList, false);
+		}
+		return matchingReferenceBmp;
+	}
+
+	/**
+	 * @return A bitmap composed of all the character bitmaps that was found,
+	 * uncontrasted.
+	 */
+	public Bitmap getUnContrastedDebugBitmap() {
+		foundUnContrastedBmps = uniformBitmapList(targetBmp,
+				blackPixelCoords, refCharWidth, refCharHeight, false);
+		unContrastedDebugBmp = composeFromBitmapList(foundUnContrastedBmps,
+		false);
+		return unContrastedDebugBmp;
+	}
+
+	/**
+	 * @return A map showing percent match with reference bitmaps, the key is its
+	 * index in result string, the value its percentage.
+	 */
+	public Map<Integer,Integer> getPercentMatchMap() {
+		return percentMatchMap;
+	}
 	/**
 	 * Scans a bitmap for continuous black pixels and lists their coordinates
 	 * in the bitmap as Rects.
@@ -307,7 +371,7 @@ public class Scanner {
 	 * @return A List of coordinates in types Rect.
 	 */
 	protected List<Rect> findBlackPixels(Bitmap bmp) {
-		//Scan columns for black pixels
+		/* Scan columns for black pixels */
 		List<Rect> coordList = new ArrayList<Rect>();
 		List<int[]> cols = new ArrayList<int[]>();
 		int lastEmpty = -2;
@@ -316,9 +380,9 @@ public class Scanner {
 		int lastRight = -2;
 		int lastTop = -2;
 		int lastBottom = -2;
-		for(int x = 0; x < bmpWidth; ++x) {
+		for(int x = 0; x < targetBmpWidth; ++x) {
 			int blackPixels = 0;
-			for(int y = 0; y < bmpHeight; ++y) {
+			for(int y = 0; y < targetBmpHeight; ++y) {
 				int p = bmp.getPixel(x,y);
 				if (p == black) {
 					++blackPixels;
@@ -333,23 +397,23 @@ public class Scanner {
 				(x == 0 && x == lastFull)){
 				lastLeft = x;
 			} else if ((lastEmpty-1 == lastFull)||
-						(x == bmpWidth-1 && x == lastFull)){
+						(x == targetBmpWidth-1 && x == lastFull)){
 				lastRight = x;
 				int[] c = new int[] {lastLeft, lastRight};
 				cols.add(c);
 			}
 		}
-		//Stop if gathered cols are too few
+		/* Stop if gathered cols are too few */
 		if (cols.size() < minResultLength) {
 			return coordList;
 		}
-		//Scan rows of gathered cols for black pixels
+		/* Scan rows of gathered cols for black pixels */
 		lastEmpty = -2;
 		lastFull = -2;
 		ListIterator<int[]> li = cols.listIterator();
 		while (li.hasNext()) {
 			int[] coords = li.next();
-			for(int y = 0; y < bmpHeight; ++y) {
+			for(int y = 0; y < targetBmpHeight; ++y) {
 				int blackPixels = 0;
 				for(int x = coords[0]; x <= coords[1]; ++x) {
 					int p = bmp.getPixel(x,y);
@@ -366,11 +430,11 @@ public class Scanner {
 					(y == 0 && y == lastFull)) {
 					lastTop = y;
 				} else if ((lastEmpty-1 == lastFull)||
-							(y == bmpWidth-1 && y == lastFull)) {
+							(y == targetBmpWidth-1 && y == lastFull)) {
 					lastBottom = y;
 					Rect coordRect = new Rect(coords[0], lastTop,
 						coords[1], lastBottom);
-					//Ignore sections of the wrong size or shape
+					/* Ignore sections of the wrong size or shape */
 					if ((coordRect.width() > charMinWidth)&&
 						(coordRect.width() < charMaxWidth)&&
 						(coordRect.height() > charMinHeight)&&
@@ -395,10 +459,11 @@ public class Scanner {
 	* @param coordList A list containing coordinates expressed as Rects
 	* @param toWidth The target width to scale the bitmaps into.
 	* @param toHeight The target height to scale the bitmaps into.
+	* @param contrast True if bitmap should be contrasted.
 	* @return The list of scaled bitmaps.
 	*/
-	private List<Bitmap> uniformBitmapList(Bitmap bmp, List coordList,
-			int toWidth, int toHeight) {
+	protected List<Bitmap> uniformBitmapList(Bitmap bmp, List coordList,
+			int toWidth, int toHeight, boolean contrast) {
 		List<Bitmap> bmpList = new ArrayList<Bitmap>();
 		ListIterator<Rect> li = coordList.listIterator();
 		while (li.hasNext()) {
@@ -412,27 +477,36 @@ public class Scanner {
 				coordRect.width(), coordRect.height(), Bitmap.Config.RGB_565);
 			Bitmap scaledBmp =
 				Bitmap.createScaledBitmap(unscaledBmp, toWidth, toHeight, true);
-			scaledBmp = Normalizer.scaleOnly(scaledBmp, colorScale);
-			scaledBmp = Normalizer.scaleTranslate(scaledBmp,
-				colorScaleTranslate);
+			if (contrast) {
+				scaledBmp = Normalizer.scaleOnly(scaledBmp, colorScale);
+				scaledBmp = Normalizer.scaleTranslate(scaledBmp,
+					colorScaleTranslate);
+			}
 			bmpList.add(scaledBmp);
 		}
 		return bmpList;
 	}
 
 	/**
-	* Composes a single bitmap from a list of bitmaps. Bitmaps are appended
-	* horizontally.
+	* Composes a single bitmap from a list of bitmaps.
 	* @param bmpList The list of bitmaps.
+	* @param vertical True if bitmaps should be appended vertically.
 	* @return The composed bitmap.
 	*/
-	private Bitmap composeFromBitmapList(List toCompose) {
+	protected Bitmap composeFromBitmapList(List toCompose, boolean vertical) {
 		List<Bitmap> bmpList = toCompose;
 		Bitmap measureBmp = bmpList.get(0);
 		int toWidth = measureBmp.getWidth();
 		int toHeight = measureBmp.getHeight();
-		Bitmap resultBmp = Bitmap.createBitmap(toWidth * bmpList.size(),
-			toHeight, Bitmap.Config.RGB_565);
+		Bitmap resultBmp;
+		Bitmap.Config config = Bitmap.Config.RGB_565;
+		if (vertical) {
+			resultBmp = Bitmap.createBitmap(toWidth,
+				toHeight * bmpList.size(), config);
+		} else {
+			resultBmp = Bitmap.createBitmap(toWidth * bmpList.size(),
+				toHeight, config);
+		}
 		Canvas canvas = new Canvas(resultBmp);
 		ListIterator<Bitmap> li = bmpList.listIterator();
 		int i = 0;
@@ -441,11 +515,14 @@ public class Scanner {
 			Rect srcRect = new Rect(0, 0, bmp.getWidth(), bmp.getHeight());
 			Rect dstRect = new Rect(srcRect);
 			if (i != 0){
-				dstRect.offset(i*bmp.getWidth(), 0);
+				if (vertical) {
+					dstRect.offset(0, i*bmp.getHeight());
+				} else {
+					dstRect.offset(i*bmp.getWidth(), 0);
+				}
 			}
 			i++;
 			canvas.drawBitmap(bmp, srcRect, dstRect, null);
-
 		}
 		return resultBmp;
 	}
@@ -454,38 +531,47 @@ public class Scanner {
 	 * Compare the list of collected bitmaps to the reference bitmaps and
 	 * interpret the best matching reference to a string.
 	 * @param bmpList The list of bitmaps to compare.
+	 * @param charMap
+	 *			A map with character as key and corresponding bitmap as value.
 	 * @return The resulting string
 	 */
-	private String referenceCompare(List bmpList) {
-		//TODO: Make a limit for how dissimilar the best matching is allowed
-		// to be, and stop iterating if match is ~99%.
+	protected String referenceCompare(List bmpList, Map charMap) {
+	/* TODO: Make a limit for how dissimilar the best matching is
+			 allowed to be, and stop iterating if match is ~99%. */
 		StringBuffer result = new StringBuffer();
 		ListIterator<Bitmap> li = bmpList.listIterator();
+		int totalPixels = refCharWidth*refCharHeight;
+		percentMatchMap = new HashMap<Integer,Integer>();
+		int percentMatch = 0;
+		int index = 0;
 		while (li.hasNext()) {
 			Bitmap bmp = li.next();
-			String bestChar = "X";
+			Character bestChar = (char)88;
 			int bestScore = -1;
 			Set set = charMap.entrySet();
 			Iterator it = set.iterator();
 			while (it.hasNext()) {
-				int truePixels = 0;
+				int matchingPixels = 0;
 				Map.Entry me = (Map.Entry)it.next();
-				String currentChar = (String)me.getKey();
+				Character currentChar = (Character)me.getKey();
 				Bitmap currentCharBmp = (Bitmap)me.getValue();
 				for(int x = 0; x < bmp.getWidth(); ++x) {
 					for(int y = 0; y < bmp.getHeight(); ++y) {
 						int refPixel = currentCharBmp.getPixel(x,y);
-						int checkPixel = bmp.getPixel(x,y);
-						if (refPixel == checkPixel){
-							truePixels++;
+						int foundPixel = bmp.getPixel(x,y);
+						if (refPixel == foundPixel){
+							matchingPixels++;
 						}
 					}
 				}
-				if (truePixels > bestScore){
-					bestScore = truePixels;
+				if (matchingPixels > bestScore){
+					bestScore = matchingPixels;
 					bestChar = currentChar;
+					percentMatch = (int)(((double)matchingPixels/totalPixels)*100);
 				}
 			}
+//			Log.d(TAG, "Best matching is: "+bestChar+" at "+percentMatch+"%");
+			percentMatchMap.put(index, percentMatch);
 			result.append(bestChar);
 		}
 		return result.toString();

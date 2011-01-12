@@ -16,22 +16,22 @@ public final class ScanResources {
 
 	private final String TAG = "aGiro.ScanResources";
 
-	private Map<String,Bitmap> charMap;
+	private Map<Character,Bitmap> charMap;
 
-	private Map<String,String> charIds = new HashMap<String,String>() {
+	private Map<Character,String> charIds = new HashMap<Character,String>() {
 		{
-			put("#","char35_16x24");
-			put("0","char48_16x24");
-			put("1","char49_16x24");
-			put("2","char50_16x24");
-			put("3","char51_16x24");
-			put("4","char52_16x24");
-			put("5","char53_16x24");
-			put("6","char54_16x24");
-			put("7","char55_16x24");
-			put("8","char56_16x24");
-			put("9","char57_16x24");
-			put(">","char62_16x24");
+			put((char)35,"char35_16x24");
+			put((char)48,"char48_16x24");
+			put((char)49,"char49_16x24");
+			put((char)50,"char50_16x24");
+			put((char)51,"char51_16x24");
+			put((char)52,"char52_16x24");
+			put((char)53,"char53_16x24");
+			put((char)54,"char54_16x24");
+			put((char)55,"char55_16x24");
+			put((char)56,"char56_16x24");
+			put((char)57,"char57_16x24");
+			put((char)62,"char62_16x24");
 		}
 	};
 
@@ -50,14 +50,14 @@ public final class ScanResources {
 		Options o = new Options();
 		o.inPreferredConfig = Bitmap.Config.RGB_565;
 		o.inScaled = false;
-		charMap = new HashMap<String,Bitmap>();
+		charMap = new HashMap<Character,Bitmap>();
 		try {
 			Class res = R.drawable.class;
 			Set set = charIds.entrySet();
 			Iterator it = set.iterator();
 			while(it.hasNext()) {
 				Map.Entry me = (Map.Entry)it.next();
-				String cha = (String)me.getKey();
+				Character cha = (Character)me.getKey();
 				String id = (String)me.getValue();
 				Field field = res.getField(id);
 				int drawableId = field.getInt(null);
@@ -71,7 +71,7 @@ public final class ScanResources {
 		}
 	}
 
-	public Map getCharMap() {
+	public Map<Character,Bitmap> getCharMap() {
 		return charMap;
 	}
 
