@@ -71,7 +71,6 @@ public final class CaptureActivity extends ListActivity implements SurfaceHolder
 
   private CaptureActivityHandler handler;
 
-  private static ScanResources scanResources;
   private ViewfinderView viewfinderView;
   private MediaPlayer mediaPlayer;
   private boolean hasSurface;
@@ -137,7 +136,6 @@ public final class CaptureActivity extends ListActivity implements SurfaceHolder
     window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     setContentView(R.layout.capture);
 
-    //TODO: all the button and listadapter things should probably be elsewhere
     this.eraseButton = (Button)this.findViewById(R.id.erase);
     this.eraseButton.setOnClickListener(new OnClickListener() {
       public void onClick(View v) {
@@ -162,9 +160,6 @@ public final class CaptureActivity extends ListActivity implements SurfaceHolder
       handler.sendEmptyMessage(R.id.restart_preview);
       }
     });
-
-    // does getResources actually always need the context from main activity?
-    scanResources = new ScanResources(this);
 
     SimpleAdapter adapter = new SimpleAdapter(this, list,
     R.layout.result_list_item,
@@ -416,7 +411,4 @@ public final class CaptureActivity extends ListActivity implements SurfaceHolder
     list.add(temp3);
     }
 
-  public static ScanResources getScanResources() {
-    return scanResources;
-  }
 }
