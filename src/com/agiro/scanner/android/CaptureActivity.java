@@ -256,7 +256,7 @@ public final class CaptureActivity extends ListActivity implements SurfaceHolder
     	new Thread(new Runnable() {
 			
 			public void run() {
-	        	AppEngineClient aec = new AppEngineClient(CaptureActivity.this, "test@example.com");
+	        	AppEngineClient aec = new AppEngineClient(CaptureActivity.this, "patrik.akerfeldt@gmail.com");
 	        	List<NameValuePair> params = new ArrayList<NameValuePair>();
 	        	params.add(new BasicNameValuePair("reference", invoice.getReference()));
 	        	try {

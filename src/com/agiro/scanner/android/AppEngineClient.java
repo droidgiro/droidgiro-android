@@ -50,7 +50,7 @@ import android.util.Log;
 public class AppEngineClient {
     private static final String TAG = "AppEngineClient";
 
-    static final String BASE_URL = "http://192.168.1.104:8080";
+    static final String BASE_URL = "http://agiroapp.appspot.com";
     private static final String AUTH_URL = BASE_URL + "/_ah/login";
     private static final String AUTH_TOKEN_TYPE = "ah";
 
@@ -73,16 +73,24 @@ public class AppEngineClient {
     private HttpResponse makeRequestNoRetry(String urlPath, List<NameValuePair> params, boolean newToken)
             throws Exception {
 
-        // Get auth token for account
+    	// Retrieve account
         Account account = new Account(mAccountName, "com.google");
-//        String authToken = getAuthToken(mContext, account);
-//        if (authToken == null) throw new PendingAuthException(mAccountName);
-//        if (newToken) {  // invalidate the cached token
-//            AccountManager accountManager = AccountManager.get(mContext);
-//            accountManager.invalidateAuthToken(account.type, authToken);
-//            authToken = getAuthToken(mContext, account);
-//        }
-        String authToken ="";
+        AccountManager accountManager = AccountManager.get(mContext);
+        Account[] accs = accountManager.getAccounts();
+        for (Account acc : accs) {
+        	if("com.google".equals(acc.type)) {
+        		account = acc;
+        		break;
+        	}
+		}
+        	
+        // Get auth token for account
+        String authToken = getAuthToken(mContext, account);
+        if (authToken == null) throw new PendingAuthException(mAccountName);
+        if (newToken) {  // invalidate the cached token
+            accountManager.invalidateAuthToken(account.type, authToken);
+            authToken = getAuthToken(mContext, account);
+        }
         // Get ACSID cookie
         DefaultHttpClient client = new DefaultHttpClient();
         String continueURL = BASE_URL;
@@ -132,8 +140,8 @@ public class AppEngineClient {
         String authToken = null;
         AccountManager accountManager = AccountManager.get(context);
         try {
-            AccountManagerFuture<Bundle> future =
-                    accountManager.getAuthToken (account, AUTH_TOKEN_TYPE, false, null, null);
+        	AccountManagerFuture<Bundle> future =
+                    accountManager.getAuthToken (account, AUTH_TOKEN_TYPE, null, (CaptureActivity)context, null, null);
             Bundle bundle = future.getResult();
             Account[] accs = accountManager.getAccounts();
             Log.v(TAG, "Account size = " + accs.length);
