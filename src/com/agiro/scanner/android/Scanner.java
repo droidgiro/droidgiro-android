@@ -239,6 +239,11 @@ public class Scanner {
 			colorScaleTranslate);
 		blackPixelCoords = findBlackPixels(contrastBmp);
 		if (blackPixelCoords.size() >= minResultLength) {
+			/* It seems best to use the original bitmap for this
+			method and change its contrast again. If the already contrasted
+			bitmap is resized it produces a lot of artefacts which interferes
+			with Scanner's bitmap comparison. It impacts performance, but it
+			will have to do for now. */
 			foundContrastedBmps = uniformBitmapList(targetBmp,
 				blackPixelCoords, refCharWidth, refCharHeight, true);
 			resultString = referenceCompare(foundContrastedBmps, charMap);
@@ -433,7 +438,7 @@ public class Scanner {
 					(y == 0 && y == lastFull)) {
 					lastTop = y;
 				} else if ((lastEmpty-1 == lastFull)||
-							(y == targetBmpWidth-1 && y == lastFull)) {
+							(y == targetBmpHeight-1 && y == lastFull)) {
 					lastBottom = y;
 					Rect coordRect = new Rect(coords[0], lastTop,
 						coords[1], lastBottom);
@@ -496,9 +501,8 @@ public class Scanner {
 	* @param vertical True if bitmaps should be appended vertically.
 	* @return The composed bitmap.
 	*/
-	protected Bitmap composeFromBitmapList(List toCompose, boolean vertical) {
-		List<Bitmap> bmpList = toCompose;
-		Bitmap measureBmp = bmpList.get(0);
+	protected Bitmap composeFromBitmapList(List bmpList, boolean vertical) {
+		Bitmap measureBmp = (Bitmap)bmpList.get(0);
 		int toWidth = measureBmp.getWidth();
 		int toHeight = measureBmp.getHeight();
 		Bitmap resultBmp;

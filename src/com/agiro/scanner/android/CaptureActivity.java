@@ -36,12 +36,21 @@ import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 
 import android.app.ListActivity;
+import android.content.Intent;
+import android.content.res.AssetFileDescriptor;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.media.MediaPlayer.OnCompletionListener;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Vibrator;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.preference.PreferenceManager;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -62,8 +71,9 @@ public final class CaptureActivity extends ListActivity implements SurfaceHolder
 
   private static final String TAG = "aGiro.CaptureActivity";
 
+  private static final int SETTINGS_ID = Menu.FIRST;
+
   private static final long INTENT_RESULT_DURATION = 1500L;
-  private static final long BULK_MODE_SCAN_DELAY_MS = 1000L;
   private static final float BEEP_VOLUME = 0.10f;
   private static final long VIBRATE_DURATION = 200L;
 
@@ -89,15 +99,15 @@ public final class CaptureActivity extends ListActivity implements SurfaceHolder
   private Button sendButton;
   private Button scanButton;
 
-  /*
+  /**
    * When the beep has finished playing, rewind to queue up another one.
-   *
+   */
   private final OnCompletionListener beepListener = new OnCompletionListener() {
     public void onCompletion(MediaPlayer mediaPlayer) {
       mediaPlayer.seekTo(0);
     }
   };
-*/
+
 /*
   private final DialogInterface.OnClickListener aboutListener =
       new DialogInterface.OnClickListener() {
@@ -192,8 +202,6 @@ public final class CaptureActivity extends ListActivity implements SurfaceHolder
       surfaceHolder.addCallback(this);
       surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
     }
-  }
-/*
     SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
     playBeep = prefs.getBoolean(PreferencesActivity.KEY_PLAY_BEEP, true);
     if (playBeep) {
@@ -204,9 +212,9 @@ public final class CaptureActivity extends ListActivity implements SurfaceHolder
       }
     }
     vibrate = prefs.getBoolean(PreferencesActivity.KEY_VIBRATE, false);
-    copyToClipboard = prefs.getBoolean(PreferencesActivity.KEY_COPY_TO_CLIPBOARD, true);
     initBeepSound();
-*/
+  }
+
   @Override
   protected void onPause() {
     super.onPause();
@@ -231,6 +239,27 @@ public final class CaptureActivity extends ListActivity implements SurfaceHolder
       return super.onKeyDown(keyCode, event);
   }
 
+  @Override
+  public boolean onCreateOptionsMenu(Menu menu) {
+    super.onCreateOptionsMenu(menu);
+    menu.add(0, SETTINGS_ID, 0, R.string.preferences_name);
+	return true;
+  }
+
+  @Override
+  public boolean onOptionsItemSelected(MenuItem item) {
+    switch (item.getItemId()) {
+      case SETTINGS_ID: {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+        intent.setClassName(this, PreferencesActivity.class.getName());
+        startActivity(intent);
+        break;
+      }
+    }
+    return super.onOptionsItemSelected(item);
+  }
+
   public void surfaceCreated(SurfaceHolder holder) {
     if (!hasSurface) {
       hasSurface = true;
@@ -247,10 +276,19 @@ public final class CaptureActivity extends ListActivity implements SurfaceHolder
 
   public void handleDecode(final Invoice invoice, Bitmap debugBmp) {
 //    inactivityTimer.onActivity();
-//    playBeepSoundAndVibrate();
-    ImageView debugImageView = (ImageView) findViewById(R.id.debug_image_view);
-    debugImageView.setImageBitmap(debugBmp);
-    
+	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+	ImageView debugImageView = (ImageView) findViewById(R.id.debug_image_view);
+    if (prefs.getBoolean(PreferencesActivity.KEY_DEBUG_IMAGE, false) && (debugBmp != null)) {
+			debugImageView.setVisibility(View.VISIBLE);
+			debugImageView.setImageBitmap(debugBmp);
+    } else if (debugImageView.getVisibility() != View.GONE) {
+		debugImageView.setVisibility(View.GONE);
+	}
+
+	// This needs to check if a change has occured to invoice somehow. Now it
+	// beeps on any result, valid or not.
+	playBeepSoundAndVibrate();
+
     Log.v(TAG, "Got invoice " + invoice);
     if(invoice.isComplete()) {
     	new Thread(new Runnable() {
@@ -279,60 +317,14 @@ public final class CaptureActivity extends ListActivity implements SurfaceHolder
 		}).start();
     }
     
-    //TODO: the isValidCC checking should be optional
-//    if (resultMap.containsKey("reference")) {
-//        String str = resultMap.get("reference").toString();
-//        if (StringDecoder.isValidCC(str)) {
-//        	new Thread(new Runnable() {
-//				
-//				public void run() {
-//		        	AppEngineClient aec = new AppEngineClient(CaptureActivity.this, "patrik.akerfeldt@gmail.com");
-//		        	List<NameValuePair> params = new ArrayList<NameValuePair>();
-//		        	params.add(new BasicNameValuePair("reference", "12345678"));
-//		        	try {
-//		        		Writer w = new StringWriter();
-//						HttpResponse res = aec.makeRequest("/add", params);
-//						Reader reader = new BufferedReader(new InputStreamReader(res.getEntity().getContent(), "UTF-8"));
-//						int n;
-//						char[] buffer = new char[1024];
-//						while ((n = reader.read(buffer)) != -1) {
-//						w.write(buffer, 0, n);
-//						}
-//						Log.e(TAG, "Got: " + w.toString());
-//					} catch (Exception e) {
-//						Log.e(TAG, e.getMessage(), e);
-//					}					
-//
-//				}
-//			}).start();
-//          reference = str;
-//        }
-//    }
-//    if (resultMap.containsKey("amount")) {
-//        String str = resultMap.get("amount").toString();
-//        if (StringDecoder.isValidCC(str)) {
-//            str = str.substring(0,str.length()-1);
-//            str = new StringBuffer(str).insert((str.length()-2), ",").toString();
-//            amount = str;
-//        }
-//    }
-//    if (resultMap.containsKey("account")) {
-//        String str = resultMap.get("account").toString();
-//        if (StringDecoder.isValidCC(str)) {
-//          account = str;
-//        }
-//    }
-//    if (resultMap.containsKey("debug")) {
-//        debug = resultMap.get("debug").toString();
-//    }
     populateList(invoice.getReference(), invoice.getCompleteAmount(), invoice.getGiroAccount(), "NOT SUPPORTED");
     onContentChanged();
   }
 
-  /*
+  /**
    * Creates the beep MediaPlayer in advance so that the sound can be triggered with the least
    * latency possible.
-   *
+   */
   private void initBeepSound() {
     if (playBeep && mediaPlayer == null) {
       // The volume on STREAM_SYSTEM is not adjustable, and users found it too loud,
@@ -364,7 +356,6 @@ public final class CaptureActivity extends ListActivity implements SurfaceHolder
       vibrator.vibrate(VIBRATE_DURATION);
     }
   }
-*/
 
   private void initCamera(SurfaceHolder surfaceHolder) {
     try {
@@ -396,19 +387,19 @@ public final class CaptureActivity extends ListActivity implements SurfaceHolder
   String debug) {
     list.clear();
     HashMap<String,String> temp = new HashMap<String,String>();
-    temp.put("data_type","Referensnummer:");
+    temp.put("data_type", getString(R.string.reference_field));
     temp.put("data", reference);
     list.add(temp);
     HashMap<String,String> temp1 = new HashMap<String,String>();
-    temp1.put("data_type","Belopp:");
+    temp1.put("data_type", getString(R.string.amount_field));
     temp1.put("data", amount);
     list.add(temp1);
     HashMap<String,String> temp2 = new HashMap<String,String>();
-    temp2.put("data_type","Kontonummer:");
+    temp2.put("data_type", getString(R.string.account_field));
     temp2.put("data", account);
     list.add(temp2);
     HashMap<String,String> temp3 = new HashMap<String,String>();
-    temp3.put("data_type","Debug:");
+    temp3.put("data_type", getString(R.string.debug_field));
     temp3.put("data", debug);
     list.add(temp3);
     }

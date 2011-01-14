@@ -1,4 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">aGiro</string>
+    <string name="reference_field">Referensnummer:</string>
+    <string name="amount_field">Belopp:</string>
+    <string name="account_field">Gironummer:</string>
+    <string name="debug_field">Debug:</string>
+    <string name="debug_name">Debug</string>
+    <string name="feedback">Feedback</string>
+    <string name="document_type_field">Dokumenttyp:</string>
+    <string name="show_debug_image">Visa debugbild</string>
+    <string name="preferences_name">Inställningar</string>
+    <string name="play_beep">Spela pip</string>
+    <string name="vibrate">Vibrera</string>
 </resources>

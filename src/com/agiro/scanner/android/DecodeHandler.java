@@ -20,11 +20,13 @@ package com.agiro.scanner.android;
 
 import java.util.HashMap;
 
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.agiro.scanner.android.camera.CameraManager;
@@ -36,7 +38,7 @@ final class DecodeHandler extends Handler {
 
 	private final CaptureActivity activity;
 	private ScanResources scanResources;
-
+	private SharedPreferences prefs;
 	private Invoice invoice;
 
 	private Scanner scanner;
@@ -46,6 +48,7 @@ final class DecodeHandler extends Handler {
 		invoice = new Invoice();
 		scanResources = new ScanResources(activity);
 		scanner = new Scanner(scanResources);
+		prefs =  PreferenceManager.getDefaultSharedPreferences(activity);
 	}
 
 	@Override
@@ -83,12 +86,15 @@ final class DecodeHandler extends Handler {
 
 		if (resultString != null) {
 			invoice.decode(resultString);
-			Bitmap debugBmp = scanner.getDebugBitmap();
 			long end = System.currentTimeMillis();
 			Log.d(TAG, "Found result (" + (end - start) + " ms):\n"
 					+ resultString);
 			Message message = Message.obtain(activity.getHandler(),
 					R.id.decode_succeeded, invoice);
+			Bitmap debugBmp = null;
+			if (prefs.getBoolean(PreferencesActivity.KEY_DEBUG_IMAGE, false)) {
+				debugBmp = scanner.getDebugBitmap();
+			}
 			Bundle bundle = new Bundle();
 			bundle.putParcelable(DecodeThread.DEBUG_BITMAP, debugBmp);
 			message.setData(bundle);

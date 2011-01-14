@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+  <PreferenceCategory android:title="@string/feedback">
+    <CheckBoxPreference
+        android:key="preferences_play_beep"
+        android:defaultValue="true"
+        android:title="@string/play_beep"/>
+    <CheckBoxPreference
+        android:key="preferences_vibrate"
+        android:defaultValue="false"
+        android:title="@string/vibrate"/>
+  </PreferenceCategory>
+  <PreferenceCategory android:title="@string/debug_name">
+    <CheckBoxPreference
+        android:key="preferences_show_debug_image"
+        android:defaultValue="false"
+        android:title="@string/show_debug_image"/>
+  </PreferenceCategory>
+</PreferenceScreen>
