@@ -1,4 +1,6 @@
 /*
+ * Copyright (C) 2011 aGiro authors
+ * 
  * Copyright 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -74,65 +76,65 @@ public class AppEngineClient {
             throws Exception {
 
     	// Retrieve account
-        Account account = new Account(mAccountName, "com.google");
-        AccountManager accountManager = AccountManager.get(mContext);
-        Account[] accs = accountManager.getAccounts();
-        for (Account acc : accs) {
-        	if("com.google".equals(acc.type)) {
-        		account = acc;
-        		break;
-        	}
-		}
+//        Account account = new Account(mAccountName, "com.google");
+//        AccountManager accountManager = AccountManager.get(mContext);
+//        Account[] accs = accountManager.getAccounts();
+//        for (Account acc : accs) {
+//        	if("com.google".equals(acc.type)) {
+//        		account = acc;
+//        		break;
+//        	}
+//		}
         	
         // Get auth token for account
-        String authToken = getAuthToken(mContext, account);
-        if (authToken == null) throw new PendingAuthException(mAccountName);
-        if (newToken) {  // invalidate the cached token
-            accountManager.invalidateAuthToken(account.type, authToken);
-            authToken = getAuthToken(mContext, account);
-        }
+//        String authToken = getAuthToken(mContext, account);
+//        if (authToken == null) throw new PendingAuthException(mAccountName);
+//        if (newToken) {  // invalidate the cached token
+//            accountManager.invalidateAuthToken(account.type, authToken);
+//            authToken = getAuthToken(mContext, account);
+//        }
         // Get ACSID cookie
         DefaultHttpClient client = new DefaultHttpClient();
-        String continueURL = BASE_URL;
-        URI uri = new URI(AUTH_URL + "?continue=" +
-                URLEncoder.encode(continueURL, "UTF-8") +
-                "&auth=" + authToken);
-        HttpPost method = new HttpPost(uri);
-        final HttpParams getParams = new BasicHttpParams();
-        HttpClientParams.setRedirecting(getParams, false);  // continue is not used
-        List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
-        nameValuePairs.add(new BasicNameValuePair("email", mAccountName));
-        nameValuePairs.add(new BasicNameValuePair("action", "Log+In"));
-        method.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-        method.setParams(getParams);
-
-        HttpResponse res = client.execute(method);
-        Header[] headers = res.getHeaders("Set-Cookie");
-        if (res.getStatusLine().getStatusCode() != 302 ||
-                headers.length == 0) {
-            return res;
-        }
-
-        String ascidCookie = null;
-        for (Header header: headers) {
-            if (header.getValue().indexOf("ACSID=") >=0) {
-                // let's parse it
-                String value = header.getValue();
-                String[] pairs = value.split(";");
-                ascidCookie = pairs[0];
-            }
-        }
+//        String continueURL = BASE_URL;
+//        URI uri = new URI(AUTH_URL + "?continue=" +
+//                URLEncoder.encode(continueURL, "UTF-8") +
+//                "&auth=" + authToken);
+//        HttpPost method = new HttpPost(uri);
+//        final HttpParams getParams = new BasicHttpParams();
+//        HttpClientParams.setRedirecting(getParams, false);  // continue is not used
+//        List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
+//        nameValuePairs.add(new BasicNameValuePair("email", mAccountName));
+//        nameValuePairs.add(new BasicNameValuePair("action", "Log+In"));
+//        method.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+//        method.setParams(getParams);
+//
+//        HttpResponse res = client.execute(method);
+//        Header[] headers = res.getHeaders("Set-Cookie");
+//        if (res.getStatusLine().getStatusCode() != 302 ||
+//                headers.length == 0) {
+//            return res;
+//        }
+//
+//        String ascidCookie = null;
+//        for (Header header: headers) {
+//            if (header.getValue().indexOf("ACSID=") >=0) {
+//                // let's parse it
+//                String value = header.getValue();
+//                String[] pairs = value.split(";");
+//                ascidCookie = pairs[0];
+//            }
+//        }
 
         // Make POST request
-        uri = new URI(BASE_URL + urlPath);
+        URI uri = new URI(BASE_URL + urlPath);
         Log.e(TAG, "" + uri.toString());
         HttpPost post = new HttpPost(uri);
         UrlEncodedFormEntity entity =
             new UrlEncodedFormEntity(params, "UTF-8");
         post.setEntity(entity);
-        post.setHeader("Cookie", ascidCookie);
-        post.setHeader("X-Same-Domain", "1");  // XSRF
-        res = client.execute(post);
+//        post.setHeader("Cookie", ascidCookie);
+//        post.setHeader("X-Same-Domain", "1");  // XSRF
+        HttpResponse res = client.execute(post);
         return res;
     }
 

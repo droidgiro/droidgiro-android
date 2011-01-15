@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_height="wrap_content" android:layout_width="wrap_content" android:id="@+id/pairLayout" android:layout_gravity="center_horizontal">
+	<LinearLayout android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:id="@+id/pinLayout"
+		android:layout_alignParentLeft="true" android:layout_centerVertical="true"
+		android:gravity="center_horizontal" android:paddingTop="50dp">
+
+		<EditText android:id="@+id/pairDigit1"
+			android:layout_alignParentLeft="true" android:layout_height="wrap_content"
+			android:layout_width="50dp" android:gravity="center_vertical|center_horizontal|center"
+			android:inputType="number" android:maxLength="1"></EditText>
+
+		<EditText android:id="@+id/pairDigit2"
+			android:layout_alignParentLeft="true" android:layout_height="wrap_content"
+			android:layout_width="50dp" android:gravity="center_vertical|center_horizontal|center"
+			android:inputType="number" android:maxLength="1"></EditText>
+
+		<EditText android:id="@+id/pairDigit3"
+			android:layout_alignParentLeft="true" android:layout_height="wrap_content"
+			android:layout_width="50dp" android:gravity="center_vertical|center_horizontal|center"
+			android:inputType="number" android:maxLength="1"></EditText>
+
+		<EditText android:id="@+id/pairDigit4"
+			android:layout_alignParentLeft="true" android:layout_height="wrap_content"
+			android:layout_width="50dp" android:gravity="center_vertical|center_horizontal|center"
+			android:inputType="number" android:maxLength="1"></EditText>
+
+	
+</LinearLayout>
+	<TextView android:id="@+id/pairDescription"
+		android:layout_width="wrap_content" android:layout_height="wrap_content"
+		android:layout_below="@+id/pinLayout" android:layout_centerHorizontal="true" android:paddingTop="15dp" android:text="Get your PIN through the Chrome extension"></TextView>
+
+
+
+</RelativeLayout>

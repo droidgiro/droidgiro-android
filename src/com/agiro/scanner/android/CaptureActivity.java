@@ -108,6 +108,8 @@ public final class CaptureActivity extends ListActivity implements SurfaceHolder
     }
   };
 
+private String identifier;
+
 /*
   private final DialogInterface.OnClickListener aboutListener =
       new DialogInterface.OnClickListener() {
@@ -141,7 +143,7 @@ public final class CaptureActivity extends ListActivity implements SurfaceHolder
   public void onCreate(Bundle icicle) {
     super.onCreate(icicle);
       Log.d(TAG, "onCreate");
-
+      identifier = getIntent().getStringExtra("identifier");
     Window window = getWindow();
     window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     setContentView(R.layout.capture);
@@ -296,12 +298,13 @@ public final class CaptureActivity extends ListActivity implements SurfaceHolder
 			public void run() {
 	        	AppEngineClient aec = new AppEngineClient(CaptureActivity.this, "patrik.akerfeldt@gmail.com");
 	        	List<NameValuePair> params = new ArrayList<NameValuePair>();
+	        	params.add(new BasicNameValuePair("identifier", CaptureActivity.this.identifier));
 	        	params.add(new BasicNameValuePair("reference", invoice.getReference()));
 	        	params.add(new BasicNameValuePair("amount", invoice.getCompleteAmount()));
 	        	params.add(new BasicNameValuePair("document_type", invoice.getInternalDocumentType()));
 	        	try {
 	        		Writer w = new StringWriter();
-					HttpResponse res = aec.makeRequest("/invoices", params);
+					HttpResponse res = aec.makeRequest("/v2/invoices", params);
 					Reader reader = new BufferedReader(new InputStreamReader(res.getEntity().getContent(), "UTF-8"));
 					int n;
 					char[] buffer = new char[1024];
