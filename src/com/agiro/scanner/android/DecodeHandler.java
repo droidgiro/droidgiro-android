@@ -34,7 +34,7 @@ import com.google.zxing.PlanarYUVLuminanceSource;
 
 final class DecodeHandler extends Handler {
 
-	private static final String TAG = DecodeHandler.class.getSimpleName();
+	private static final String TAG = "aGiro.DecodeHandler";
 
 	private final CaptureActivity activity;
 	private ScanResources scanResources;
@@ -106,7 +106,6 @@ final class DecodeHandler extends Handler {
 			message.sendToTarget();
 		}
 
-		scanner.clear();
 	}
 
 }
