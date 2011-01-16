@@ -35,6 +35,16 @@ public class PairingActivity extends Activity {
 		digit3.addTextChangedListener(dw);
 		digit4.addTextChangedListener(dw);
 	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		digit1.setText("");
+		digit2.setText("");
+		digit3.setText("");
+		digit4.setText("");
+		digit1.requestFocus();
+	}
 
 	private class DigitWatcher implements TextWatcher {
 

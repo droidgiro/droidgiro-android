@@ -276,7 +276,7 @@ private String identifier;
   public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
   }
 
-  public void handleDecode(final Invoice invoice, Bitmap debugBmp) {
+  public void handleDecode(final Invoice invoice, int fieldsFound, Bitmap debugBmp) {
 //    inactivityTimer.onActivity();
 	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 	ImageView debugImageView = (ImageView) findViewById(R.id.debug_image_view);
@@ -296,7 +296,6 @@ private String identifier;
     	new Thread(new Runnable() {
 			
 			public void run() {
-	        	AppEngineClient aec = new AppEngineClient(CaptureActivity.this, "patrik.akerfeldt@gmail.com");
 	        	List<NameValuePair> params = new ArrayList<NameValuePair>();
 	        	params.add(new BasicNameValuePair("identifier", CaptureActivity.this.identifier));
 	        	params.add(new BasicNameValuePair("reference", invoice.getReference()));
@@ -304,7 +303,7 @@ private String identifier;
 	        	params.add(new BasicNameValuePair("document_type", invoice.getInternalDocumentType()));
 	        	try {
 	        		Writer w = new StringWriter();
-					HttpResponse res = aec.makeRequest("/v2/invoices", params);
+					HttpResponse res = CloudClient.makeRequest("/v2/invoices", params);
 					Reader reader = new BufferedReader(new InputStreamReader(res.getEntity().getContent(), "UTF-8"));
 					int n;
 					char[] buffer = new char[1024];

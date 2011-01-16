@@ -85,21 +85,24 @@ final class DecodeHandler extends Handler {
 		resultString = scanner.getResultString();
 
 		if (resultString != null) {
-			invoice.decode(resultString);
+			int fieldsFound = invoice.parse(resultString);
 			long end = System.currentTimeMillis();
 			Log.d(TAG, "Found result (" + (end - start) + " ms):\n"
 					+ resultString);
-			Message message = Message.obtain(activity.getHandler(),
-					R.id.decode_succeeded, invoice);
-			Bitmap debugBmp = null;
-			if (prefs.getBoolean(PreferencesActivity.KEY_DEBUG_IMAGE, false)) {
-				debugBmp = scanner.getDebugBitmap();
+			if(fieldsFound != 0) {
+				Message message = Message.obtain(activity.getHandler(),
+						R.id.decode_succeeded, invoice);				
+				Bitmap debugBmp = null;
+				if (prefs.getBoolean(PreferencesActivity.KEY_DEBUG_IMAGE, false)) {
+					debugBmp = scanner.getDebugBitmap();
+				}
+				Bundle bundle = new Bundle();
+				bundle.putParcelable(DecodeThread.DEBUG_BITMAP, debugBmp);
+				bundle.putInt(Invoice.FIELDS_FOUND, fieldsFound);
+				message.setData(bundle);
+				// Log.d(TAG, "Sending decode succeeded message...");
+				message.sendToTarget();
 			}
-			Bundle bundle = new Bundle();
-			bundle.putParcelable(DecodeThread.DEBUG_BITMAP, debugBmp);
-			message.setData(bundle);
-			// Log.d(TAG, "Sending decode succeeded message...");
-			message.sendToTarget();
 		} else {
 			Message message = Message.obtain(activity.getHandler(),
 					R.id.decode_failed);
