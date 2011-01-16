@@ -44,6 +44,16 @@ import android.util.Log;
  */
 public class Invoice {
 
+	public static final String FIELDS_FOUND = "Invoice.fieldsFound";
+	
+	public static final int REFERENCE_FIELD = 1;
+
+	public static final int AMOUNT_FIELD = 2;
+
+	public static final int GIRO_ACCOUNT_FIELD = 4;
+
+	public static final int DOCUMENT_TYPE_FIELD = 8;
+
 	private final String TAG = "aGiro.Invoice";
 
 	/*
@@ -186,7 +196,10 @@ public class Invoice {
 	}
 
 	public String getCompleteAmount() {
-		return Integer.toString(amount) + "," + (amountFractional < 10 ? "0"+amountFractional : amountFractional);
+		return Integer.toString(amount)
+				+ ","
+				+ (amountFractional < 10 ? "0" + amountFractional
+						: amountFractional);
 	}
 
 	public String getCheckDigitAmount() {
@@ -221,25 +234,37 @@ public class Invoice {
 				&& checkDigitAmount != null && giroAccount != null;
 	}
 
-	public void decode(String field) {
+	/**
+	 * Parses the specified input and looks for known fields.
+	 * 
+	 * @param input
+	 *            the {@code String} to parse for invoice fields.
+	 * @return the fields found in the specified input.
+	 */
+	public int parse(String input) {
+		int fieldsDecoded = 0;
 		/* Look for reference number */
-		Matcher m = OCR_PATTERN.matcher(field);
+		Matcher m = OCR_PATTERN.matcher(input);
 		if (m.find()) {
 			setReference(m.group(2));
+			fieldsDecoded += REFERENCE_FIELD;
 		}
 
 		/* Look for amount */
-		m = AMOUNT_PATTERN.matcher(field);
+		m = AMOUNT_PATTERN.matcher(input);
 		if (m.find()) {
 			setAmount(m.group(2), m.group(3), m.group(4));
+			fieldsDecoded += AMOUNT_FIELD;
 		}
 
 		/* Look for BG/PG number */
-		m = ACCOUNT_PATTERN.matcher(field);
+		m = ACCOUNT_PATTERN.matcher(input);
 		if (m.find()) {
 			setGiroAccount(m.group(2));
 			setInternalDocumentType(m.group(3));
+			fieldsDecoded += GIRO_ACCOUNT_FIELD + DOCUMENT_TYPE_FIELD;
 		}
+		return fieldsDecoded;
 	}
 
 	private static boolean isValidCC(String num) {
