@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 aGiro authors
+ * Copyright (C) 2011 DroidGiro authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.agiro.scanner.android;
+package se.droidgiro.scanner;
 
 import java.lang.Math;
 import java.text.CharacterIterator;
@@ -42,7 +42,7 @@ import android.util.Log;
  */
 public class Scanner {
 
-	private final String TAG = "aGiro.Scanner";
+	private final String TAG = "DroidGiro.Scanner";
 	private boolean DEBUG = false;
 
 	/**

@@ -16,9 +16,11 @@
  * limitations under the License.
  */
 
-package com.agiro.scanner.android;
+package se.droidgiro.scanner;
 
 import java.util.HashMap;
+
+import se.droidgiro.scanner.camera.CameraManager;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -28,7 +30,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
-import com.agiro.scanner.android.camera.CameraManager;
 
 /**
  * This class handles all the messaging which comprises the state machine for capture.

@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2010 ZXing authors
  *
- * Parts of the file was modified by aGiro authors
+ * Parts of the file was modified by DroidGiro authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,11 @@
  * limitations under the License.
  */
 
-package com.agiro.scanner.android;
+package se.droidgiro.scanner;
 
 import java.util.HashMap;
+
+import se.droidgiro.scanner.camera.CameraManager;
 
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -29,12 +31,11 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import com.agiro.scanner.android.camera.CameraManager;
 import com.google.zxing.PlanarYUVLuminanceSource;
 
 final class DecodeHandler extends Handler {
 
-	private static final String TAG = "aGiro.DecodeHandler";
+	private static final String TAG = "DroidGiro.DecodeHandler";
 
 	private final CaptureActivity activity;
 	private ScanResources scanResources;

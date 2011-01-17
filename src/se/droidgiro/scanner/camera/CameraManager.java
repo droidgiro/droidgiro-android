@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2008 ZXing authors
  *
- * Parts of the file was modified by aGiro authors .
+ * Parts of the file was modified by DroidGiro authors .
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.agiro.scanner.android.camera;
+package se.droidgiro.scanner.camera;
 
 import java.io.IOException;
 

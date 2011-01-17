@@ -1,4 +1,4 @@
-package com.agiro.scanner.android;
+package se.droidgiro.scanner;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -22,7 +22,7 @@ import android.util.Log;
  */
 public class CloudClient {
 
-	public static final String TAG = "aGiro.CloudClient";
+	public static final String TAG = "DroidGiro.CloudClient";
 
 	private static final String REGISTER_URL = "http://agiroapp.appspot.com/v2/register";
 	

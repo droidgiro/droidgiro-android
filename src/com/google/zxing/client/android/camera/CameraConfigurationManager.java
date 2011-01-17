@@ -18,6 +18,8 @@ package com.google.zxing.client.android.camera;
 
 import java.util.regex.Pattern;
 
+import se.droidgiro.scanner.camera.CameraManager;
+
 import android.content.Context;
 import android.graphics.Point;
 import android.hardware.Camera;
@@ -26,7 +28,6 @@ import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
 
-import com.agiro.scanner.android.camera.CameraManager;
 
 public final class CameraConfigurationManager {
 

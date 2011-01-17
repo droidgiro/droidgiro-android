@@ -1,4 +1,4 @@
-package com.agiro.scanner.android;
+package se.droidgiro.scanner;
 
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;

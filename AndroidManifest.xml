@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
- Copyright (C) 2011 aGiro authors
+ Copyright (C) 2011 DroidGiro authors
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -16,9 +16,7 @@
  -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.agiro.scanner.android"
-          android:versionName="alpha 2"
-          android:versionCode="2">
+          android:versionName="alpha 3" android:versionCode="3" package="se.droidgiro.scanner">
   <uses-sdk android:minSdkVersion="3"
             android:targetSdkVersion="4"/>
   <supports-screens android:largeScreens="true"

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2008 ZXing authors
- * Copyright (C) 2011 Agiro authors
+ * Copyright (C) 2011 DroidGiro authors
  *
  * This file is mostly based on
  * com.google.zxing.client.android.CaptureActivity
@@ -19,7 +19,7 @@
  * limitations under the License.
  */
 
-package com.agiro.scanner.android;
+package se.droidgiro.scanner;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -34,6 +34,8 @@ import java.util.List;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
+
+import se.droidgiro.scanner.camera.CameraManager;
 
 import android.app.ListActivity;
 import android.content.Intent;
@@ -62,14 +64,13 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
-import com.agiro.scanner.android.camera.CameraManager;
 
 /**
  * The main activity. Draws the views and shows the results in them.
  */
 public final class CaptureActivity extends ListActivity implements SurfaceHolder.Callback {
 
-  private static final String TAG = "aGiro.CaptureActivity";
+  private static final String TAG = "DroidGiro.CaptureActivity";
 
   private static final int SETTINGS_ID = Menu.FIRST;
 
@@ -77,7 +78,7 @@ public final class CaptureActivity extends ListActivity implements SurfaceHolder
   private static final long VIBRATE_DURATION = 200L;
   private static final long SCAN_DELAY_MS = 1500L;
 
-  private static final String PACKAGE_NAME = "com.agiro.scanner.android";
+  private static final String PACKAGE_NAME = "se.droidgiro.scanner";
 
   private CaptureActivityHandler handler;
 

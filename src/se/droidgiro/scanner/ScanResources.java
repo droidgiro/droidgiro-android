@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.agiro.scanner.android;
+package se.droidgiro.scanner;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;

@@ -1,5 +1,7 @@
-package com.agiro.scanner.android.auth;
+package se.droidgiro.scanner.auth;
 
+import se.droidgiro.scanner.CaptureActivity;
+import se.droidgiro.scanner.R;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -7,8 +9,6 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.EditText;
 
-import com.agiro.scanner.android.CaptureActivity;
-import com.agiro.scanner.android.R;
 
 public class PairingActivity extends Activity {
 

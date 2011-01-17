@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 aGiro authors
+ * Copyright (C) 2011 DroidGiro authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.agiro.scanner.android;
+package se.droidgiro.scanner;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -54,7 +54,7 @@ public class Invoice {
 
 	public static final int DOCUMENT_TYPE_FIELD = 8;
 
-	private final String TAG = "aGiro.Invoice";
+	private final String TAG = "DroidGiro.Invoice";
 
 	/*
 	 * The patterns below have been derived from reading the following

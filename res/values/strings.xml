@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">aGiro</string>
+    <string name="app_name">DroidGiro</string>
     <string name="reference_field">Referensnummer:</string>
     <string name="amount_field">Belopp:</string>
     <string name="account_field">Gironummer:</string>
