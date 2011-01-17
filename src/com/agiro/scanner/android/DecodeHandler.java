@@ -91,7 +91,7 @@ final class DecodeHandler extends Handler {
 					+ resultString);
 			if(fieldsFound != 0) {
 				Message message = Message.obtain(activity.getHandler(),
-						R.id.decode_succeeded, invoice);				
+						R.id.decode_succeeded, invoice);
 				Bitmap debugBmp = null;
 				if (prefs.getBoolean(PreferencesActivity.KEY_DEBUG_IMAGE, false)) {
 					debugBmp = scanner.getDebugBitmap();
@@ -102,13 +102,16 @@ final class DecodeHandler extends Handler {
 				message.setData(bundle);
 				// Log.d(TAG, "Sending decode succeeded message...");
 				message.sendToTarget();
+			} else {
+				Message message = Message.obtain(activity.getHandler(),
+						R.id.decode_failed);
+				message.sendToTarget();
 			}
 		} else {
 			Message message = Message.obtain(activity.getHandler(),
 					R.id.decode_failed);
 			message.sendToTarget();
 		}
-
 	}
 
 }

@@ -153,7 +153,7 @@ public class Scanner {
 
 	/**
 	 * @param minBlackPerRow The minimum amount of black pixels required for
-	 * a row to be registerd.
+	 * a row to be registered.
 	 */
 	public void setMinBlackPerRow(int minBlackPerRow) {
 		this.minBlackPerRow = minBlackPerRow;
@@ -161,7 +161,7 @@ public class Scanner {
 
 	/**
 	 * @param minBlackPerCol The minimum amount of black pixels required for
-	 * column to be registerd.
+	 * column to be registered.
 	 */
 	public void setMinBlackPerCol(int minBlackPerCol) {
 		this.minBlackPerCol = minBlackPerCol;
@@ -281,10 +281,9 @@ public class Scanner {
 	 */
 	public void setTargetBitmap(Bitmap targetBmp) {
 		this.targetBmp = targetBmp;
-			if (DEBUG) {Log.d(TAG, "New target bitmap.");}
-			targetBmpHeight = targetBmp.getHeight();
-			targetBmpWidth = targetBmp.getWidth();
-			calculateCharSizeLimits(targetBmpWidth, targetBmpHeight);
+		targetBmpHeight = targetBmp.getHeight();
+		targetBmpWidth = targetBmp.getWidth();
+		calculateCharSizeLimits(targetBmpWidth, targetBmpHeight);
 	}
 
 	/**
@@ -328,7 +327,9 @@ public class Scanner {
 		if (resultString != null) {
 			CharacterIterator it = new StringCharacterIterator(resultString);
 			for (char ch = it.first(); ch != CharacterIterator.DONE; ch = it.next()){
-				matchingBmpList.add(charMap.get(ch));
+				if (charMap.containsKey(ch)) {
+					matchingBmpList.add(charMap.get(ch));
+				}
 			}
 			matchingReferenceBmp = composeFromBitmapList(matchingBmpList, false);
 		}
@@ -514,6 +515,36 @@ public class Scanner {
 	protected float minInitMatchPercent = 50f;
 	protected int matchTolerenceRows = 3;
 	protected int matchTolerencePixels;
+	protected int compareRowSpacing = 2;
+	protected int compareColSpacing = 2;
+
+	/**
+	 * @param Number of rows to skip over when comparing character bitmaps.
+	 */
+	public void setCompareRowSpacing(int compareRowSpacing) {
+		if	(compareRowSpacing <= 0) {
+			this.compareRowSpacing = 1;
+		} else if
+			(compareRowSpacing > refCharWidth) {
+			this.compareRowSpacing = refCharWidth;
+		} else {
+			this.compareRowSpacing = compareRowSpacing + 1;
+		}
+	}
+
+	/**
+	 * @param Number of columns to skip over when comparing character bitmaps.
+	 */
+	public void setCompareColumnSpacing(int compareColSpacing) {
+		if	(compareColSpacing <= 0) {
+			this.compareColSpacing = 1;
+		} else if
+			(compareColSpacing > refCharHeight) {
+			this.compareColSpacing = refCharWidth;
+		} else {
+			this.compareColSpacing = compareColSpacing + 1;
+		}
+	}
 
 	/**
 	 * @param When iterating through the scanned characters in the comparison
@@ -542,10 +573,9 @@ public class Scanner {
 	 */
 	protected void calculateMatchTolerencePixels() {
 		if (refCharWidth != 0) {
-			matchTolerencePixels =
-				Math.round(refCharWidth*matchTolerenceRows);
+			matchTolerencePixels = refCharWidth*matchTolerenceRows;
 		} else {
-			matchTolerencePixels = Math.round(16*matchTolerenceRows);
+			matchTolerencePixels = 16*matchTolerenceRows;
 		}
 	}
 
@@ -570,7 +600,6 @@ public class Scanner {
 			float bestScore = minInitMatchPercent;
 			Set set = charMap.entrySet();
 			Iterator it = set.iterator();
-			boolean firstCheck = true;
 			/* Iterate over the reference bitmap list. */
 			while (it.hasNext()) {
 				int matching = matchTolerencePixels;
@@ -581,8 +610,15 @@ public class Scanner {
 				Bitmap currentCharBmp = (Bitmap)me.getValue();
 				/* Iterate over pixels in the target bitmap. */
 				currentCharLoop:
-				for(int x = 0; x < bmp.getWidth(); ++x) {
-					for(int y = 0; y < bmp.getHeight(); ++y) {
+				/* The spacing on y and x will probably not produce faster
+				   results, it will not have to read the whole bitmap anyway,
+				   but will make the comparison more spread out before it
+				   skips to the next character. Possibly this will improve
+				   accuracy. I have experimented with creating a set path
+				   to check but so far it has mostly decreased reading speed
+				   significantly.. */
+				for(int y = 0; y < bmp.getHeight(); y+=compareRowSpacing) {
+					for(int x = 0; x < bmp.getWidth(); x+=compareColSpacing) {
 						int refPixel = currentCharBmp.getPixel(x,y);
 						int foundPixel = bmp.getPixel(x,y);
 						/* Compare pixels between target and reference. */
@@ -610,7 +646,6 @@ public class Scanner {
 						}
 					}
 				}
-				firstCheck = false;
 				/* If current has a higher match percent than any before, update
 				   bestScore */
 				if (percent > bestScore) {

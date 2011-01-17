@@ -73,9 +73,9 @@ public final class CaptureActivity extends ListActivity implements SurfaceHolder
 
   private static final int SETTINGS_ID = Menu.FIRST;
 
-  private static final long INTENT_RESULT_DURATION = 1500L;
   private static final float BEEP_VOLUME = 0.10f;
   private static final long VIBRATE_DURATION = 200L;
+  private static final long SCAN_DELAY_MS = 1500L;
 
   private static final String PACKAGE_NAME = "com.agiro.scanner.android";
 
@@ -91,12 +91,13 @@ public final class CaptureActivity extends ListActivity implements SurfaceHolder
 
   private static final ArrayList<HashMap<String,String>> list = new ArrayList<HashMap<String,String>>();
   private static String reference = null;
+  private static String incomingReference = null;
   private static String amount = null;
+  private static String incomingAmount = null;
   private static String account = null;
-  private static String debug = null;
+  private static String incomingAccount = null;
 
   private Button eraseButton;
-  private Button sendButton;
   private Button scanButton;
 
   /**
@@ -125,9 +126,8 @@ private String identifier;
     super.onListItemClick(l, v, position, id);
     if      (position == 0) { reference = null; }
     else if (position == 1) { amount = null; }
-    else if (position == 2) { account = null; }
-    else                    { debug = null; }
-    populateList(reference, amount, account, debug);
+    else                    { account = null; }
+    populateList(reference, amount, account);
     onContentChanged();
   }
 
@@ -154,15 +154,8 @@ private String identifier;
         reference = null;
         amount = null;
         account = null;
-        debug = null;
-        populateList(reference, amount, account, debug);
+        populateList(reference, amount, account);
         onContentChanged();
-      }
-    });
-
-    this.sendButton = (Button)this.findViewById(R.id.send);
-    this.sendButton.setOnClickListener(new OnClickListener() {
-      public void onClick(View v) {
       }
     });
 
@@ -177,7 +170,7 @@ private String identifier;
     R.layout.result_list_item,
     new String[] {"data_type","data"},
     new int[] {R.id.data_type,R.id.data});
-    populateList(reference, amount, account, debug);
+    populateList(reference, amount, account);
     setListAdapter(adapter);
 
     CameraManager.init(getApplication());
@@ -235,9 +228,6 @@ private String identifier;
 
   @Override
   public boolean onKeyDown(int keyCode, KeyEvent event) {
-    if (keyCode == KeyEvent.KEYCODE_SEARCH) {
-      handler.sendEmptyMessage(R.id.restart_preview);
-    }
       return super.onKeyDown(keyCode, event);
   }
 
@@ -289,7 +279,27 @@ private String identifier;
 
 	// This needs to check if a change has occured to invoice somehow. Now it
 	// beeps on any result, valid or not.
-	playBeepSoundAndVibrate();
+	try {
+		incomingReference = invoice.getReference();
+		if (!incomingReference.equals(reference)) {
+			playBeepSoundAndVibrate();
+			reference = incomingReference;
+		}
+	} catch(NullPointerException e){}
+	try {
+		incomingAmount = invoice.getCompleteAmount();
+		if (!incomingAmount.equals(amount)) {
+			playBeepSoundAndVibrate();
+			amount = incomingAmount;
+		}
+	} catch(NullPointerException e) {}
+	try {
+		incomingAccount = invoice.getGiroAccount();
+		if (!incomingAccount.equals(account)) {
+			playBeepSoundAndVibrate();
+			account = incomingAccount;
+		}
+	} catch(NullPointerException e) {}
 
     Log.v(TAG, "Got invoice " + invoice);
     if(invoice.isComplete()) {
@@ -317,9 +327,11 @@ private String identifier;
 
 			}
 		}).start();
-    }
+    } else {
+              handler.sendEmptyMessageDelayed(R.id.restart_preview, SCAN_DELAY_MS);
+	}
     
-    populateList(invoice.getReference(), invoice.getCompleteAmount(), invoice.getGiroAccount(), "NOT SUPPORTED");
+    populateList(invoice.getReference(), invoice.getCompleteAmount(), invoice.getGiroAccount());
     onContentChanged();
   }
 
@@ -385,8 +397,7 @@ private String identifier;
   }
 
   //TODO: all this should be done in a database probably
-  private void populateList(String reference, String amount, String account,
-  String debug) {
+  private void populateList(String reference, String amount, String account) {
     list.clear();
     HashMap<String,String> temp = new HashMap<String,String>();
     temp.put("data_type", getString(R.string.reference_field));
@@ -400,10 +411,6 @@ private String identifier;
     temp2.put("data_type", getString(R.string.account_field));
     temp2.put("data", account);
     list.add(temp2);
-    HashMap<String,String> temp3 = new HashMap<String,String>();
-    temp3.put("data_type", getString(R.string.debug_field));
-    temp3.put("data", debug);
-    list.add(temp3);
     }
 
 }
