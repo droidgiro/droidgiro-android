@@ -312,15 +312,8 @@ private String identifier;
 	        	params.add(new BasicNameValuePair("amount", invoice.getCompleteAmount()));
 	        	params.add(new BasicNameValuePair("document_type", invoice.getInternalDocumentType()));
 	        	try {
-	        		Writer w = new StringWriter();
-					HttpResponse res = CloudClient.makeRequest("/v2/invoices", params);
-					Reader reader = new BufferedReader(new InputStreamReader(res.getEntity().getContent(), "UTF-8"));
-					int n;
-					char[] buffer = new char[1024];
-					while ((n = reader.read(buffer)) != -1) {
-					w.write(buffer, 0, n);
-					}
-					Log.e(TAG, "Got " + res.getStatusLine().getStatusCode() + ": " + w.toString());
+	        		boolean res = CloudClient.postFields(identifier, params);
+	        		Log.v(TAG, "Result from posting invoice: " + res);
 				} catch (Exception e) {
 					Log.e(TAG, e.getMessage(), e);
 				}					

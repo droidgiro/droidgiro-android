@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_height="wrap_content" android:layout_width="wrap_content" android:id="@+id/pairLayout" android:layout_gravity="center_horizontal">
+	android:layout_height="wrap_content" android:layout_width="wrap_content"
+	android:id="@+id/pairLayout" android:layout_gravity="center_horizontal">
 	<LinearLayout android:layout_width="fill_parent"
 		android:layout_height="wrap_content" android:id="@+id/pinLayout"
 		android:layout_alignParentLeft="true" android:layout_centerVertical="true"
@@ -26,11 +27,12 @@
 			android:layout_width="50dp" android:gravity="center_vertical|center_horizontal|center"
 			android:inputType="number" android:maxLength="1"></EditText>
 
-	
-</LinearLayout>
+
+	</LinearLayout>
 	<TextView android:id="@+id/pairDescription"
 		android:layout_width="wrap_content" android:layout_height="wrap_content"
-		android:layout_below="@+id/pinLayout" android:layout_centerHorizontal="true" android:paddingTop="15dp" android:text="Get your PIN through the Chrome extension"></TextView>
+		android:layout_below="@+id/pinLayout" android:layout_centerHorizontal="true"
+		android:paddingTop="15dp" android:text="@string/get_pin"></TextView>
 
 
 

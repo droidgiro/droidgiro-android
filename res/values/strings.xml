@@ -12,4 +12,5 @@
     <string name="preferences_name">Inställningar</string>
     <string name="play_beep">Spela pip</string>
     <string name="vibrate">Vibrera</string>
+    <string name="get_pin">Hämta din PIN-kod från Chrome-tillägget</string>
 </resources>
