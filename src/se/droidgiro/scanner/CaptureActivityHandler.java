@@ -89,6 +89,10 @@ public final class CaptureActivityHandler extends Handler {
         state = State.PREVIEW;
         CameraManager.get().requestPreviewFrame(decodeThread.getHandler(), R.id.decode);
         break;
+      case R.id.new_invoice:
+        state = State.PREVIEW;
+        CameraManager.get().requestPreviewFrame(decodeThread.getHandler(), R.id.new_invoice);
+        break;
       case R.id.return_scan_result:
         Log.d(TAG, "Got return scan result message");
         activity.setResult(Activity.RESULT_OK, (Intent) message.obj);

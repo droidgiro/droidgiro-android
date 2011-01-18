@@ -23,6 +23,7 @@
   <item type="id" name="encode_failed"/>
   <item type="id" name="encode_succeeded"/>
   <item type="id" name="launch_product_query"/>
+  <item type="id" name="new_invoice"/>
   <item type="id" name="quit"/>
   <item type="id" name="restart_preview"/>
   <item type="id" name="return_scan_result"/>

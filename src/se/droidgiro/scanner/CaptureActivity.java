@@ -152,6 +152,7 @@ private String identifier;
     this.eraseButton = (Button)this.findViewById(R.id.erase);
     this.eraseButton.setOnClickListener(new OnClickListener() {
       public void onClick(View v) {
+        handler.sendEmptyMessage(R.id.new_invoice);
         reference = null;
         amount = null;
         account = null;

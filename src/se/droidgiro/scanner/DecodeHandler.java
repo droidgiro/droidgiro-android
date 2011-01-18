@@ -58,6 +58,10 @@ final class DecodeHandler extends Handler {
 		case R.id.decode:
 			decode((byte[]) message.obj, message.arg1, message.arg2);
 			break;
+		case R.id.new_invoice:
+			invoice = new Invoice();
+			decode((byte[]) message.obj, message.arg1, message.arg2);
+			break;
 		case R.id.quit:
 			Looper.myLooper().quit();
 			break;
