@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2008 ZXing authors
- * Copyright (C) 2011 aGiro authors authors
+ * Copyright (C) 2011 DroidGiro authors authors
  *
  * This file is mostly based on the file
  * com.google.zxing.client.android.ViewfinderView

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 aGiro authors
+ * Copyright (C) 2011 DroidGiro authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import android.util.Log;
  */
 public final class ScanResources {
 
-	private final String TAG = "aGiro.ScanResources";
+	private final String TAG = "DroidGiro.ScanResources";
 
 	private Map<Character,Bitmap> charMap;
 
