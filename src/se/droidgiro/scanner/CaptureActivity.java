@@ -112,6 +112,8 @@ public final class CaptureActivity extends ListActivity implements SurfaceHolder
 
 private String identifier;
 
+private String channel;
+
 /*
   private final DialogInterface.OnClickListener aboutListener =
       new DialogInterface.OnClickListener() {
@@ -143,8 +145,17 @@ private String identifier;
   @Override
   public void onCreate(Bundle icicle) {
     super.onCreate(icicle);
-      Log.d(TAG, "onCreate");
-      identifier = getIntent().getStringExtra("identifier");
+    
+    Log.d(TAG, "onCreate");
+    identifier = getIntent().getStringExtra("identifier");
+    try {
+    	channel = CloudClient.register(identifier);
+    } catch (Exception e) {
+    	finish();
+    }
+    if(channel == null) 
+    	finish();
+	
     Window window = getWindow();
     window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     setContentView(R.layout.capture);
@@ -315,7 +326,7 @@ private String identifier;
 	        	params.add(new BasicNameValuePair("document_type", invoice.getInternalDocumentType()));
 	        	try {
 	        		boolean res = CloudClient.postFields(identifier, params);
-	        		Log.v(TAG, "Result from posting invoice: " + res);
+	        		Log.v(TAG, "Result from posting invoice " + params + " to channel " + channel + ": " + res);
 				} catch (Exception e) {
 					Log.e(TAG, e.getMessage(), e);
 				}					
