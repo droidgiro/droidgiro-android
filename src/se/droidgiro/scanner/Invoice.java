@@ -151,6 +151,10 @@ public class Invoice {
 		return reference;
 	}
 
+	public void initReference() {
+		reference = null;
+	}
+
 	/**
 	 * Verifies the reference number with the check digit and sets them if they
 	 * match.
@@ -167,9 +171,14 @@ public class Invoice {
 		} else
 			Log.e(TAG, "Got reference. Check digit invalid.");
 	}
-
+	
 	public short getCheckDigitReference() {
 		return Short.parseShort(reference.substring(reference.length() - 1));
+	}
+
+	public void initAmount() {
+		amount = -1;
+		amountFractional = -1;
 	}
 
 	public void setAmount(String amount, String amountFractionals,
@@ -196,14 +205,22 @@ public class Invoice {
 	}
 
 	public String getCompleteAmount() {
-		return Integer.toString(amount)
-				+ ","
-				+ (amountFractional < 10 ? "0" + amountFractional
-						: amountFractional);
+		if(amount != -1 && amountFractional != -1) {
+			return Integer.toString(amount)
+			+ ","
+			+ (amountFractional < 10 ? "0" + amountFractional
+					: amountFractional);
+		} else {
+			return "";
+		}
 	}
 
 	public String getCheckDigitAmount() {
 		return checkDigitAmount;
+	}
+
+	public void initGiroAccount() {
+		giroAccount = null;
 	}
 
 	public String getGiroAccount() {
@@ -215,6 +232,10 @@ public class Invoice {
 		this.giroAccount = giroAccount;
 	}
 
+	public void initDocumentType() {
+		internalDocumentType = null;
+	}
+
 	public void setInternalDocumentType(String internalDocumentType) {
 		this.internalDocumentType = internalDocumentType;
 	}
@@ -222,6 +243,14 @@ public class Invoice {
 	public String getInternalDocumentType() {
 		return internalDocumentType;
 	}
+	
+	public void initFields() {
+		initReference();
+		initAmount();
+		initGiroAccount();
+		initDocumentType();
+	}
+
 
 	/**
 	 * An invoice is considered complete if it contains a reference number,

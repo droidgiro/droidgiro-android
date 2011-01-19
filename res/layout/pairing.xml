@@ -10,22 +10,22 @@
 		<EditText android:id="@+id/pairDigit1"
 			android:layout_alignParentLeft="true" android:layout_height="wrap_content"
 			android:layout_width="50dp" android:gravity="center_vertical|center_horizontal|center"
-			android:inputType="number" android:maxLength="1"></EditText>
+			android:inputType="phone" android:maxLength="1"></EditText>
 
 		<EditText android:id="@+id/pairDigit2"
 			android:layout_alignParentLeft="true" android:layout_height="wrap_content"
 			android:layout_width="50dp" android:gravity="center_vertical|center_horizontal|center"
-			android:inputType="number" android:maxLength="1"></EditText>
+			android:inputType="phone" android:maxLength="1"></EditText>
 
 		<EditText android:id="@+id/pairDigit3"
 			android:layout_alignParentLeft="true" android:layout_height="wrap_content"
 			android:layout_width="50dp" android:gravity="center_vertical|center_horizontal|center"
-			android:inputType="number" android:maxLength="1"></EditText>
+			android:inputType="phone" android:maxLength="1"></EditText>
 
 		<EditText android:id="@+id/pairDigit4"
 			android:layout_alignParentLeft="true" android:layout_height="wrap_content"
 			android:layout_width="50dp" android:gravity="center_vertical|center_horizontal|center"
-			android:inputType="number" android:maxLength="1"></EditText>
+			android:inputType="phone" android:maxLength="1"></EditText>
 
 
 	</LinearLayout>
