@@ -91,12 +91,14 @@ public final class CaptureActivity extends ListActivity implements SurfaceHolder
 //  private InactivityTimer inactivityTimer;
 
   private static final ArrayList<HashMap<String,String>> list = new ArrayList<HashMap<String,String>>();
+  private static Invoice currentInvoice = null;
   private static String reference = null;
   private static String incomingReference = null;
   private static String amount = null;
   private static String incomingAmount = null;
   private static String account = null;
   private static String incomingAccount = null;
+  private static boolean isComplete = false;
 
   private Button eraseButton;
   private Button scanButton;
@@ -124,12 +126,14 @@ private String identifier;
 */
   @Override
   protected void onListItemClick(ListView l, View v, int position, long id) {
-    super.onListItemClick(l, v, position, id);
-    if      (position == 0) { reference = null; }
-    else if (position == 1) { amount = null; }
-    else                    { account = null; }
-    populateList(reference, amount, account);
-    onContentChanged();
+	if(currentInvoice != null) {
+	  super.onListItemClick(l, v, position, id);
+	  if      (position == 0) { reference = null; currentInvoice.initReference(); }
+	  else if (position == 1) { amount = null; currentInvoice.initAmount(); }
+	  else                    { account = null; currentInvoice.initGiroAccount(); }
+	  populateList(reference, amount, account);
+	  onContentChanged();
+	}
   }
 
   ViewfinderView getViewfinderView() {
@@ -153,9 +157,7 @@ private String identifier;
     this.eraseButton.setOnClickListener(new OnClickListener() {
       public void onClick(View v) {
         handler.sendEmptyMessage(R.id.new_invoice);
-        reference = null;
-        amount = null;
-        account = null;
+        initLocalInvoice();
         populateList(reference, amount, account);
         onContentChanged();
       }
@@ -278,6 +280,7 @@ private String identifier;
     } else if (debugImageView.getVisibility() != View.GONE) {
 		debugImageView.setVisibility(View.GONE);
 	}
+    currentInvoice = invoice;
 
 	// This needs to check if a change has occured to invoice somehow. Now it
 	// beeps on any result, valid or not.
@@ -304,7 +307,9 @@ private String identifier;
 	} catch(NullPointerException e) {}
 
     Log.v(TAG, "Got invoice " + invoice);
+    isComplete = false;
     if(invoice.isComplete()) {
+        isComplete = true;
     	new Thread(new Runnable() {
 			
 			public void run() {
@@ -316,6 +321,9 @@ private String identifier;
 	        	try {
 	        		boolean res = CloudClient.postFields(identifier, params);
 	        		Log.v(TAG, "Result from posting invoice: " + res);
+	        	    invoice.initFields();
+	        	    initLocalInvoice();
+	        	    currentInvoice = null;
 				} catch (Exception e) {
 					Log.e(TAG, e.getMessage(), e);
 				}					
@@ -323,11 +331,21 @@ private String identifier;
 			}
 		}).start();
     } else {
-              handler.sendEmptyMessageDelayed(R.id.restart_preview, SCAN_DELAY_MS);
+	    handler.sendEmptyMessageDelayed(R.id.restart_preview, SCAN_DELAY_MS);
 	}
-    
+
     populateList(invoice.getReference(), invoice.getCompleteAmount(), invoice.getGiroAccount());
     onContentChanged();
+    isComplete = false;
+  }
+  
+  /**
+   * Initiating local invoice variables. 
+   */
+  private void initLocalInvoice() {
+      reference = null;
+      amount = null;
+      account = null;
   }
 
   /**
@@ -406,6 +424,12 @@ private String identifier;
     temp2.put("data_type", getString(R.string.account_field));
     temp2.put("data", account);
     list.add(temp2);
+    if(isComplete) { 
+        HashMap<String,String> temp3 = new HashMap<String,String>();
+        temp3.put("data_type", "");
+        temp3.put("data", getString(R.string.invoice_sent));
+        list.add(temp3);
     }
+  }
 
 }
