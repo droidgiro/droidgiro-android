@@ -24,9 +24,9 @@ public class CloudClient {
 
 	public static final String TAG = "DroidGiro.CloudClient";
 
-	private static final String REGISTER_URL = "http://agiroapp.appspot.com/v2/register";
-	
-	private static final String INVOICES_URL = "http://agiroapp.appspot.com/v2/invoices";
+	private static final String REGISTER_URL = "http://agiroapp.appspot.com/register";
+
+	private static final String INVOICES_URL = "http://agiroapp.appspot.com/invoices";
 
 	/**
 	 * Sends a pair request to the server with the specified pin code.
@@ -48,26 +48,26 @@ public class CloudClient {
 		UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params, "UTF-8");
 		post.setEntity(entity);
 		HttpResponse res = client.execute(post);
+		Log.v(TAG, "Post to register returned "
+				+ res.getStatusLine().getStatusCode());
 		if (res.getStatusLine().getStatusCode() == 200) {
 			StringBuilder sb = new StringBuilder();
 			String line;
 
-			try {
-				BufferedReader reader = new BufferedReader(
-						new InputStreamReader(res.getEntity().getContent(),
-								"UTF-8"));
-				while ((line = reader.readLine()) != null) {
-					sb.append(line).append("\n");
-				}
-			} finally {
-				res.getEntity().getContent().close();
+			BufferedReader reader = new BufferedReader(new InputStreamReader(
+					res.getEntity().getContent(), "UTF-8"));
+			while ((line = reader.readLine()) != null) {
+				sb.append(line).append("\n");
 			}
+			Log.v(TAG, "Post to register returned " + sb + " with status "
+					+ res.getStatusLine().getStatusCode());
 			return sb.toString();
 		}
 		return null;
 	}
-	
-	public static boolean postFields(String hash, List<NameValuePair> fields) throws Exception {
+
+	public static boolean postFields(String hash, List<NameValuePair> fields)
+			throws Exception {
 
 		DefaultHttpClient client = new DefaultHttpClient();
 		URI uri = new URI(INVOICES_URL);
