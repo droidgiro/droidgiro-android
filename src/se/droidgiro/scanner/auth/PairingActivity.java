@@ -1,6 +1,7 @@
 package se.droidgiro.scanner.auth;
 
 import se.droidgiro.scanner.CaptureActivity;
+import se.droidgiro.scanner.CloudClient;
 import se.droidgiro.scanner.R;
 import android.app.Activity;
 import android.content.Intent;
@@ -8,7 +9,6 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.EditText;
-
 
 public class PairingActivity extends Activity {
 
@@ -35,7 +35,7 @@ public class PairingActivity extends Activity {
 		digit3.addTextChangedListener(dw);
 		digit4.addTextChangedListener(dw);
 	}
-	
+
 	@Override
 	protected void onResume() {
 		super.onResume();
@@ -49,14 +49,6 @@ public class PairingActivity extends Activity {
 	private class DigitWatcher implements TextWatcher {
 
 		public void afterTextChanged(Editable s) {
-		}
-
-		public void beforeTextChanged(CharSequence s, int start, int count,
-				int after) {
-		}
-
-		public void onTextChanged(CharSequence s, int start, int before,
-				int count) {
 			if (digit1.getText().length() == 0)
 				digit1.requestFocus();
 			else if (digit2.getText().length() == 0)
@@ -67,17 +59,50 @@ public class PairingActivity extends Activity {
 				digit4.requestFocus();
 			else {
 				// compose pin
-				String identifier = digit1.getText().toString()
+				String pin = digit1.getText().toString()
 						+ digit2.getText().toString()
 						+ digit3.getText().toString()
 						+ digit4.getText().toString();
-				// Open scanner
-				Intent intent = new Intent(PairingActivity.this,
-						CaptureActivity.class);
-				intent.putExtra("identifier", identifier);
-				startActivity(intent);
+				register(pin);
 			}
 		}
+
+		public void beforeTextChanged(CharSequence s, int start, int count,
+				int after) {
+		}
+
+		public void onTextChanged(CharSequence s, int start, int before,
+				int count) {
+		}
+	}
+
+	public void clear() {
+		digit4.setText("");
+		digit3.setText("");
+		digit2.setText("");
+		digit1.setText("");
+		digit1.requestFocus();
+	}
+
+	public void register(String pin) {
+		String channel = null;
+		try {
+			channel = CloudClient.register(pin);
+		} catch (Exception e) {
+			clear();
+		}
+		if (channel == null)
+			clear();
+		else {
+			// Open scanner
+			Intent intent = new Intent(PairingActivity.this,
+					CaptureActivity.class);
+			intent.putExtra("identifier", pin);
+			intent.putExtra("channel", channel);
+			startActivity(intent);
+
+		}
+
 	}
 
 }

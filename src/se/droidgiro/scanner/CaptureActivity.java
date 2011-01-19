@@ -152,12 +152,8 @@ private String channel;
     
     Log.d(TAG, "onCreate");
     identifier = getIntent().getStringExtra("identifier");
-    try {
-    	channel = CloudClient.register(identifier);
-    } catch (Exception e) {
-    	finish();
-    }
-    if(channel == null) 
+    channel = getIntent().getStringExtra("channel");
+    if(identifier == null) // Change this to channel when new server API is ready
     	finish();
 	
     Window window = getWindow();
