@@ -16,7 +16,7 @@
  -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          android:versionName="alpha 3" android:versionCode="3" package="se.droidgiro.scanner">
+          android:versionName="0.4 alpha" android:versionCode="4" package="se.droidgiro.scanner">
   <uses-sdk android:minSdkVersion="3"
             android:targetSdkVersion="4"/>
   <supports-screens android:largeScreens="true"
