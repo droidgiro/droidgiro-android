@@ -18,8 +18,6 @@
 
 package se.droidgiro.scanner;
 
-import java.util.HashMap;
-
 import se.droidgiro.scanner.camera.CameraManager;
 
 import android.app.Activity;

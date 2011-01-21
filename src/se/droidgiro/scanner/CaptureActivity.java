@@ -80,7 +80,6 @@ public final class CaptureActivity extends ListActivity implements SurfaceHolder
   private boolean hasSurface;
   private boolean playBeep;
   private boolean vibrate;
-  private boolean copyToClipboard;
 //  private InactivityTimer inactivityTimer;
 
   private static final ArrayList<HashMap<String,String>> list = new ArrayList<HashMap<String,String>>();

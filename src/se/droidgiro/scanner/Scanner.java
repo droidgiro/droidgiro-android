@@ -20,16 +20,14 @@ import java.lang.Math;
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
@@ -47,7 +45,6 @@ import android.util.Log;
 public class Scanner {
 
 	private final String TAG = "DroidGiro.Scanner";
-	private boolean debug = false;
 
 	/**
 	 * The width of the bitmap to be scanned.
@@ -184,36 +181,95 @@ public class Scanner {
 	}
 
 
-	private String resultString = null;
-	private Bitmap targetBmp = null;
-	private Bitmap debugBmp = null;
-	private Bitmap referenceBmp = null;
-	private Bitmap matchingReferenceBmp = null;
-	private Bitmap contrastedDebugBmp = null;
-	private Bitmap nonContrastedDebugBmp = null;
-	private Bitmap contrastBmp = null;
-	private List<Bitmap> debugBmps;
-	private List<Bitmap> foundContrastedBmps;
-	private List<Bitmap> foundNonContrastedBmps;
-	private List<Rect> targetRects;
-	private Map<Character,Bitmap> charMap;
-	private Set charSet;
+	/**
+	 * The resulting string from scan().
+	 */
+	protected String resultString = null;
+	/**
+	 * The bitmap to be analyzed.
+	 */
+	protected Bitmap targetBmp = null;
+	/**
+	 * The bitmap that is created from the getDebugBitmap() method. Shows
+	 * three parts of the scan process, the noncontrasted bitmaps, the
+	 * contrasted bitmaps, and the best matching reference bitmaps.
+	 */
+	protected Bitmap debugBmp = null;
+	/**
+	 * A bitmap composed of all the reference bitmaps.
+	 */
+	protected Bitmap referenceBmp = null;
+	/**
+	 * A bitmap composed of the best matching reference bitmaps.
+	 */
+	protected Bitmap matchingReferenceBmp = null;
+	/**
+	 * A bitmap composed of the found black pixel sections with
+	 * contrast added.
+	 */
+	protected Bitmap contrastedDebugBmp = null;
+	/**
+	 * A bitmap composed of the original black pixels found.
+	 */
+	protected Bitmap nonContrastedDebugBmp = null;
+	/**
+	 * The target bitmap with contrast added.
+	 */
+	protected Bitmap contrastBmp = null;
+	/**
+	 * A list of the three different bitmaps in debugBmp.
+	 */
+	protected List<Bitmap> debugBmps;
+	/**
+	 * A list of bitmaps with the found black pixel sections,
+	 * contrast added.
+	 */
+	protected List<Bitmap> foundContrastedBmps;
+	/**
+	 * A list of bitmaps with the found black pixel sections,
+	 * no contrast.
+	 */
+	protected List<Bitmap> foundNonContrastedBmps;
+	/**
+	 * The coordinates of the cound black pixel sections, as Rects.
+	 */
+	protected List<Rect> targetRects;
+	/**
+	 * The reference character bitmaps in a Map.
+	 */
+	protected Map<Character,Bitmap> charMap;
+	/**
+	 * The reference character bitmaps in a Set.
+	 */
+	protected Set<Entry<Character,Bitmap>> charSet;
 
+	/**
+	 * @param scanResources The resource class for the scanner.
+	 */
 	public Scanner(ScanResources scanResources) {
 		setupScanResources(scanResources);
 	}
 
+	/**
+	 * @param scanResources The resource class for the scanner.
+	 * @param targetBmp Sets the bitmap to be scanned.
+	 */
 	public Scanner(ScanResources scanResources, Bitmap targetBmp) {
 		setupScanResources(scanResources);
 		this.targetBmp = targetBmp;
 	}
 
+	/**
+	 * Sets up the reference character Set and measures the height of
+	 * the first bitmap.
+	 * @param scanResources The resource class for the scanner.
+	 */
 	protected void setupScanResources(ScanResources scanResources) {
 		charMap = scanResources.getCharMap();
 		if (!charMap.isEmpty()) {
 			charSet = charMap.entrySet();
-			Iterator it = charSet.iterator();
-			Map.Entry entry = (Map.Entry) it.next();
+			Iterator<Entry<Character, Bitmap>> it = charSet.iterator();
+			Map.Entry<Character, Bitmap> entry = it.next();
 			Bitmap measure = (Bitmap)entry.getValue();
 			refCharWidth = measure.getWidth();
 			refCharHeight = measure.getHeight();
@@ -441,7 +497,7 @@ public class Scanner {
 	* @param contrast True if bitmap should be contrasted.
 	* @return The list of scaled bitmaps.
 	*/
-	protected List<Bitmap> uniformBitmapList(Bitmap bmp, List coordList,
+	protected List<Bitmap> uniformBitmapList(Bitmap bmp, List<Rect> coordList,
 			int toWidth, int toHeight, boolean contrast) {
 		List<Bitmap> bmpList = new ArrayList<Bitmap>();
 		ListIterator<Rect> li = coordList.listIterator();
@@ -470,10 +526,10 @@ public class Scanner {
 	* @param vertical True if bitmaps should be appended vertically.
 	* @return The composed bitmap.
 	*/
-	protected Bitmap composeFromBitmapList(List bmpList, boolean vertical) {
+	protected Bitmap composeFromBitmapList(List<Bitmap> bmpList, boolean vertical) {
 		//TODO: Probably unnecessary object creations in this method but
 		// not very important since it's only for debug bitmap
-		Bitmap measureBmp = (Bitmap)bmpList.get(0);
+		Bitmap measureBmp = bmpList.get(0);
 		int toWidth = measureBmp.getWidth();
 		int toHeight = measureBmp.getHeight();
 		Bitmap resultBmp;
@@ -505,10 +561,28 @@ public class Scanner {
 		return resultBmp;
 	}
 
+	/**
+	 * The initial minimum percent matching pixels the reference bitmaps must
+	 * have in the pixel comparison method.
+	 */
 	protected float minInitMatchPercent = 50f;
+	/**
+	 * Maximum amount of nonmatching rows to ignore when comparing with the
+	 * reference bitmaps.
+	 */
 	protected int matchTolerenceRows = 3;
+	/**
+	 * Maximum amount of nonmatching pixels to ignore when comparing with the
+	 * reference bitmaps.
+	 */
 	protected int matchTolerencePixels;
+	/**
+	 * Number of rows to skip over when comparing character bitmaps.
+	 */
 	protected int compareRowSpacing = 2;
+	/**
+	 * Number of columns to skip over when comparing character bitmaps.
+	 */
 	protected int compareColSpacing = 2;
 
 	/**
@@ -577,14 +651,13 @@ public class Scanner {
 	 * interpret the best matching reference to a string.
 	 * @param bmpList The list of bitmaps to compare.
 	 * @param charMap
-	 *			A map with character as key and corresponding bitmap as value.
+	 * A map with character as key and corresponding bitmap as value.
 	 * @return The resulting string
 	 */
-	protected String referenceCompare(List bmpList, Map charMap) {
+	protected String referenceCompare(List<Bitmap> bmpList, Map<Character, Bitmap> charMap) {
 		calculateMatchTolerencePixels();
 		StringBuffer result = new StringBuffer();
 		ListIterator<Bitmap> li = bmpList.listIterator();
-		int totalPixels = refCharWidth*refCharHeight;
 		Bitmap currentCharBmp;
 		Character currentChar;
 		/* Iterate over the target bitmap list. */
@@ -592,13 +665,13 @@ public class Scanner {
 			Bitmap bmp = li.next();
 			Character bestChar = (char)88;
 			float bestScore = minInitMatchPercent;
-			Iterator it = charSet.iterator();
+			Iterator<Entry<Character, Bitmap>> it = charSet.iterator();
 			/* Iterate over the reference bitmap list. */
 			while (it.hasNext()) {
 				int matching = matchTolerencePixels;
 				int nonmatching = 0;
 				float percent = 0;
-				Map.Entry charSetEntry = (Map.Entry)it.next();
+				Map.Entry<Character, Bitmap> charSetEntry = it.next();
 				currentChar = (Character)charSetEntry.getKey();
 				currentCharBmp = (Bitmap)charSetEntry.getValue();
 				/* Iterate over pixels in the target bitmap. */
@@ -626,13 +699,6 @@ public class Scanner {
 								percent = ((float)matching/
 									((float)matching+(float)nonmatching))*100;
 								if (percent < bestScore) {
-									if (debug) {Log.d(TAG,
-										"Skipping: "+currentChar+
-										" true:"+matching+
-										" false:"+nonmatching+
-										" scanned:"+(matching+nonmatching)+
-										" percent:"+percent);
-									}
 									break currentCharLoop;
 								}
 							}
@@ -644,15 +710,8 @@ public class Scanner {
 				if (percent > bestScore) {
 					bestScore = percent;
 					bestChar = currentChar;
-					if (debug) {Log.d(TAG, "Better match found= "+bestChar+
-						" true:"+matching+
-						" false:"+nonmatching+
-						" scan:"+(matching+nonmatching)+
-						" percent:"+percent);
-					}
 				}
 			}
-			if (debug) {Log.d(TAG, "Final char= "+bestChar);}
 			result.append(bestChar);
 		}
 		return result.toString();

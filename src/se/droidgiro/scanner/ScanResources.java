@@ -20,7 +20,10 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+
+import se.droidgiro.scanner.R.drawable;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -85,11 +88,11 @@ public final class ScanResources {
 		o.inScaled = false;
 		charMap = new HashMap<Character,Bitmap>();
 		try {
-			Class res = R.drawable.class;
-			Set set = charIds.entrySet();
-			Iterator it = set.iterator();
+			Class<drawable> res = R.drawable.class;
+			Set<Entry<Character,String>> set = charIds.entrySet();
+			Iterator<Entry<Character, String>> it = set.iterator();
 			while(it.hasNext()) {
-				Map.Entry me = (Map.Entry)it.next();
+				Entry<Character,String> me = it.next();
 				Character cha = (Character)me.getKey();
 				String id = (String)me.getValue();
 				Field field = res.getField(id);

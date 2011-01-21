@@ -39,15 +39,11 @@ import android.view.View;
  */
 public final class ViewfinderView extends View {
 
-  private static final int[] SCANNER_ALPHA = {0, 64, 128, 192, 255, 192, 128, 64};
   private static final long ANIMATION_DELAY = 100L;
-  private static final int OPAQUE = 0xFF;
 
   private final Paint paint;
   private final int maskColor;
   private final int frameColor;
-  private final int laserColor;
-  private int scannerAlpha;
 
   // This constructor is used when the class is built from an XML resource.
   public ViewfinderView(Context context, AttributeSet attrs) {
@@ -58,8 +54,6 @@ public final class ViewfinderView extends View {
     Resources resources = getResources();
     maskColor = resources.getColor(R.color.viewfinder_mask);
     frameColor = resources.getColor(R.color.viewfinder_frame);
-    laserColor = resources.getColor(R.color.viewfinder_laser);
-    scannerAlpha = 0;
   }
 
   @Override
