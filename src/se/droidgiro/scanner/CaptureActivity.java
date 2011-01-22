@@ -323,7 +323,8 @@ private String channel;
 	        	params.add(new BasicNameValuePair("channel", CaptureActivity.this.channel));
 	        	params.add(new BasicNameValuePair("reference", invoice.getReference()));
 	        	params.add(new BasicNameValuePair("amount", invoice.getCompleteAmount()));
-	        	params.add(new BasicNameValuePair("document_type", invoice.getInternalDocumentType()));
+	        	params.add(new BasicNameValuePair("type", invoice.getInternalDocumentType()));
+	        	params.add(new BasicNameValuePair("account", invoice.getGiroAccount()));
 	        	try {
 	        		boolean res = CloudClient.postFields(params);
 	        		Log.v(TAG, "Result from posting invoice " + params + " to channel " + channel + ": " + res);
