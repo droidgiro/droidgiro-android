@@ -140,6 +140,8 @@ public final class CaptureActivity extends ListActivity implements
 		this.eraseButton = (Button) this.findViewById(R.id.erase);
 		this.eraseButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
+				if(currentInvoice != null)
+					currentInvoice.initFields();
 				resultListHandler.clear();
 				handler.sendEmptyMessage(R.id.new_invoice);
 				onContentChanged();
@@ -277,9 +279,12 @@ public final class CaptureActivity extends ListActivity implements
 		}
 		currentInvoice = invoice;
 
-		resultListHandler.setReference(invoice.getReference());
-		resultListHandler.setAmount(invoice.getCompleteAmount());
-		resultListHandler.setAccount(invoice.getGiroAccount());
+		if(invoice.isReferenceDefined())
+			resultListHandler.setReference(invoice.getReference());
+		if(invoice.isAmountDefined())
+			resultListHandler.setAmount(invoice.getCompleteAmount());
+		if(invoice.isGiroAccountDefined())
+			resultListHandler.setAccount(invoice.getGiroAccount());
 		if (resultListHandler.hasNewData()) {
 			playBeepSoundAndVibrate();
 			resultListHandler.setNewData(false);

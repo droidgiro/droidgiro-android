@@ -253,6 +253,22 @@ public class Invoice {
 		initDocumentType();
 	}
 
+	public boolean isReferenceDefined() {
+		return reference != null;
+	}
+
+	public boolean isAmountDefined() {
+		return amount != -1 && amountFractional != -1;
+	}
+
+	public boolean isGiroAccountDefined() {
+		return giroAccount != null;
+	}
+
+	public boolean isDocumentTypeDefined() {
+		return internalDocumentType != null;
+	}
+
 	/**
 	 * An invoice is considered complete if it contains a reference number,
 	 * amount including fractionals, the amount check digit and a giro account.
