@@ -16,7 +16,6 @@
 
 package se.droidgiro.scanner;
 
-import java.lang.Math;
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
 import java.util.ArrayList;
@@ -24,8 +23,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;

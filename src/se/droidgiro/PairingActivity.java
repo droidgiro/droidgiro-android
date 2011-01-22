@@ -1,8 +1,7 @@
-package se.droidgiro.scanner.auth;
+package se.droidgiro;
 
 import se.droidgiro.scanner.CaptureActivity;
 import se.droidgiro.scanner.CloudClient;
-import se.droidgiro.scanner.R;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;

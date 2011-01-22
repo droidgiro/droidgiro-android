@@ -1,5 +1,6 @@
 package se.droidgiro.scanner;
 
+import se.droidgiro.R;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;

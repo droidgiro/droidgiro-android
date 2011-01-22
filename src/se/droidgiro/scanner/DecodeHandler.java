@@ -18,8 +18,8 @@
 
 package se.droidgiro.scanner;
 
+import se.droidgiro.R;
 import se.droidgiro.scanner.camera.CameraManager;
-
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;

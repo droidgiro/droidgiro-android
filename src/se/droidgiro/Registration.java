@@ -1,4 +1,4 @@
-package se.droidgiro.scanner.auth;
+package se.droidgiro;
 
 public class Registration {
 

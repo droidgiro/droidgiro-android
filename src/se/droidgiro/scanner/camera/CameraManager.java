@@ -26,7 +26,6 @@ import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.Camera;
-import android.hardware.Camera.Parameters;
 import android.os.Build;
 import android.os.Handler;
 import android.preference.PreferenceManager;

@@ -13,11 +13,10 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 
-import com.google.gson.Gson;
-
-import se.droidgiro.scanner.auth.Registration;
-
+import se.droidgiro.Registration;
 import android.util.Log;
+
+import com.google.gson.Gson;
 
 /**
  * Handles communication with the cloud service for pushing and retrieving

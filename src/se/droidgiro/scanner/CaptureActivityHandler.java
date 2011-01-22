@@ -18,8 +18,8 @@
 
 package se.droidgiro.scanner;
 
+import se.droidgiro.R;
 import se.droidgiro.scanner.camera.CameraManager;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;

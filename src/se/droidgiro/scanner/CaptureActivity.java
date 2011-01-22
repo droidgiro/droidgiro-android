@@ -29,6 +29,7 @@ import java.util.List;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 
+import se.droidgiro.R;
 import se.droidgiro.scanner.camera.CameraManager;
 import android.app.ListActivity;
 import android.content.Intent;
