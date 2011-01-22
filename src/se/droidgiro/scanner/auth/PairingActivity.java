@@ -105,13 +105,18 @@ public class PairingActivity extends Activity {
 		}
 
 	}
-	
+
+	/**
+	 * Temporary by-pass method for accessing the CaptureActivity without a pin
+	 * code
+	 * 
+	 * @param v
+	 */
 	public void bypass(View v) {
-		Intent intent = new Intent(PairingActivity.this,
-				CaptureActivity.class);
+		Intent intent = new Intent(PairingActivity.this, CaptureActivity.class);
 		intent.putExtra("identifier", "debug");
 		intent.putExtra("channel", "debug");
-		startActivity(intent);		
+		startActivity(intent);
 	}
 
 }
