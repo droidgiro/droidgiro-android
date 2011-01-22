@@ -93,7 +93,7 @@ public class PairingActivity extends Activity {
 			clear();
 			return;
 		}
-		if (!registration.isSucessful()) {
+		if (!registration.isSuccessful()) {
 			clear();
 			return;
 		} else {

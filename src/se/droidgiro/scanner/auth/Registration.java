@@ -14,7 +14,7 @@ public class Registration {
 		return message;
 	}
 	
-	public boolean isSucessful() {
+	public boolean isSuccessful() {
 		return channel != null;
 	}
 	
