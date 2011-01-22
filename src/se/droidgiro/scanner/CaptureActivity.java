@@ -84,17 +84,9 @@ public final class CaptureActivity extends ListActivity implements SurfaceHolder
   private boolean hasSurface;
   private boolean playBeep;
   private boolean vibrate;
-//  private InactivityTimer inactivityTimer;
 
-  private static final ArrayList<HashMap<String,String>> list = new ArrayList<HashMap<String,String>>();
   private static Invoice currentInvoice = null;
-  private static String reference = null;
-  private static String incomingReference = null;
-  private static String amount = null;
-  private static String incomingAmount = null;
-  private static String account = null;
-  private static String incomingAccount = null;
-  private static boolean isComplete = false;
+  private ResultListHandler resultListHandler;
 
   private Button eraseButton;
   private Button scanButton;
@@ -110,25 +102,17 @@ public final class CaptureActivity extends ListActivity implements SurfaceHolder
 
 private String channel;
 
-/*
-  private final DialogInterface.OnClickListener aboutListener =
-      new DialogInterface.OnClickListener() {
-    public void onClick(DialogInterface dialogInterface, int i) {
-      Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.zxing_url)));
-      intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-      startActivity(intent);
-    }
-  };
-*/
   @Override
   protected void onListItemClick(ListView l, View v, int position, long id) {
 	if(currentInvoice != null) {
 	  super.onListItemClick(l, v, position, id);
-	  if      (position == 0) { reference = null; currentInvoice.initReference(); }
-	  else if (position == 1) { amount = null; currentInvoice.initAmount(); }
-	  else                    { account = null; currentInvoice.initGiroAccount(); }
-	  populateList(reference, amount, account);
-	  onContentChanged();
+	  if      (position == 0) { resultListHandler.setReference(null);
+		currentInvoice.initReference(); }
+	  else if (position == 1) { resultListHandler.setAmount(null);
+		currentInvoice.initAmount(); }
+	  else                    { resultListHandler.setAccount(null);
+		currentInvoice.initGiroAccount(); }
+		onContentChanged();
 	}
   }
 
@@ -156,9 +140,8 @@ private String channel;
     this.eraseButton = (Button)this.findViewById(R.id.erase);
     this.eraseButton.setOnClickListener(new OnClickListener() {
       public void onClick(View v) {
+		resultListHandler.clear();
         handler.sendEmptyMessage(R.id.new_invoice);
-        initLocalInvoice();
-        populateList(reference, amount, account);
         onContentChanged();
       }
     });
@@ -170,18 +153,16 @@ private String channel;
       }
     });
 
-    SimpleAdapter adapter = new SimpleAdapter(this, list,
-    R.layout.result_list_item,
-    new String[] {"data_type","data"},
-    new int[] {R.id.data_type,R.id.data});
-    populateList(reference, amount, account);
+    resultListHandler = new ResultListHandler(this);
+    List<ResultListHandler.ListItem> resultList = resultListHandler.getList();
+    ResultListAdapter adapter = new ResultListAdapter(this,
+		R.layout.result_list_item, resultList);
     setListAdapter(adapter);
 
     CameraManager.init(getApplication());
     viewfinderView = (ViewfinderView) findViewById(R.id.viewfinder_view);
     handler = null;
     hasSurface = false;
-//    inactivityTimer = new InactivityTimer(this);
   }
 
   @Override
@@ -288,34 +269,18 @@ private String channel;
 	}
     currentInvoice = invoice;
 
-	// This needs to check if a change has occured to invoice somehow. Now it
-	// beeps on any result, valid or not.
-	try {
-		incomingReference = invoice.getReference();
-		if (!incomingReference.equals(reference)) {
-			playBeepSoundAndVibrate();
-			reference = incomingReference;
-		}
-	} catch(NullPointerException e){}
-	try {
-		incomingAmount = invoice.getCompleteAmount();
-		if (!incomingAmount.equals(amount)) {
-			playBeepSoundAndVibrate();
-			amount = incomingAmount;
-		}
-	} catch(NullPointerException e) {}
-	try {
-		incomingAccount = invoice.getGiroAccount();
-		if (!incomingAccount.equals(account)) {
-			playBeepSoundAndVibrate();
-			account = incomingAccount;
-		}
-	} catch(NullPointerException e) {}
+	resultListHandler.setReference(invoice.getReference());
+	resultListHandler.setAmount(invoice.getCompleteAmount());
+	resultListHandler.setAccount(invoice.getGiroAccount());
+	if (resultListHandler.hasNewData()) {
+		playBeepSoundAndVibrate();
+		resultListHandler.setNewData(false);
+	}
 
     Log.v(TAG, "Got invoice " + invoice);
-    isComplete = false;
+
     if(invoice.isComplete()) {
-        isComplete = true;
+		resultListHandler.setSent(true);
     	new Thread(new Runnable() {
 			
 			public void run() {
@@ -323,13 +288,13 @@ private String channel;
 	        	params.add(new BasicNameValuePair("channel", CaptureActivity.this.channel));
 	        	params.add(new BasicNameValuePair("reference", invoice.getReference()));
 	        	params.add(new BasicNameValuePair("amount", invoice.getCompleteAmount()));
-	        	params.add(new BasicNameValuePair("type", invoice.getInternalDocumentType()));
-	        	params.add(new BasicNameValuePair("account", invoice.getGiroAccount()));
+				params.add(new BasicNameValuePair("type", invoice.getInternalDocumentType()));
+				params.add(new BasicNameValuePair("account", invoice.getGiroAccount()));
 	        	try {
 	        		boolean res = CloudClient.postFields(params);
 	        		Log.v(TAG, "Result from posting invoice " + params + " to channel " + channel + ": " + res);
 	        	    invoice.initFields();
-	        	    initLocalInvoice();
+//	        	    initLocalInvoice();
 	        	    currentInvoice = null;
 				} catch (Exception e) {
 					Log.e(TAG, e.getMessage(), e);
@@ -340,19 +305,7 @@ private String channel;
     } else {
 	    handler.sendEmptyMessageDelayed(R.id.restart_preview, SCAN_DELAY_MS);
 	}
-
-    populateList(invoice.getReference(), invoice.getCompleteAmount(), invoice.getGiroAccount());
     onContentChanged();
-    isComplete = false;
-  }
-  
-  /**
-   * Initiating local invoice variables. 
-   */
-  private void initLocalInvoice() {
-      reference = null;
-      amount = null;
-      account = null;
   }
 
   /**
@@ -414,29 +367,6 @@ private String channel;
 
   public void drawViewfinder() {
     viewfinderView.drawViewfinder();
-  }
-
-  //TODO: all this should be done in a database probably
-  private void populateList(String reference, String amount, String account) {
-    list.clear();
-    HashMap<String,String> temp = new HashMap<String,String>();
-    temp.put("data_type", getString(R.string.reference_field));
-    temp.put("data", reference);
-    list.add(temp);
-    HashMap<String,String> temp1 = new HashMap<String,String>();
-    temp1.put("data_type", getString(R.string.amount_field));
-    temp1.put("data", amount);
-    list.add(temp1);
-    HashMap<String,String> temp2 = new HashMap<String,String>();
-    temp2.put("data_type", getString(R.string.account_field));
-    temp2.put("data", account);
-    list.add(temp2);
-    if(isComplete) { 
-        HashMap<String,String> temp3 = new HashMap<String,String>();
-        temp3.put("data_type", "");
-        temp3.put("data", getString(R.string.invoice_sent));
-        list.add(temp3);
-    }
   }
 
 }

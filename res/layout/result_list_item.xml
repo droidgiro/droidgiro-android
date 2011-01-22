@@ -4,7 +4,7 @@
               android:layout_width="fill_parent"
               android:layout_height="wrap_content">
 
-    <TextView android:id="@+id/data_type"
+    <TextView android:id="@+id/field_result_type"
               android:layout_weight="1"
               android:layout_width="fill_parent"
               android:layout_height="wrap_content"
@@ -16,7 +16,7 @@
               android:textSize="8pt"
               android:textColor="#ffffff"/>
 
-    <TextView android:id="@+id/data"
+    <TextView android:id="@+id/field_result_data"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
               android:padding="2dp"
