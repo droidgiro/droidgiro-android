@@ -13,6 +13,10 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 
+import com.google.gson.Gson;
+
+import se.droidgiro.scanner.auth.Registration;
+
 import android.util.Log;
 
 /**
@@ -24,9 +28,9 @@ public class CloudClient {
 
 	public static final String TAG = "DroidGiro.CloudClient";
 
-	private static final String REGISTER_URL = "http://agiroapp.appspot.com/register";
+	private static final String REGISTER_URL = "http://2.latest.agiroapp.appspot.com/register";
 
-	private static final String INVOICES_URL = "http://agiroapp.appspot.com/invoices";
+	private static final String INVOICES_URL = "http://2.latest.agiroapp.appspot.com/invoices";
 
 	/**
 	 * Sends a pair request to the server with the specified pin code.
@@ -38,13 +42,13 @@ public class CloudClient {
 	 * 
 	 * @throws Exception
 	 */
-	public static String register(String pin) throws Exception {
+	public static Registration register(String pin) throws Exception {
 		DefaultHttpClient client = new DefaultHttpClient();
 		URI uri = new URI(REGISTER_URL);
 		Log.e(TAG, "" + uri.toString());
 		HttpPost post = new HttpPost(uri);
 		List<NameValuePair> params = new ArrayList<NameValuePair>();
-		params.add(new BasicNameValuePair("identifier", pin));
+		params.add(new BasicNameValuePair("pin", pin));
 		UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params, "UTF-8");
 		post.setEntity(entity);
 		HttpResponse res = client.execute(post);
@@ -52,18 +56,22 @@ public class CloudClient {
 				+ res.getStatusLine().getStatusCode());
 		if (res.getStatusLine().getStatusCode() == 200) {
 			StringBuilder sb = new StringBuilder();
-			String line;
 
 			BufferedReader reader = new BufferedReader(new InputStreamReader(
 					res.getEntity().getContent(), "UTF-8"));
-			while ((line = reader.readLine()) != null) {
-				sb.append(line).append("\n");
-			}
 			Log.v(TAG, "Post to register returned " + sb + " with status "
 					+ res.getStatusLine().getStatusCode());
-			return sb.toString();
+			Gson gson = new Gson();
+			Registration registration = gson.fromJson(reader, Registration.class);
+			Log.v(TAG, registration.toString());
+			return registration;
+		} else if(res.getStatusLine().getStatusCode() == 401) {
+			Log.w(TAG, "Unauthorized");
+			return new Registration();
+		} else {
+			Log.e(TAG, "Unknown error");
+			return new Registration();
 		}
-		return null;
 	}
 
 	public static boolean postFields(String hash, List<NameValuePair> fields)
