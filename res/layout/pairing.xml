@@ -36,4 +36,7 @@
 
 
 
+	<Button android:layout_width="wrap_content"
+		android:layout_height="wrap_content" android:id="@+id/debugBypass"
+		android:text="Debug bypass" android:layout_centerHorizontal="true" android:onClick="bypass"></Button>
 </RelativeLayout>

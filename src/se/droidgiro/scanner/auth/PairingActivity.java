@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.View;
 import android.widget.EditText;
 
 public class PairingActivity extends Activity {
@@ -87,7 +88,7 @@ public class PairingActivity extends Activity {
 	public void register(String pin) {
 		String channel = null;
 		try {
-			channel = CloudClient.register(pin);
+			channel = CloudClient.register(pin).getChannel();
 		} catch (Exception e) {
 			clear();
 		}
@@ -103,6 +104,14 @@ public class PairingActivity extends Activity {
 
 		}
 
+	}
+	
+	public void bypass(View v) {
+		Intent intent = new Intent(PairingActivity.this,
+				CaptureActivity.class);
+		intent.putExtra("identifier", "debug");
+		intent.putExtra("channel", "debug");
+		startActivity(intent);		
 	}
 
 }
