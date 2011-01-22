@@ -1,4 +1,4 @@
-package se.droidgiro.scanner;
+package se.droidgiro;
 
 import se.droidgiro.R;
 import android.content.SharedPreferences;

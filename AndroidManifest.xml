@@ -31,6 +31,12 @@
               android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
               android:windowSoftInputMode="stateAlwaysHidden">
     </activity>
+    <activity android:name=".About"
+              android:screenOrientation="portrait"
+              android:configChanges="orientation"
+              android:windowSoftInputMode="stateAlwaysVisible">              
+    </activity>
+    
     <activity android:name=".PairingActivity"
               android:screenOrientation="portrait"
               android:configChanges="orientation"

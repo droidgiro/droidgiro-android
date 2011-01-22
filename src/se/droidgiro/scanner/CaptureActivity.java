@@ -29,6 +29,8 @@ import java.util.List;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 
+import se.droidgiro.About;
+import se.droidgiro.PreferencesActivity;
 import se.droidgiro.R;
 import se.droidgiro.scanner.camera.CameraManager;
 import android.app.ListActivity;
@@ -46,6 +48,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -235,14 +238,20 @@ private String channel;
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
     super.onCreateOptionsMenu(menu);
-    menu.add(0, SETTINGS_ID, 0, R.string.preferences_name);
+    MenuInflater inflater = getMenuInflater();
+	inflater.inflate(R.menu.options_menu, menu);
 	return true;
   }
 
   @Override
   public boolean onOptionsItemSelected(MenuItem item) {
     switch (item.getItemId()) {
-      case SETTINGS_ID: {
+    case R.id.about: {
+    	Intent intent = new Intent(this, About.class);
+    	startActivity(intent);
+    	break;
+    }
+      case R.id.settings: {
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
         intent.setClassName(this, PreferencesActivity.class.getName());
