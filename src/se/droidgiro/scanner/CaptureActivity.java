@@ -277,19 +277,22 @@ private String channel;
 		resultListHandler.setNewData(false);
 	}
 
-    Log.v(TAG, "Got invoice " + invoice);
-
-    if(invoice.isComplete()) {
-		resultListHandler.setSent(true);
+	Log.v(TAG, "Got invoice " + invoice);
+    int fieldsScanned = invoice.getLastFieldsDecoded();
+    if(fieldsScanned > 0) {
+    	final List<NameValuePair> params = new ArrayList<NameValuePair>();
+    	if((fieldsScanned & Invoice.AMOUNT_FIELD) == Invoice.AMOUNT_FIELD)
+        	params.add(new BasicNameValuePair("amount", invoice.getCompleteAmount()));
+    	if((fieldsScanned & Invoice.DOCUMENT_TYPE_FIELD) == Invoice.DOCUMENT_TYPE_FIELD)
+        	params.add(new BasicNameValuePair("type", invoice.getInternalDocumentType()));
+    	if((fieldsScanned & Invoice.GIRO_ACCOUNT_FIELD) == Invoice.GIRO_ACCOUNT_FIELD)
+        	params.add(new BasicNameValuePair("account", invoice.getGiroAccount()));
+    	if((fieldsScanned & Invoice.REFERENCE_FIELD) == Invoice.REFERENCE_FIELD)
+           	params.add(new BasicNameValuePair("reference", invoice.getReference())); 
+    	
     	new Thread(new Runnable() {
-			
 			public void run() {
-	        	List<NameValuePair> params = new ArrayList<NameValuePair>();
 	        	params.add(new BasicNameValuePair("channel", CaptureActivity.this.channel));
-	        	params.add(new BasicNameValuePair("reference", invoice.getReference()));
-	        	params.add(new BasicNameValuePair("amount", invoice.getCompleteAmount()));
-				params.add(new BasicNameValuePair("type", invoice.getInternalDocumentType()));
-				params.add(new BasicNameValuePair("account", invoice.getGiroAccount()));
 	        	try {
 	        		boolean res = CloudClient.postFields(params);
 	        		Log.v(TAG, "Result from posting invoice " + params + " to channel " + channel + ": " + res);
@@ -302,6 +305,9 @@ private String channel;
 
 			}
 		}).start();
+    }
+    if(invoice.isComplete()) {
+		resultListHandler.setSent(true);
     } else {
 	    handler.sendEmptyMessageDelayed(R.id.restart_preview, SCAN_DELAY_MS);
 	}

@@ -44,8 +44,10 @@ import android.util.Log;
  */
 public class Invoice {
 
+	private final String TAG = "DroidGiro.Invoice";
+
 	public static final String FIELDS_FOUND = "Invoice.fieldsFound";
-	
+
 	public static final int REFERENCE_FIELD = 1;
 
 	public static final int AMOUNT_FIELD = 2;
@@ -54,7 +56,7 @@ public class Invoice {
 
 	public static final int DOCUMENT_TYPE_FIELD = 8;
 
-	private final String TAG = "DroidGiro.Invoice";
+	public int lastFieldsDecoded = 0;
 
 	/*
 	 * The patterns below have been derived from reading the following
@@ -171,7 +173,7 @@ public class Invoice {
 		} else
 			Log.e(TAG, "Got reference. Check digit invalid.");
 	}
-	
+
 	public short getCheckDigitReference() {
 		return Short.parseShort(reference.substring(reference.length() - 1));
 	}
@@ -205,11 +207,11 @@ public class Invoice {
 	}
 
 	public String getCompleteAmount() {
-		if(amount != -1 && amountFractional != -1) {
+		if (amount != -1 && amountFractional != -1) {
 			return Integer.toString(amount)
-			+ ","
-			+ (amountFractional < 10 ? "0" + amountFractional
-					: amountFractional);
+					+ ","
+					+ (amountFractional < 10 ? "0" + amountFractional
+							: amountFractional);
 		} else {
 			return "";
 		}
@@ -243,14 +245,13 @@ public class Invoice {
 	public String getInternalDocumentType() {
 		return internalDocumentType;
 	}
-	
+
 	public void initFields() {
 		initReference();
 		initAmount();
 		initGiroAccount();
 		initDocumentType();
 	}
-
 
 	/**
 	 * An invoice is considered complete if it contains a reference number,
@@ -261,6 +262,15 @@ public class Invoice {
 	public boolean isComplete() {
 		return reference != null && amount != -1 && amountFractional != -1
 				&& checkDigitAmount != null && giroAccount != null;
+	}
+
+	/**
+	 * Returns all fields found in last decode.
+	 * 
+	 * @return all fields found in last decode.
+	 */
+	public int getLastFieldsDecoded() {
+		return lastFieldsDecoded;
 	}
 
 	/**
@@ -293,6 +303,7 @@ public class Invoice {
 			setInternalDocumentType(m.group(3));
 			fieldsDecoded += GIRO_ACCOUNT_FIELD + DOCUMENT_TYPE_FIELD;
 		}
+		lastFieldsDecoded = fieldsDecoded;
 		return fieldsDecoded;
 	}
 
