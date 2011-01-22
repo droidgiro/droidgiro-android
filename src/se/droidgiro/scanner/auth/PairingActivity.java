@@ -86,22 +86,22 @@ public class PairingActivity extends Activity {
 	}
 
 	public void register(String pin) {
-		String channel = null;
+		Registration registration;
 		try {
-			channel = CloudClient.register(pin).getChannel();
+			registration = CloudClient.register(pin);
 		} catch (Exception e) {
 			clear();
+			return;
 		}
-		if (channel == null)
+		if (!registration.isSucessful()) {
 			clear();
-		else {
+			return;
+		} else {
 			// Open scanner
 			Intent intent = new Intent(PairingActivity.this,
 					CaptureActivity.class);
-			intent.putExtra("identifier", pin);
-			intent.putExtra("channel", channel);
+			intent.putExtra("channel", registration.getChannel());
 			startActivity(intent);
-
 		}
 
 	}

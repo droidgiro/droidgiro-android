@@ -104,8 +104,6 @@ public final class CaptureActivity extends ListActivity implements SurfaceHolder
     }
   };
 
-private String identifier;
-
 private String channel;
 
 /*
@@ -143,9 +141,8 @@ private String channel;
     super.onCreate(icicle);
     
     Log.d(TAG, "onCreate");
-    identifier = getIntent().getStringExtra("identifier");
     channel = getIntent().getStringExtra("channel");
-    if(identifier == null) // Change this to channel when new server API is ready
+    if(channel == null)
     	finish();
 	
     Window window = getWindow();
@@ -313,12 +310,12 @@ private String channel;
 			
 			public void run() {
 	        	List<NameValuePair> params = new ArrayList<NameValuePair>();
-	        	params.add(new BasicNameValuePair("identifier", CaptureActivity.this.identifier));
+	        	params.add(new BasicNameValuePair("channel", CaptureActivity.this.channel));
 	        	params.add(new BasicNameValuePair("reference", invoice.getReference()));
 	        	params.add(new BasicNameValuePair("amount", invoice.getCompleteAmount()));
 	        	params.add(new BasicNameValuePair("document_type", invoice.getInternalDocumentType()));
 	        	try {
-	        		boolean res = CloudClient.postFields(identifier, params);
+	        		boolean res = CloudClient.postFields(params);
 	        		Log.v(TAG, "Result from posting invoice " + params + " to channel " + channel + ": " + res);
 	        	    invoice.initFields();
 	        	    initLocalInvoice();

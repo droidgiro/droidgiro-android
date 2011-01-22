@@ -74,7 +74,7 @@ public class CloudClient {
 		}
 	}
 
-	public static boolean postFields(String hash, List<NameValuePair> fields)
+	public static boolean postFields(List<NameValuePair> fields)
 			throws Exception {
 
 		DefaultHttpClient client = new DefaultHttpClient();
