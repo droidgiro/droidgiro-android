@@ -7,13 +7,13 @@ import android.widget.TextView;
 import android.view.View;
 import se.droidgiro.R;
 
-public class ResultListAdapter extends TextViewListAdapter<ResultListHandler.ListItem> {
+public class ResultListAdapter extends
+		TextViewListAdapter<ResultListHandler.ListItem> {
 
 	private Context context;
-	private long ownerPartyId;
 
 	public ResultListAdapter(Context context, int viewid,
-		List<ResultListHandler.ListItem> objects) {
+			List<ResultListHandler.ListItem> objects) {
 		super(context, viewid, objects);
 		this.context = context;
 	}
@@ -21,8 +21,9 @@ public class ResultListAdapter extends TextViewListAdapter<ResultListHandler.Lis
 	protected void bindHolder(ViewHolder holder) {
 		ResultViewHolder resultHolder = (ResultViewHolder) holder;
 
-		ResultListHandler.ListItem listItem  = (ResultListHandler.ListItem)resultHolder.data;
-		Typeface ocrb = Typeface.createFromAsset(context.getAssets(),"fonts/ocrb10.ttf");
+		ResultListHandler.ListItem listItem = (ResultListHandler.ListItem) resultHolder.data;
+		Typeface ocrb = Typeface.createFromAsset(context.getAssets(),
+				"fonts/ocrb10.ttf");
 		resultHolder.listItemDataView.setTypeface(ocrb);
 
 		resultHolder.listItemDataView.setText(listItem.listItemData);
@@ -31,19 +32,23 @@ public class ResultListAdapter extends TextViewListAdapter<ResultListHandler.Lis
 
 	@Override
 	protected ViewHolder createHolder(View v) {
-		TextView listItemDataView = (TextView) v.findViewById(R.id.field_result_data);
-		TextView listItemTypeView = (TextView) v.findViewById(R.id.field_result_type);
-		ViewHolder resultHolder = new ResultViewHolder(listItemDataView, listItemTypeView);
+		TextView listItemDataView = (TextView) v
+				.findViewById(R.id.field_result_data);
+		TextView listItemTypeView = (TextView) v
+				.findViewById(R.id.field_result_type);
+		ViewHolder resultHolder = new ResultViewHolder(listItemDataView,
+				listItemTypeView);
 		return resultHolder;
 	}
 
 	static class ResultViewHolder extends ViewHolder {
 		TextView listItemDataView;
 		TextView listItemTypeView;
-		public ResultViewHolder(TextView listItemDataView, TextView listItemTypeView) {
+
+		public ResultViewHolder(TextView listItemDataView,
+				TextView listItemTypeView) {
 			this.listItemDataView = listItemDataView;
 			this.listItemTypeView = listItemTypeView;
 		}
- }
- }
-
+	}
+}

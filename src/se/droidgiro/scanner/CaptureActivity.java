@@ -61,318 +61,336 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 
-
 /**
  * The main activity. Draws the views and shows the results in them.
  */
-public final class CaptureActivity extends ListActivity implements SurfaceHolder.Callback {
+public final class CaptureActivity extends ListActivity implements
+		SurfaceHolder.Callback {
 
-  private static final String TAG = "DroidGiro.CaptureActivity";
+	private static final String TAG = "DroidGiro.CaptureActivity";
 
-  private static final int SETTINGS_ID = Menu.FIRST;
+	private static final float BEEP_VOLUME = 0.10f;
+	private static final long VIBRATE_DURATION = 200L;
+	private static final long SCAN_DELAY_MS = 1500L;
 
-  private static final float BEEP_VOLUME = 0.10f;
-  private static final long VIBRATE_DURATION = 200L;
-  private static final long SCAN_DELAY_MS = 1500L;
+	private CaptureActivityHandler handler;
 
-  private static final String PACKAGE_NAME = "se.droidgiro.scanner";
+	private ViewfinderView viewfinderView;
+	private MediaPlayer mediaPlayer;
+	private boolean hasSurface;
+	private boolean playBeep;
+	private boolean vibrate;
 
-  private CaptureActivityHandler handler;
+	private static Invoice currentInvoice = null;
+	private ResultListHandler resultListHandler;
 
-  private ViewfinderView viewfinderView;
-  private MediaPlayer mediaPlayer;
-  private boolean hasSurface;
-  private boolean playBeep;
-  private boolean vibrate;
+	private Button eraseButton;
+	private Button scanButton;
 
-  private static Invoice currentInvoice = null;
-  private ResultListHandler resultListHandler;
+	/**
+	 * When the beep has finished playing, rewind to queue up another one.
+	 */
+	private final OnCompletionListener beepListener = new OnCompletionListener() {
+		public void onCompletion(MediaPlayer mediaPlayer) {
+			mediaPlayer.seekTo(0);
+		}
+	};
 
-  private Button eraseButton;
-  private Button scanButton;
+	private String channel;
 
-  /**
-   * When the beep has finished playing, rewind to queue up another one.
-   */
-  private final OnCompletionListener beepListener = new OnCompletionListener() {
-    public void onCompletion(MediaPlayer mediaPlayer) {
-      mediaPlayer.seekTo(0);
-    }
-  };
-
-private String channel;
-
-  @Override
-  protected void onListItemClick(ListView l, View v, int position, long id) {
-	if(currentInvoice != null) {
-	  super.onListItemClick(l, v, position, id);
-	  if      (position == 0) { resultListHandler.setReference(null);
-		currentInvoice.initReference(); }
-	  else if (position == 1) { resultListHandler.setAmount(null);
-		currentInvoice.initAmount(); }
-	  else                    { resultListHandler.setAccount(null);
-		currentInvoice.initGiroAccount(); }
-		onContentChanged();
+	@Override
+	protected void onListItemClick(ListView l, View v, int position, long id) {
+		if (currentInvoice != null) {
+			super.onListItemClick(l, v, position, id);
+			if (position == 0) {
+				resultListHandler.setReference(null);
+				currentInvoice.initReference();
+			} else if (position == 1) {
+				resultListHandler.setAmount(null);
+				currentInvoice.initAmount();
+			} else {
+				resultListHandler.setAccount(null);
+				currentInvoice.initGiroAccount();
+			}
+			onContentChanged();
+		}
 	}
-  }
 
-  ViewfinderView getViewfinderView() {
-    return viewfinderView;
-  }
+	ViewfinderView getViewfinderView() {
+		return viewfinderView;
+	}
 
-  public Handler getHandler() {
-    return handler;
-  }
+	public Handler getHandler() {
+		return handler;
+	}
 
-  @Override
-  public void onCreate(Bundle icicle) {
-    super.onCreate(icicle);
-    
-    Log.d(TAG, "onCreate");
-    channel = getIntent().getStringExtra("channel");
-    if(channel == null)
-    	finish();
-	
-    Window window = getWindow();
-    window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-    setContentView(R.layout.capture);
+	@Override
+	public void onCreate(Bundle icicle) {
+		super.onCreate(icicle);
 
-    this.eraseButton = (Button)this.findViewById(R.id.erase);
-    this.eraseButton.setOnClickListener(new OnClickListener() {
-      public void onClick(View v) {
-		resultListHandler.clear();
-        handler.sendEmptyMessage(R.id.new_invoice);
-        onContentChanged();
-      }
-    });
+		Log.d(TAG, "onCreate");
+		channel = getIntent().getStringExtra("channel");
+		if (channel == null)
+			finish();
 
-    this.scanButton = (Button)this.findViewById(R.id.scan);
-    this.scanButton.setOnClickListener(new OnClickListener() {
-      public void onClick(View v) {
-      handler.sendEmptyMessage(R.id.restart_preview);
-      }
-    });
+		Window window = getWindow();
+		window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+		setContentView(R.layout.capture);
 
-    resultListHandler = new ResultListHandler(this);
-    List<ResultListHandler.ListItem> resultList = resultListHandler.getList();
-    ResultListAdapter adapter = new ResultListAdapter(this,
-		R.layout.result_list_item, resultList);
-    setListAdapter(adapter);
+		this.eraseButton = (Button) this.findViewById(R.id.erase);
+		this.eraseButton.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				resultListHandler.clear();
+				handler.sendEmptyMessage(R.id.new_invoice);
+				onContentChanged();
+			}
+		});
 
-    CameraManager.init(getApplication());
-    viewfinderView = (ViewfinderView) findViewById(R.id.viewfinder_view);
-    handler = null;
-    hasSurface = false;
-  }
+		this.scanButton = (Button) this.findViewById(R.id.scan);
+		this.scanButton.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				handler.sendEmptyMessage(R.id.restart_preview);
+			}
+		});
 
-  @Override
-  protected void onResume() {
-    super.onResume();
-    resetStatusView();
-      Log.d(TAG, "onResume");
+		resultListHandler = new ResultListHandler(this);
+		List<ResultListHandler.ListItem> resultList = resultListHandler
+				.getList();
+		ResultListAdapter adapter = new ResultListAdapter(this,
+				R.layout.result_list_item, resultList);
+		setListAdapter(adapter);
 
-    SurfaceView surfaceView = (SurfaceView) findViewById(R.id.preview_view);
-    SurfaceHolder surfaceHolder = surfaceView.getHolder();
-    if (hasSurface) {
-      // The activity was paused but not stopped, so the surface still exists. Therefore
-      // surfaceCreated() won't be called, so init the camera here.
-      initCamera(surfaceHolder);
-    } else {
-      // Install the callback and wait for surfaceCreated() to init the camera.
-      surfaceHolder.addCallback(this);
-      surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-    }
-    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-    playBeep = prefs.getBoolean(PreferencesActivity.KEY_PLAY_BEEP, true);
-    if (playBeep) {
-      // See if sound settings overrides this
-      AudioManager audioService = (AudioManager) getSystemService(AUDIO_SERVICE);
-      if (audioService.getRingerMode() != AudioManager.RINGER_MODE_NORMAL) {
-        playBeep = false;
-      }
-    }
-    vibrate = prefs.getBoolean(PreferencesActivity.KEY_VIBRATE, false);
-    initBeepSound();
-  }
+		CameraManager.init(getApplication());
+		viewfinderView = (ViewfinderView) findViewById(R.id.viewfinder_view);
+		handler = null;
+		hasSurface = false;
+	}
 
-  @Override
-  protected void onPause() {
-    super.onPause();
-    if (handler != null) {
-      handler.quitSynchronously();
-      handler = null;
-    }
-    CameraManager.get().closeDriver();
-  }
+	@Override
+	protected void onResume() {
+		super.onResume();
+		resetStatusView();
+		Log.d(TAG, "onResume");
 
-  @Override
-  protected void onDestroy() {
-//    inactivityTimer.shutdown();
-    super.onDestroy();
-  }
+		SurfaceView surfaceView = (SurfaceView) findViewById(R.id.preview_view);
+		SurfaceHolder surfaceHolder = surfaceView.getHolder();
+		if (hasSurface) {
+			// The activity was paused but not stopped, so the surface still
+			// exists. Therefore
+			// surfaceCreated() won't be called, so init the camera here.
+			initCamera(surfaceHolder);
+		} else {
+			// Install the callback and wait for surfaceCreated() to init the
+			// camera.
+			surfaceHolder.addCallback(this);
+			surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+		}
+		SharedPreferences prefs = PreferenceManager
+				.getDefaultSharedPreferences(this);
+		playBeep = prefs.getBoolean(PreferencesActivity.KEY_PLAY_BEEP, true);
+		if (playBeep) {
+			// See if sound settings overrides this
+			AudioManager audioService = (AudioManager) getSystemService(AUDIO_SERVICE);
+			if (audioService.getRingerMode() != AudioManager.RINGER_MODE_NORMAL) {
+				playBeep = false;
+			}
+		}
+		vibrate = prefs.getBoolean(PreferencesActivity.KEY_VIBRATE, false);
+		initBeepSound();
+	}
 
-  @Override
-  public boolean onKeyDown(int keyCode, KeyEvent event) {
-      return super.onKeyDown(keyCode, event);
-  }
+	@Override
+	protected void onPause() {
+		super.onPause();
+		if (handler != null) {
+			handler.quitSynchronously();
+			handler = null;
+		}
+		CameraManager.get().closeDriver();
+	}
 
-  @Override
-  public boolean onCreateOptionsMenu(Menu menu) {
-    super.onCreateOptionsMenu(menu);
-    MenuInflater inflater = getMenuInflater();
-	inflater.inflate(R.menu.options_menu, menu);
-	return true;
-  }
+	@Override
+	protected void onDestroy() {
+		// inactivityTimer.shutdown();
+		super.onDestroy();
+	}
 
-  @Override
-  public boolean onOptionsItemSelected(MenuItem item) {
-    switch (item.getItemId()) {
-    case R.id.about: {
-    	Intent intent = new Intent(this, About.class);
-    	startActivity(intent);
-    	break;
-    }
-      case R.id.settings: {
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-        intent.setClassName(this, PreferencesActivity.class.getName());
-        startActivity(intent);
-        break;
-      }
-    }
-    return super.onOptionsItemSelected(item);
-  }
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		return super.onKeyDown(keyCode, event);
+	}
 
-  public void surfaceCreated(SurfaceHolder holder) {
-    if (!hasSurface) {
-      hasSurface = true;
-      initCamera(holder);
-    }
-  }
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		super.onCreateOptionsMenu(menu);
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.options_menu, menu);
+		return true;
+	}
 
-  public void surfaceDestroyed(SurfaceHolder holder) {
-    hasSurface = false;
-  }
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.about: {
+			Intent intent = new Intent(this, About.class);
+			startActivity(intent);
+			break;
+		}
+		case R.id.settings: {
+			Intent intent = new Intent(Intent.ACTION_VIEW);
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+			intent.setClassName(this, PreferencesActivity.class.getName());
+			startActivity(intent);
+			break;
+		}
+		}
+		return super.onOptionsItemSelected(item);
+	}
 
-  public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-  }
+	public void surfaceCreated(SurfaceHolder holder) {
+		if (!hasSurface) {
+			hasSurface = true;
+			initCamera(holder);
+		}
+	}
 
-  public void handleDecode(final Invoice invoice, int fieldsFound, Bitmap debugBmp) {
-//    inactivityTimer.onActivity();
-	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-	ImageView debugImageView = (ImageView) findViewById(R.id.debug_image_view);
-    if (prefs.getBoolean(PreferencesActivity.KEY_DEBUG_IMAGE, false) && (debugBmp != null)) {
+	public void surfaceDestroyed(SurfaceHolder holder) {
+		hasSurface = false;
+	}
+
+	public void surfaceChanged(SurfaceHolder holder, int format, int width,
+			int height) {
+	}
+
+	public void handleDecode(final Invoice invoice, int fieldsFound,
+			Bitmap debugBmp) {
+		// inactivityTimer.onActivity();
+		SharedPreferences prefs = PreferenceManager
+				.getDefaultSharedPreferences(this);
+		ImageView debugImageView = (ImageView) findViewById(R.id.debug_image_view);
+		if (prefs.getBoolean(PreferencesActivity.KEY_DEBUG_IMAGE, false)
+				&& (debugBmp != null)) {
 			debugImageView.setVisibility(View.VISIBLE);
 			debugImageView.setImageBitmap(debugBmp);
-    } else if (debugImageView.getVisibility() != View.GONE) {
-		debugImageView.setVisibility(View.GONE);
+		} else if (debugImageView.getVisibility() != View.GONE) {
+			debugImageView.setVisibility(View.GONE);
+		}
+		currentInvoice = invoice;
+
+		resultListHandler.setReference(invoice.getReference());
+		resultListHandler.setAmount(invoice.getCompleteAmount());
+		resultListHandler.setAccount(invoice.getGiroAccount());
+		if (resultListHandler.hasNewData()) {
+			playBeepSoundAndVibrate();
+			resultListHandler.setNewData(false);
+		}
+
+		Log.v(TAG, "Got invoice " + invoice);
+		int fieldsScanned = invoice.getLastFieldsDecoded();
+		if (fieldsScanned > 0) {
+			final List<NameValuePair> params = new ArrayList<NameValuePair>();
+			if ((fieldsScanned & Invoice.AMOUNT_FIELD) == Invoice.AMOUNT_FIELD)
+				params.add(new BasicNameValuePair("amount", invoice
+						.getCompleteAmount()));
+			if ((fieldsScanned & Invoice.DOCUMENT_TYPE_FIELD) == Invoice.DOCUMENT_TYPE_FIELD)
+				params.add(new BasicNameValuePair("type", invoice
+						.getInternalDocumentType()));
+			if ((fieldsScanned & Invoice.GIRO_ACCOUNT_FIELD) == Invoice.GIRO_ACCOUNT_FIELD)
+				params.add(new BasicNameValuePair("account", invoice
+						.getGiroAccount()));
+			if ((fieldsScanned & Invoice.REFERENCE_FIELD) == Invoice.REFERENCE_FIELD)
+				params.add(new BasicNameValuePair("reference", invoice
+						.getReference()));
+
+			new Thread(new Runnable() {
+				public void run() {
+					params.add(new BasicNameValuePair("channel",
+							CaptureActivity.this.channel));
+					try {
+						boolean res = CloudClient.postFields(params);
+						Log.v(TAG, "Result from posting invoice " + params
+								+ " to channel " + channel + ": " + res);
+						invoice.initFields();
+						// initLocalInvoice();
+						currentInvoice = null;
+					} catch (Exception e) {
+						Log.e(TAG, e.getMessage(), e);
+					}
+
+				}
+			}).start();
+		}
+		if (invoice.isComplete()) {
+			resultListHandler.setSent(true);
+		} else {
+			handler
+					.sendEmptyMessageDelayed(R.id.restart_preview,
+							SCAN_DELAY_MS);
+		}
+		onContentChanged();
 	}
-    currentInvoice = invoice;
 
-	resultListHandler.setReference(invoice.getReference());
-	resultListHandler.setAmount(invoice.getCompleteAmount());
-	resultListHandler.setAccount(invoice.getGiroAccount());
-	if (resultListHandler.hasNewData()) {
-		playBeepSoundAndVibrate();
-		resultListHandler.setNewData(false);
-	}
+	/**
+	 * Creates the beep MediaPlayer in advance so that the sound can be
+	 * triggered with the least latency possible.
+	 */
+	private void initBeepSound() {
+		if (playBeep && mediaPlayer == null) {
+			// The volume on STREAM_SYSTEM is not adjustable, and users found it
+			// too loud,
+			// so we now play on the music stream.
+			setVolumeControlStream(AudioManager.STREAM_MUSIC);
+			mediaPlayer = new MediaPlayer();
+			mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+			mediaPlayer.setOnCompletionListener(beepListener);
 
-	Log.v(TAG, "Got invoice " + invoice);
-    int fieldsScanned = invoice.getLastFieldsDecoded();
-    if(fieldsScanned > 0) {
-    	final List<NameValuePair> params = new ArrayList<NameValuePair>();
-    	if((fieldsScanned & Invoice.AMOUNT_FIELD) == Invoice.AMOUNT_FIELD)
-        	params.add(new BasicNameValuePair("amount", invoice.getCompleteAmount()));
-    	if((fieldsScanned & Invoice.DOCUMENT_TYPE_FIELD) == Invoice.DOCUMENT_TYPE_FIELD)
-        	params.add(new BasicNameValuePair("type", invoice.getInternalDocumentType()));
-    	if((fieldsScanned & Invoice.GIRO_ACCOUNT_FIELD) == Invoice.GIRO_ACCOUNT_FIELD)
-        	params.add(new BasicNameValuePair("account", invoice.getGiroAccount()));
-    	if((fieldsScanned & Invoice.REFERENCE_FIELD) == Invoice.REFERENCE_FIELD)
-           	params.add(new BasicNameValuePair("reference", invoice.getReference())); 
-    	
-    	new Thread(new Runnable() {
-			public void run() {
-	        	params.add(new BasicNameValuePair("channel", CaptureActivity.this.channel));
-	        	try {
-	        		boolean res = CloudClient.postFields(params);
-	        		Log.v(TAG, "Result from posting invoice " + params + " to channel " + channel + ": " + res);
-	        	    invoice.initFields();
-//	        	    initLocalInvoice();
-	        	    currentInvoice = null;
-				} catch (Exception e) {
-					Log.e(TAG, e.getMessage(), e);
-				}					
-
+			AssetFileDescriptor file = getResources().openRawResourceFd(
+					R.raw.beep);
+			try {
+				mediaPlayer.setDataSource(file.getFileDescriptor(), file
+						.getStartOffset(), file.getLength());
+				file.close();
+				mediaPlayer.setVolume(BEEP_VOLUME, BEEP_VOLUME);
+				mediaPlayer.prepare();
+			} catch (IOException e) {
+				mediaPlayer = null;
 			}
-		}).start();
-    }
-    if(invoice.isComplete()) {
-		resultListHandler.setSent(true);
-    } else {
-	    handler.sendEmptyMessageDelayed(R.id.restart_preview, SCAN_DELAY_MS);
+		}
 	}
-    onContentChanged();
-  }
 
-  /**
-   * Creates the beep MediaPlayer in advance so that the sound can be triggered with the least
-   * latency possible.
-   */
-  private void initBeepSound() {
-    if (playBeep && mediaPlayer == null) {
-      // The volume on STREAM_SYSTEM is not adjustable, and users found it too loud,
-      // so we now play on the music stream.
-      setVolumeControlStream(AudioManager.STREAM_MUSIC);
-      mediaPlayer = new MediaPlayer();
-      mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-      mediaPlayer.setOnCompletionListener(beepListener);
+	private void playBeepSoundAndVibrate() {
+		if (playBeep && mediaPlayer != null) {
+			mediaPlayer.start();
+		}
+		if (vibrate) {
+			Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+			vibrator.vibrate(VIBRATE_DURATION);
+		}
+	}
 
-      AssetFileDescriptor file = getResources().openRawResourceFd(R.raw.beep);
-      try {
-        mediaPlayer.setDataSource(file.getFileDescriptor(), file.getStartOffset(),
-            file.getLength());
-        file.close();
-        mediaPlayer.setVolume(BEEP_VOLUME, BEEP_VOLUME);
-        mediaPlayer.prepare();
-      } catch (IOException e) {
-        mediaPlayer = null;
-      }
-    }
-  }
+	private void initCamera(SurfaceHolder surfaceHolder) {
+		try {
+			CameraManager.get().openDriver(surfaceHolder);
+		} catch (IOException ioe) {
+			Log.w(TAG, ioe);
+			return;
+		} catch (RuntimeException e) {
+			// Barcode Scanner has seen crashes in the wild of this variety:
+			// java.?lang.?RuntimeException: Fail to connect to camera service
+			Log.w(TAG, "Unexpected error initializating camera", e);
+			return;
+		}
+		if (handler == null) {
+			handler = new CaptureActivityHandler(this);
+		}
+	}
 
-  private void playBeepSoundAndVibrate() {
-    if (playBeep && mediaPlayer != null) {
-      mediaPlayer.start();
-    }
-    if (vibrate) {
-      Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
-      vibrator.vibrate(VIBRATE_DURATION);
-    }
-  }
+	private void resetStatusView() {
+		viewfinderView.setVisibility(View.VISIBLE);
+	}
 
-  private void initCamera(SurfaceHolder surfaceHolder) {
-    try {
-      CameraManager.get().openDriver(surfaceHolder);
-    } catch (IOException ioe) {
-      Log.w(TAG, ioe);
-      return;
-    } catch (RuntimeException e) {
-      // Barcode Scanner has seen crashes in the wild of this variety:
-      // java.?lang.?RuntimeException: Fail to connect to camera service
-      Log.w(TAG, "Unexpected error initializating camera", e);
-      return;
-    }
-    if (handler == null) {
-      handler = new CaptureActivityHandler(this);
-    }
-  }
-
-  private void resetStatusView() {
-    viewfinderView.setVisibility(View.VISIBLE);
-  }
-
-  public void drawViewfinder() {
-    viewfinderView.drawViewfinder();
-  }
+	public void drawViewfinder() {
+		viewfinderView.drawViewfinder();
+	}
 
 }

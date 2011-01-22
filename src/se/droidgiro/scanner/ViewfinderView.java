@@ -31,56 +31,61 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
 
-
 /**
- * This view is overlaid on top of the camera preview. It adds the viewfinder rectangle and partial
- * transparency outside it, as well as the laser scanner animation and result points.
- *
+ * This view is overlaid on top of the camera preview. It adds the viewfinder
+ * rectangle and partial transparency outside it, as well as the laser scanner
+ * animation and result points.
+ * 
  * @author dswitkin@google.com (Daniel Switkin) (original author)
  */
 public final class ViewfinderView extends View {
 
-  private static final long ANIMATION_DELAY = 100L;
+	private static final long ANIMATION_DELAY = 100L;
 
-  private final Paint paint;
-  private final int maskColor;
-  private final int frameColor;
+	private final Paint paint;
+	private final int maskColor;
+	private final int frameColor;
 
-  // This constructor is used when the class is built from an XML resource.
-  public ViewfinderView(Context context, AttributeSet attrs) {
-    super(context, attrs);
+	// This constructor is used when the class is built from an XML resource.
+	public ViewfinderView(Context context, AttributeSet attrs) {
+		super(context, attrs);
 
-    // Initialize these once for performance rather than calling them every time in onDraw().
-    paint = new Paint();
-    Resources resources = getResources();
-    maskColor = resources.getColor(R.color.viewfinder_mask);
-    frameColor = resources.getColor(R.color.viewfinder_frame);
-  }
+		// Initialize these once for performance rather than calling them every
+		// time in onDraw().
+		paint = new Paint();
+		Resources resources = getResources();
+		maskColor = resources.getColor(R.color.viewfinder_mask);
+		frameColor = resources.getColor(R.color.viewfinder_frame);
+	}
 
-  @Override
-  public void onDraw(Canvas canvas) {
-    Rect frame = CameraManager.get().getFramingRect();
-    if (frame == null) {
-      return;
-    }
-    int width = canvas.getWidth();
-    int height = canvas.getHeight();
+	@Override
+	public void onDraw(Canvas canvas) {
+		Rect frame = CameraManager.get().getFramingRect();
+		if (frame == null) {
+			return;
+		}
+		int width = canvas.getWidth();
+		int height = canvas.getHeight();
 
-    paint.setColor(maskColor);
-    canvas.drawRect(0, 0, width, frame.top, paint);
-    canvas.drawRect(0, frame.top, frame.left, frame.bottom + 1, paint);
-    canvas.drawRect(frame.right + 1, frame.top, width, frame.bottom + 1, paint);
-    canvas.drawRect(0, frame.bottom + 1, width, height, paint);
+		paint.setColor(maskColor);
+		canvas.drawRect(0, 0, width, frame.top, paint);
+		canvas.drawRect(0, frame.top, frame.left, frame.bottom + 1, paint);
+		canvas.drawRect(frame.right + 1, frame.top, width, frame.bottom + 1,
+				paint);
+		canvas.drawRect(0, frame.bottom + 1, width, height, paint);
 
-    paint.setColor(frameColor);
-    paint.setStyle(Paint.Style.STROKE);
-    canvas.drawRect(frame.left, frame.top, frame.right, frame.bottom, paint);
-    paint.setStyle(Paint.Style.FILL);
-    postInvalidateDelayed(ANIMATION_DELAY, frame.left, frame.top, frame.right, frame.bottom);
-  }
+		paint.setColor(frameColor);
+		paint.setStyle(Paint.Style.STROKE);
+		canvas
+				.drawRect(frame.left, frame.top, frame.right, frame.bottom,
+						paint);
+		paint.setStyle(Paint.Style.FILL);
+		postInvalidateDelayed(ANIMATION_DELAY, frame.left, frame.top,
+				frame.right, frame.bottom);
+	}
 
-  public void drawViewfinder() {
-    invalidate();
-  }
+	public void drawViewfinder() {
+		invalidate();
+	}
 
 }

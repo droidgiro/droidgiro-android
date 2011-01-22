@@ -35,10 +35,10 @@ import android.graphics.Rect;
 import android.util.Log;
 
 /**
- * A scanner object with methods to determine coordinates of black pixels in
- * the provided bitmap and compare sections of those black pixels to a list
- * of reference bitmaps.
- *
+ * A scanner object with methods to determine coordinates of black pixels in the
+ * provided bitmap and compare sections of those black pixels to a list of
+ * reference bitmaps.
+ * 
  * @author wulax
  */
 public class Scanner {
@@ -80,13 +80,13 @@ public class Scanner {
 	 */
 	protected float charMaxWidthFraction = 0.1f;
 	/**
-	 * The minimum height a possible character must have to be
-	 * registered. Expressed as fraction of height of the bitmap to be scanned.
+	 * The minimum height a possible character must have to be registered.
+	 * Expressed as fraction of height of the bitmap to be scanned.
 	 */
 	protected float charMinHeightFraction = 0.15f;
 	/**
-	 * The maximum height a possible character must have to be
-	 * registered. Expressed as fraction of height of the bitmap to be scanned.
+	 * The maximum height a possible character must have to be registered.
+	 * Expressed as fraction of height of the bitmap to be scanned.
 	 */
 	protected float charMaxHeightFraction = 0.9f;
 	/**
@@ -100,13 +100,13 @@ public class Scanner {
 	 */
 	protected int charMaxWidth;
 	/**
-	 * The minimum height a possible character must have to be
-	 * registered. Expressed as pixels.
+	 * The minimum height a possible character must have to be registered.
+	 * Expressed as pixels.
 	 */
 	protected int charMinHeight;
 	/**
-	 * The maximum height a possible character must have to be
-	 * registered. Expressed as pixels.
+	 * The maximum height a possible character must have to be registered.
+	 * Expressed as pixels.
 	 */
 	protected int charMaxHeight;
 	/**
@@ -114,8 +114,8 @@ public class Scanner {
 	 */
 	protected boolean charAlwaysPortrait = true;
 	/**
-	 * The minimum lenght the interpreted string must have for the scanner
-	 * to produce a result.
+	 * The minimum lenght the interpreted string must have for the scanner to
+	 * produce a result.
 	 */
 	protected int minResultLength = 4;
 	/**
@@ -129,19 +129,23 @@ public class Scanner {
 
 	/**
 	 * Calculates the limits in pixels for allowed/required character size.
-	 * @param width The width of the bitmap to be scanned.
-	 * @param height The height of the bitmap to be scanned.
+	 * 
+	 * @param width
+	 *            The width of the bitmap to be scanned.
+	 * @param height
+	 *            The height of the bitmap to be scanned.
 	 */
 	protected void calculateCharSizeLimits(int width, int height) {
-		charMinWidth = Math.round(width*charMinWidthFraction);
-		charMaxWidth = Math.round(width*charMaxWidthFraction);
-		charMinHeight = Math.round(height*charMinHeightFraction);
-		charMaxHeight = Math.round(height*charMaxHeightFraction);
+		charMinWidth = Math.round(width * charMinWidthFraction);
+		charMaxWidth = Math.round(width * charMaxWidthFraction);
+		charMinHeight = Math.round(height * charMinHeightFraction);
+		charMaxHeight = Math.round(height * charMaxHeightFraction);
 	}
 
 	/**
-	 * @param minResultLength	The minimum lenght the interpreted string must
-	 * have for the scanner to produce a result.
+	 * @param minResultLength
+	 *            The minimum lenght the interpreted string must have for the
+	 *            scanner to produce a result.
 	 */
 	public void setMinResultLength(int minResultLength) {
 		this.minResultLength = minResultLength;
@@ -149,7 +153,9 @@ public class Scanner {
 
 	/**
 	 * The minimum width a possible character must have to be registered.
-	 * @param charMinWidthFraction Fraction of bitmap width.
+	 * 
+	 * @param charMinWidthFraction
+	 *            Fraction of bitmap width.
 	 */
 	public void setCharMinWidthFraction(float charMinWidthFraction) {
 		this.charMinWidthFraction = charMinWidthFraction;
@@ -157,7 +163,9 @@ public class Scanner {
 
 	/**
 	 * The maximum width a possible character must have to be registered.
-	 * @param charMaxWidthFraction Fraction of bitmap width.
+	 * 
+	 * @param charMaxWidthFraction
+	 *            Fraction of bitmap width.
 	 */
 	public void setCharMaxWidthFraction(float charMaxWidthFraction) {
 		this.charMaxWidthFraction = charMaxWidthFraction;
@@ -165,7 +173,9 @@ public class Scanner {
 
 	/**
 	 * The minumum height a possible character must have to be registered.
-	 * @param charMinHeightFraction Fraction of bitmap height.
+	 * 
+	 * @param charMinHeightFraction
+	 *            Fraction of bitmap height.
 	 */
 	public void setCharMinHeightFraction(float charMinHeightFraction) {
 		this.charMinHeightFraction = charMinHeightFraction;
@@ -173,12 +183,13 @@ public class Scanner {
 
 	/**
 	 * The maximum height a possible character must have to be registered.
-	 * @param charMaxHeightFraction Fraction of bitmap height.
+	 * 
+	 * @param charMaxHeightFraction
+	 *            Fraction of bitmap height.
 	 */
 	public void setCharMaxHeightFraction(float charMaxHeightFraction) {
 		this.charMaxHeightFraction = charMaxHeightFraction;
 	}
-
 
 	/**
 	 * The resulting string from scan().
@@ -189,9 +200,9 @@ public class Scanner {
 	 */
 	protected Bitmap targetBmp = null;
 	/**
-	 * The bitmap that is created from the getDebugBitmap() method. Shows
-	 * three parts of the scan process, the noncontrasted bitmaps, the
-	 * contrasted bitmaps, and the best matching reference bitmaps.
+	 * The bitmap that is created from the getDebugBitmap() method. Shows three
+	 * parts of the scan process, the noncontrasted bitmaps, the contrasted
+	 * bitmaps, and the best matching reference bitmaps.
 	 */
 	protected Bitmap debugBmp = null;
 	/**
@@ -203,8 +214,7 @@ public class Scanner {
 	 */
 	protected Bitmap matchingReferenceBmp = null;
 	/**
-	 * A bitmap composed of the found black pixel sections with
-	 * contrast added.
+	 * A bitmap composed of the found black pixel sections with contrast added.
 	 */
 	protected Bitmap contrastedDebugBmp = null;
 	/**
@@ -220,13 +230,11 @@ public class Scanner {
 	 */
 	protected List<Bitmap> debugBmps;
 	/**
-	 * A list of bitmaps with the found black pixel sections,
-	 * contrast added.
+	 * A list of bitmaps with the found black pixel sections, contrast added.
 	 */
 	protected List<Bitmap> foundContrastedBmps;
 	/**
-	 * A list of bitmaps with the found black pixel sections,
-	 * no contrast.
+	 * A list of bitmaps with the found black pixel sections, no contrast.
 	 */
 	protected List<Bitmap> foundNonContrastedBmps;
 	/**
@@ -236,22 +244,25 @@ public class Scanner {
 	/**
 	 * The reference character bitmaps in a Map.
 	 */
-	protected Map<Character,Bitmap> charMap;
+	protected Map<Character, Bitmap> charMap;
 	/**
 	 * The reference character bitmaps in a Set.
 	 */
-	protected Set<Entry<Character,Bitmap>> charSet;
+	protected Set<Entry<Character, Bitmap>> charSet;
 
 	/**
-	 * @param scanResources The resource class for the scanner.
+	 * @param scanResources
+	 *            The resource class for the scanner.
 	 */
 	public Scanner(ScanResources scanResources) {
 		setupScanResources(scanResources);
 	}
 
 	/**
-	 * @param scanResources The resource class for the scanner.
-	 * @param targetBmp Sets the bitmap to be scanned.
+	 * @param scanResources
+	 *            The resource class for the scanner.
+	 * @param targetBmp
+	 *            Sets the bitmap to be scanned.
 	 */
 	public Scanner(ScanResources scanResources, Bitmap targetBmp) {
 		setupScanResources(scanResources);
@@ -259,9 +270,11 @@ public class Scanner {
 	}
 
 	/**
-	 * Sets up the reference character Set and measures the height of
-	 * the first bitmap.
-	 * @param scanResources The resource class for the scanner.
+	 * Sets up the reference character Set and measures the height of the first
+	 * bitmap.
+	 * 
+	 * @param scanResources
+	 *            The resource class for the scanner.
 	 */
 	protected void setupScanResources(ScanResources scanResources) {
 		charMap = scanResources.getCharMap();
@@ -269,7 +282,7 @@ public class Scanner {
 			charSet = charMap.entrySet();
 			Iterator<Entry<Character, Bitmap>> it = charSet.iterator();
 			Map.Entry<Character, Bitmap> entry = it.next();
-			Bitmap measure = (Bitmap)entry.getValue();
+			Bitmap measure = (Bitmap) entry.getValue();
 			refCharWidth = measure.getWidth();
 			refCharHeight = measure.getHeight();
 		} else {
@@ -284,13 +297,15 @@ public class Scanner {
 		contrastBmp = setContrast(targetBmp, colorScale, colorScaleTranslate);
 		targetRects = findTargetRects(contrastBmp);
 		if (targetRects.size() >= minResultLength) {
-			/* It seems best to use the original bitmap for this
-			method and change its contrast again. If the already contrasted
-			bitmap is resized it produces a lot of artefacts which interferes
-			with Scanner's bitmap comparison. It impacts performance, but it
-			will have to do for now. */
-			foundContrastedBmps = uniformBitmapList(targetBmp,
-				targetRects, refCharWidth, refCharHeight, true);
+			/*
+			 * It seems best to use the original bitmap for this method and
+			 * change its contrast again. If the already contrasted bitmap is
+			 * resized it produces a lot of artefacts which interferes with
+			 * Scanner's bitmap comparison. It impacts performance, but it will
+			 * have to do for now.
+			 */
+			foundContrastedBmps = uniformBitmapList(targetBmp, targetRects,
+					refCharWidth, refCharHeight, true);
 			resultString = referenceCompare(foundContrastedBmps, charMap);
 		} else {
 			resultString = null;
@@ -298,8 +313,8 @@ public class Scanner {
 	}
 
 	/**
-	 * @return A list containing coordinates of the black pixels expressed
-	 * as Rect types.
+	 * @return A list containing coordinates of the black pixels expressed as
+	 *         Rect types.
 	 */
 	public List<Rect> getTargetPixels() {
 		return targetRects;
@@ -307,7 +322,7 @@ public class Scanner {
 
 	/**
 	 * @return Null if the scanner did not produce any results, else the
-	 * interpreted string.
+	 *         interpreted string.
 	 */
 	public String getResultString() {
 		return resultString;
@@ -321,7 +336,8 @@ public class Scanner {
 	}
 
 	/**
-	 * @param targetBmp The bitmap to be scanned.
+	 * @param targetBmp
+	 *            The bitmap to be scanned.
 	 */
 	public void setTargetBitmap(Bitmap targetBmp) {
 		this.targetBmp = targetBmp;
@@ -332,8 +348,8 @@ public class Scanner {
 
 	/**
 	 * @return A bitmap composed of the matching reference character bitmaps,
-	 * the contrasted and the noncontrasted characters found in the scanned
-	 * bitmap.
+	 *         the contrasted and the noncontrasted characters found in the
+	 *         scanned bitmap.
 	 */
 	public Bitmap getDebugBitmap() {
 		debugBmps = new ArrayList<Bitmap>();
@@ -346,7 +362,7 @@ public class Scanner {
 
 	/**
 	 * @return A bitmap composed of all the character bitmaps that was found,
-	 * contrasted.
+	 *         contrasted.
 	 */
 	public Bitmap getContrastedDebugBitmap() {
 		contrastedDebugBmp = composeFromBitmapList(foundContrastedBmps, false);
@@ -363,14 +379,15 @@ public class Scanner {
 	}
 
 	/**
-	 * @return A bitmap composed of all the character reference bitmaps
-	 * ordered to match the resulting string.
+	 * @return A bitmap composed of all the character reference bitmaps ordered
+	 *         to match the resulting string.
 	 */
 	public Bitmap getMatchingReferenceBitmap() {
 		List<Bitmap> matchingBmpList = new ArrayList<Bitmap>();
 		if (resultString != null) {
 			CharacterIterator it = new StringCharacterIterator(resultString);
-			for (char ch = it.first(); ch != CharacterIterator.DONE; ch = it.next()){
+			for (char ch = it.first(); ch != CharacterIterator.DONE; ch = it
+					.next()) {
 				if (charMap.containsKey(ch)) {
 					matchingBmpList.add(charMap.get(ch));
 				}
@@ -382,37 +399,38 @@ public class Scanner {
 
 	/**
 	 * @return A bitmap composed of all the character bitmaps that was found,
-	 * noncontrasted.
+	 *         noncontrasted.
 	 */
 	public Bitmap getNonContrastedDebugBitmap() {
-		foundNonContrastedBmps = uniformBitmapList(targetBmp,
-				targetRects, refCharWidth, refCharHeight, false);
+		foundNonContrastedBmps = uniformBitmapList(targetBmp, targetRects,
+				refCharWidth, refCharHeight, false);
 		nonContrastedDebugBmp = composeFromBitmapList(foundNonContrastedBmps,
-		false);
+				false);
 		return nonContrastedDebugBmp;
 	}
 
 	/**
-	 * Scans a bitmap for continuous black pixels and lists their coordinates
-	 * in the bitmap as Rects.
-	 * @param bmp The bitmap to be scanned.
+	 * Scans a bitmap for continuous black pixels and lists their coordinates in
+	 * the bitmap as Rects.
+	 * 
+	 * @param bmp
+	 *            The bitmap to be scanned.
 	 * @return A List of coordinates in types Rect.
 	 */
 	protected List<Rect> findTargetRects(Bitmap bmp) {
 		/* Scan columns for black pixels */
 		targetRects = new ArrayList<Rect>();
 		List<int[]> cols = new ArrayList<int[]>();
-		int fullCol = black*targetBmpHeight;
-		int emptyCol = white*targetBmpHeight;
+		int fullCol = black * targetBmpHeight;
+		int emptyCol = white * targetBmpHeight;
 		int lastFalse = -2;
 		int lastTrue = -2;
 		int lastLeft = -2;
 		int lastRight = -2;
-		for(int x = 0; x < targetBmpWidth; ++x) {
+		for (int x = 0; x < targetBmpWidth; ++x) {
 			int[] colPixels = new int[targetBmpHeight];
-			bmp.getPixels(colPixels, 0, 1,
-			x, 0, 1, targetBmpHeight);
-			int colSum = 0; //128 pixels max for integer I think
+			bmp.getPixels(colPixels, 0, 1, x, 0, 1, targetBmpHeight);
+			int colSum = 0; // 128 pixels max for integer I think
 			for (int p : colPixels) {
 				colSum += p;
 			}
@@ -421,13 +439,12 @@ public class Scanner {
 			} else {
 				lastFalse = x;
 			}
-			if ((lastTrue-1 == lastFalse)||
-				(x == 0 && x == lastTrue)){
+			if ((lastTrue - 1 == lastFalse) || (x == 0 && x == lastTrue)) {
 				lastLeft = x;
-			} else if ((lastFalse-1 == lastTrue)||
-						(x == targetBmpWidth-1 && x == lastTrue)){
+			} else if ((lastFalse - 1 == lastTrue)
+					|| (x == targetBmpWidth - 1 && x == lastTrue)) {
 				lastRight = x;
-				int[] c = new int[] {lastLeft, lastRight};
+				int[] c = new int[] { lastLeft, lastRight };
 				cols.add(c);
 			}
 		}
@@ -447,10 +464,10 @@ public class Scanner {
 			int right = leftRight[1];
 			int sectionWidth = right - left;
 			int emptyRow = sectionWidth * white;
-			for(int y = 0; y < targetBmpHeight; ++y) {
+			for (int y = 0; y < targetBmpHeight; ++y) {
 				int[] rowPixels = new int[sectionWidth];
-				bmp.getPixels(rowPixels, 0, targetBmpWidth,
-					left, y, sectionWidth, 1);
+				bmp.getPixels(rowPixels, 0, targetBmpWidth, left, y,
+						sectionWidth, 1);
 				int rowSum = 0;
 				for (int p : rowPixels) {
 					rowSum += p;
@@ -460,23 +477,21 @@ public class Scanner {
 				} else {
 					lastFalse = y;
 				}
-				if ((lastTrue-1 == lastFalse)||
-					(y == 0 && y == lastTrue)) {
+				if ((lastTrue - 1 == lastFalse) || (y == 0 && y == lastTrue)) {
 					lastTop = y;
-				} else if ((lastFalse-1 == lastTrue)||
-							(y == targetBmpHeight-1 && y == lastTrue)) {
+				} else if ((lastFalse - 1 == lastTrue)
+						|| (y == targetBmpHeight - 1 && y == lastTrue)) {
 					lastBottom = y;
 				}
 			}
-			Rect targetRect = new Rect(left, lastTop,
-				right, lastBottom);
+			Rect targetRect = new Rect(left, lastTop, right, lastBottom);
 			/* Ignore sections of the wrong size or shape */
-			if ((targetRect.width() > charMinWidth)&&
-				(targetRect.width() < charMaxWidth)&&
-				(targetRect.height() > charMinHeight)&&
-				(targetRect.height() < charMaxHeight)) {
+			if ((targetRect.width() > charMinWidth)
+					&& (targetRect.width() < charMaxWidth)
+					&& (targetRect.height() > charMinHeight)
+					&& (targetRect.height() < charMaxHeight)) {
 				if (charAlwaysPortrait) {
-					if (targetRect.height() > targetRect.width() ) {
+					if (targetRect.height() > targetRect.width()) {
 						targetRects.add(targetRect);
 					}
 				} else {
@@ -488,14 +503,20 @@ public class Scanner {
 	}
 
 	/**
-	* Creates a List of bitmaps and scales them uniformly.
-	* @param bmp The source bitmap.
-	* @param coordList A list containing coordinates expressed as Rects
-	* @param toWidth The target width to scale the bitmaps into.
-	* @param toHeight The target height to scale the bitmaps into.
-	* @param contrast True if bitmap should be contrasted.
-	* @return The list of scaled bitmaps.
-	*/
+	 * Creates a List of bitmaps and scales them uniformly.
+	 * 
+	 * @param bmp
+	 *            The source bitmap.
+	 * @param coordList
+	 *            A list containing coordinates expressed as Rects
+	 * @param toWidth
+	 *            The target width to scale the bitmaps into.
+	 * @param toHeight
+	 *            The target height to scale the bitmaps into.
+	 * @param contrast
+	 *            True if bitmap should be contrasted.
+	 * @return The list of scaled bitmaps.
+	 */
 	protected List<Bitmap> uniformBitmapList(Bitmap bmp, List<Rect> coordList,
 			int toWidth, int toHeight, boolean contrast) {
 		List<Bitmap> bmpList = new ArrayList<Bitmap>();
@@ -505,14 +526,15 @@ public class Scanner {
 			int[] pixels;
 			pixels = new int[targetRect.height() * targetRect.width()];
 			bmp.getPixels(pixels, 0, targetRect.width(), targetRect.left,
-				targetRect.top, targetRect.width(), targetRect.height());
-			Bitmap nonscaledBmp =
-				Bitmap.createBitmap(pixels, 0, targetRect.width(),
-				targetRect.width(), targetRect.height(), Bitmap.Config.RGB_565);
-			Bitmap scaledBmp =
-				Bitmap.createScaledBitmap(nonscaledBmp, toWidth, toHeight, true);
+					targetRect.top, targetRect.width(), targetRect.height());
+			Bitmap nonscaledBmp = Bitmap.createBitmap(pixels, 0, targetRect
+					.width(), targetRect.width(), targetRect.height(),
+					Bitmap.Config.RGB_565);
+			Bitmap scaledBmp = Bitmap.createScaledBitmap(nonscaledBmp, toWidth,
+					toHeight, true);
 			if (contrast) {
-				scaledBmp = setContrast(scaledBmp, colorScale, colorScaleTranslate);
+				scaledBmp = setContrast(scaledBmp, colorScale,
+						colorScaleTranslate);
 			}
 			bmpList.add(scaledBmp);
 		}
@@ -520,13 +542,17 @@ public class Scanner {
 	}
 
 	/**
-	* Composes a single bitmap from a list of bitmaps.
-	* @param bmpList The list of bitmaps.
-	* @param vertical True if bitmaps should be appended vertically.
-	* @return The composed bitmap.
-	*/
-	protected Bitmap composeFromBitmapList(List<Bitmap> bmpList, boolean vertical) {
-		//TODO: Probably unnecessary object creations in this method but
+	 * Composes a single bitmap from a list of bitmaps.
+	 * 
+	 * @param bmpList
+	 *            The list of bitmaps.
+	 * @param vertical
+	 *            True if bitmaps should be appended vertically.
+	 * @return The composed bitmap.
+	 */
+	protected Bitmap composeFromBitmapList(List<Bitmap> bmpList,
+			boolean vertical) {
+		// TODO: Probably unnecessary object creations in this method but
 		// not very important since it's only for debug bitmap
 		Bitmap measureBmp = bmpList.get(0);
 		int toWidth = measureBmp.getWidth();
@@ -534,11 +560,11 @@ public class Scanner {
 		Bitmap resultBmp;
 		Bitmap.Config config = Bitmap.Config.RGB_565;
 		if (vertical) {
-			resultBmp = Bitmap.createBitmap(toWidth,
-				toHeight * bmpList.size(), config);
+			resultBmp = Bitmap.createBitmap(toWidth, toHeight * bmpList.size(),
+					config);
 		} else {
-			resultBmp = Bitmap.createBitmap(toWidth * bmpList.size(),
-				toHeight, config);
+			resultBmp = Bitmap.createBitmap(toWidth * bmpList.size(), toHeight,
+					config);
 		}
 		Canvas canvas = new Canvas(resultBmp);
 		ListIterator<Bitmap> li = bmpList.listIterator();
@@ -547,11 +573,11 @@ public class Scanner {
 			Bitmap bmp = li.next();
 			Rect srcRect = new Rect(0, 0, bmp.getWidth(), bmp.getHeight());
 			Rect dstRect = new Rect(srcRect);
-			if (i != 0){
+			if (i != 0) {
 				if (vertical) {
-					dstRect.offset(0, i*bmp.getHeight());
+					dstRect.offset(0, i * bmp.getHeight());
 				} else {
-					dstRect.offset(i*bmp.getWidth(), 0);
+					dstRect.offset(i * bmp.getWidth(), 0);
 				}
 			}
 			i++;
@@ -585,13 +611,13 @@ public class Scanner {
 	protected int compareColSpacing = 2;
 
 	/**
-	 * @param Number of rows to skip over when comparing character bitmaps.
+	 * @param Number
+	 *            of rows to skip over when comparing character bitmaps.
 	 */
 	public void setCompareRowSpacing(int compareRowSpacing) {
-		if	(compareRowSpacing <= 0) {
+		if (compareRowSpacing <= 0) {
 			this.compareRowSpacing = 1;
-		} else if
-			(compareRowSpacing > refCharWidth) {
+		} else if (compareRowSpacing > refCharWidth) {
 			this.compareRowSpacing = refCharWidth;
 		} else {
 			this.compareRowSpacing = compareRowSpacing + 1;
@@ -599,13 +625,13 @@ public class Scanner {
 	}
 
 	/**
-	 * @param Number of columns to skip over when comparing character bitmaps.
+	 * @param Number
+	 *            of columns to skip over when comparing character bitmaps.
 	 */
 	public void setCompareColumnSpacing(int compareColSpacing) {
-		if	(compareColSpacing <= 0) {
+		if (compareColSpacing <= 0) {
 			this.compareColSpacing = 1;
-		} else if
-			(compareColSpacing > refCharHeight) {
+		} else if (compareColSpacing > refCharHeight) {
 			this.compareColSpacing = refCharWidth;
 		} else {
 			this.compareColSpacing = compareColSpacing + 1;
@@ -613,22 +639,25 @@ public class Scanner {
 	}
 
 	/**
-	 * @param When iterating through the scanned characters in the comparison
-	 * loop, if no reference character has a higher match percent than this, the
-	 * scanned character is translated as an "X", which is invalid.
+	 * @param When
+	 *            iterating through the scanned characters in the comparison
+	 *            loop, if no reference character has a higher match percent
+	 *            than this, the scanned character is translated as an "X",
+	 *            which is invalid.
 	 */
 	public void setMinInitialMatchPercent(float minInitMatchPercent) {
 		this.minInitMatchPercent = minInitMatchPercent;
 	}
 
 	/**
-	 * @param When iterating through the scanned characters in the comparison
-	 * loop, ignore this amount of nonmatching rows in the character bitmap
-	 * when calculating match percentage. If match percentage falls below the
-	 * minimum initial amount, or the best match percent of the currently best
-	 * matching reference bitmap, it breaks the loop and tries the next
-	 * character. A low number results in a faster comparison but more
-	 * wrong matches.
+	 * @param When
+	 *            iterating through the scanned characters in the comparison
+	 *            loop, ignore this amount of nonmatching rows in the character
+	 *            bitmap when calculating match percentage. If match percentage
+	 *            falls below the minimum initial amount, or the best match
+	 *            percent of the currently best matching reference bitmap, it
+	 *            breaks the loop and tries the next character. A low number
+	 *            results in a faster comparison but more wrong matches.
 	 */
 	public void setMatchTolerenceRows(int matchTolerenceRows) {
 		this.matchTolerenceRows = matchTolerenceRows;
@@ -639,21 +668,24 @@ public class Scanner {
 	 */
 	protected void calculateMatchTolerencePixels() {
 		if (refCharWidth != 0) {
-			matchTolerencePixels = refCharWidth*matchTolerenceRows;
+			matchTolerencePixels = refCharWidth * matchTolerenceRows;
 		} else {
-			matchTolerencePixels = 16*matchTolerenceRows;
+			matchTolerencePixels = 16 * matchTolerenceRows;
 		}
 	}
 
 	/**
 	 * Compare the list of collected bitmaps to the reference bitmaps and
 	 * interpret the best matching reference to a string.
-	 * @param bmpList The list of bitmaps to compare.
+	 * 
+	 * @param bmpList
+	 *            The list of bitmaps to compare.
 	 * @param charMap
-	 * A map with character as key and corresponding bitmap as value.
+	 *            A map with character as key and corresponding bitmap as value.
 	 * @return The resulting string
 	 */
-	protected String referenceCompare(List<Bitmap> bmpList, Map<Character, Bitmap> charMap) {
+	protected String referenceCompare(List<Bitmap> bmpList,
+			Map<Character, Bitmap> charMap) {
 		calculateMatchTolerencePixels();
 		StringBuffer result = new StringBuffer();
 		ListIterator<Bitmap> li = bmpList.listIterator();
@@ -662,7 +694,7 @@ public class Scanner {
 		/* Iterate over the target bitmap list. */
 		while (li.hasNext()) {
 			Bitmap bmp = li.next();
-			Character bestChar = (char)88;
+			Character bestChar = (char) 88;
 			float bestScore = minInitMatchPercent;
 			Iterator<Entry<Character, Bitmap>> it = charSet.iterator();
 			/* Iterate over the reference bitmap list. */
@@ -671,32 +703,34 @@ public class Scanner {
 				int nonmatching = 0;
 				float percent = 0;
 				Map.Entry<Character, Bitmap> charSetEntry = it.next();
-				currentChar = (Character)charSetEntry.getKey();
-				currentCharBmp = (Bitmap)charSetEntry.getValue();
+				currentChar = (Character) charSetEntry.getKey();
+				currentCharBmp = (Bitmap) charSetEntry.getValue();
 				/* Iterate over pixels in the target bitmap. */
 				currentCharLoop:
-				/* The spacing on y and x will probably not produce faster
-					 results, it will not have to read the whole bitmap anyway,
-					 but will make the comparison more spread out before it
-					 skips to the next character. Possibly this will improve
-					 accuracy. I have experimented with creating a set path
-					 to check but so far it has mostly decreased reading speed
-					 significantly.. */
-				for(int y = 0; y < bmp.getHeight(); y+=compareRowSpacing) {
-					for(int x = 0; x < bmp.getWidth(); x+=compareColSpacing) {
-						int refPixel = currentCharBmp.getPixel(x,y);
-						int foundPixel = bmp.getPixel(x,y);
+				/*
+				 * The spacing on y and x will probably not produce faster
+				 * results, it will not have to read the whole bitmap anyway,
+				 * but will make the comparison more spread out before it skips
+				 * to the next character. Possibly this will improve accuracy. I
+				 * have experimented with creating a set path to check but so
+				 * far it has mostly decreased reading speed significantly..
+				 */
+				for (int y = 0; y < bmp.getHeight(); y += compareRowSpacing) {
+					for (int x = 0; x < bmp.getWidth(); x += compareColSpacing) {
+						int refPixel = currentCharBmp.getPixel(x, y);
+						int foundPixel = bmp.getPixel(x, y);
 						/* Compare pixels between target and reference. */
-						if (refPixel == foundPixel){
+						if (refPixel == foundPixel) {
 							matching++;
 						} else {
 							nonmatching++;
-							/* If current gets a lower match percent than best
-								 previous, break the loop even if there are pixels
-								 left to compare.*/
-							if (nonmatching % 2 == 0) { //check every other
-								percent = ((float)matching/
-									((float)matching+(float)nonmatching))*100;
+							/*
+							 * If current gets a lower match percent than best
+							 * previous, break the loop even if there are pixels
+							 * left to compare.
+							 */
+							if (nonmatching % 2 == 0) { // check every other
+								percent = ((float) matching / ((float) matching + (float) nonmatching)) * 100;
 								if (percent < bestScore) {
 									break currentCharLoop;
 								}
@@ -704,8 +738,10 @@ public class Scanner {
 						}
 					}
 				}
-				/* If current has a higher match percent than any before, update
-					 bestScore */
+				/*
+				 * If current has a higher match percent than any before, update
+				 * bestScore
+				 */
 				if (percent > bestScore) {
 					bestScore = percent;
 					bestChar = currentChar;
@@ -719,42 +755,39 @@ public class Scanner {
 	/**
 	 * Sets the contrast for the bitmap to be scanned. To be replaced some day
 	 * with a histogram method.
-	 * @param bmpOriginal The bitmap to be contrasted.
-	 * @param scaleonly The amount of brightness to set at the start.
-	 * @param scaletrans The amount of contrast,
+	 * 
+	 * @param bmpOriginal
+	 *            The bitmap to be contrasted.
+	 * @param scaleonly
+	 *            The amount of brightness to set at the start.
+	 * @param scaletrans
+	 *            The amount of contrast,
 	 */
 	public static Bitmap setContrast(Bitmap bmpOriginal, float scaleonly,
 			float scaletrans) {
 		int width, height;
 		height = bmpOriginal.getHeight();
 		width = bmpOriginal.getWidth();
-		Bitmap bmpGrayscale = Bitmap.createBitmap
-			(width, height, Bitmap.Config.RGB_565);
+		Bitmap bmpGrayscale = Bitmap.createBitmap(width, height,
+				Bitmap.Config.RGB_565);
 		Canvas c = new Canvas(bmpGrayscale);
 		Paint paint = new Paint();
 		ColorMatrix cm1 = new ColorMatrix();
-			float scale1 = scaleonly + 1.f;
-			cm1.set(new float[] {
-					 scale1, 0, 0, 0, 0,
-					 0, scale1, 0, 0, 0,
-					 0, 0, scale1, 0, 0,
-					 0, 0, 0, 1, 0 });
+		float scale1 = scaleonly + 1.f;
+		cm1.set(new float[] { scale1, 0, 0, 0, 0, 0, scale1, 0, 0, 0, 0, 0,
+				scale1, 0, 0, 0, 0, 0, 1, 0 });
 		ColorMatrixColorFilter f1 = new ColorMatrixColorFilter(cm1);
 		paint.setColorFilter(f1);
 		c.drawBitmap(bmpOriginal, 0, 0, paint);
 		ColorMatrix cm2 = new ColorMatrix();
-			float scale2 = scaletrans + 1.f;
-				 float translate = (-.5f * scale2 + .5f) * 255.f;
-			cm2.set(new float[] {
-					 scale2, 0, 0, 0, translate,
-					 0, scale2, 0, 0, translate,
-					 0, 0, scale2, 0, translate,
-					 0, 0, 0, 1, 0});
+		float scale2 = scaletrans + 1.f;
+		float translate = (-.5f * scale2 + .5f) * 255.f;
+		cm2.set(new float[] { scale2, 0, 0, 0, translate, 0, scale2, 0, 0,
+				translate, 0, 0, scale2, 0, translate, 0, 0, 0, 1, 0 });
 		ColorMatrixColorFilter f2 = new ColorMatrixColorFilter(cm2);
 		paint.setColorFilter(f2);
 		c.drawBitmap(bmpGrayscale, 0, 0, paint);
 		return bmpGrayscale;
 	}
-
 
 }

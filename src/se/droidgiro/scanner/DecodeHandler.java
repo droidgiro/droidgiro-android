@@ -48,7 +48,7 @@ final class DecodeHandler extends Handler {
 		invoice = new Invoice();
 		scanResources = new ScanResources(activity);
 		scanner = new Scanner(scanResources);
-		prefs =  PreferenceManager.getDefaultSharedPreferences(activity);
+		prefs = PreferenceManager.getDefaultSharedPreferences(activity);
 	}
 
 	@Override
@@ -93,11 +93,12 @@ final class DecodeHandler extends Handler {
 			long end = System.currentTimeMillis();
 			Log.d(TAG, "Found result (" + (end - start) + " ms):\n"
 					+ resultString);
-			if(fieldsFound != 0) {
+			if (fieldsFound != 0) {
 				Message message = Message.obtain(activity.getHandler(),
 						R.id.decode_succeeded, invoice);
 				Bitmap debugBmp = null;
-				if (prefs.getBoolean(PreferencesActivity.KEY_DEBUG_IMAGE, false)) {
+				if (prefs
+						.getBoolean(PreferencesActivity.KEY_DEBUG_IMAGE, false)) {
 					debugBmp = scanner.getDebugBitmap();
 				}
 				Bundle bundle = new Bundle();

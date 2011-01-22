@@ -14,7 +14,7 @@ public class ResultListHandler {
 	private ListItem sent;
 	private Boolean newData = false;
 
-	public ResultListHandler (Context c) {
+	public ResultListHandler(Context c) {
 		reference = new ListItem();
 		amount = new ListItem();
 		account = new ListItem();
@@ -36,7 +36,8 @@ public class ResultListHandler {
 				this.reference.listItemData = reference;
 				newData = true;
 			}
-		} catch(NullPointerException e) {}
+		} catch (NullPointerException e) {
+		}
 	}
 
 	public void setAmount(String amount) {
@@ -45,16 +46,18 @@ public class ResultListHandler {
 				this.amount.listItemData = amount;
 				newData = true;
 			}
-		} catch(NullPointerException e) {}
+		} catch (NullPointerException e) {
+		}
 	}
 
 	public void setAccount(String account) {
 		try {
 			if (!account.equals(this.account.listItemData)) {
 				this.account.listItemData = account;
-				newData = true; 
+				newData = true;
 			}
-		} catch(NullPointerException e) {}
+		} catch (NullPointerException e) {
+		}
 	}
 
 	public void setSent(Boolean status) {
@@ -92,7 +95,7 @@ public class ResultListHandler {
 
 	public class ListItem {
 		public String listItemData = null;
-	    public String listItemType = null;
+		public String listItemType = null;
 	}
 
 }

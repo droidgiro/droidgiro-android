@@ -33,30 +33,30 @@ import android.util.Log;
 
 /**
  * Loads the the resources used by the Scanner class.
- *
+ * 
  * @author wulax
  */
 public final class ScanResources {
 
 	private final String TAG = "DroidGiro.ScanResources";
 
-	private Map<Character,Bitmap> charMap;
+	private Map<Character, Bitmap> charMap;
 
-	//TODO: Make this more dynamic
-	private Map<Character,String> charIds = new HashMap<Character,String>() {
+	// TODO: Make this more dynamic
+	private Map<Character, String> charIds = new HashMap<Character, String>() {
 		{
-			put((char)35,"char35_16x24");
-			put((char)48,"char48_16x24");
-			put((char)49,"char49_16x24");
-			put((char)50,"char50_16x24");
-			put((char)51,"char51_16x24");
-			put((char)52,"char52_16x24");
-			put((char)53,"char53_16x24");
-			put((char)54,"char54_16x24");
-			put((char)55,"char55_16x24");
-			put((char)56,"char56_16x24");
-			put((char)57,"char57_16x24");
-			put((char)62,"char62_16x24");
+			put((char) 35, "char35_16x24");
+			put((char) 48, "char48_16x24");
+			put((char) 49, "char49_16x24");
+			put((char) 50, "char50_16x24");
+			put((char) 51, "char51_16x24");
+			put((char) 52, "char52_16x24");
+			put((char) 53, "char53_16x24");
+			put((char) 54, "char54_16x24");
+			put((char) 55, "char55_16x24");
+			put((char) 56, "char56_16x24");
+			put((char) 57, "char57_16x24");
+			put((char) 62, "char62_16x24");
 		}
 	};
 
@@ -69,40 +69,43 @@ public final class ScanResources {
 	}
 
 	/**
-	 * Loads the the reference bitmaps from an external path into a map, with
-	 * a Character as key and its corresponding Bitmap as value.
-	 * @param path The path to the bitmaps.
+	 * Loads the the reference bitmaps from an external path into a map, with a
+	 * Character as key and its corresponding Bitmap as value.
+	 * 
+	 * @param path
+	 *            The path to the bitmaps.
 	 */
 	public void loadCharsFromExt(String path) {
-	//TODO
+		// TODO
 	}
 
 	/**
-	 * Loads the the reference bitmaps from the application resources into a map,
-	 * with a Character as key and its corresponding Bitmap as value.
-	 * @param context The application context.
+	 * Loads the the reference bitmaps from the application resources into a
+	 * map, with a Character as key and its corresponding Bitmap as value.
+	 * 
+	 * @param context
+	 *            The application context.
 	 */
 	public void loadCharsFromRes(Context context) {
 		Options o = new Options();
 		o.inPreferredConfig = Bitmap.Config.RGB_565;
 		o.inScaled = false;
-		charMap = new HashMap<Character,Bitmap>();
+		charMap = new HashMap<Character, Bitmap>();
 		try {
 			Class<drawable> res = R.drawable.class;
-			Set<Entry<Character,String>> set = charIds.entrySet();
+			Set<Entry<Character, String>> set = charIds.entrySet();
 			Iterator<Entry<Character, String>> it = set.iterator();
-			while(it.hasNext()) {
-				Entry<Character,String> me = it.next();
-				Character cha = (Character)me.getKey();
-				String id = (String)me.getValue();
+			while (it.hasNext()) {
+				Entry<Character, String> me = it.next();
+				Character cha = (Character) me.getKey();
+				String id = (String) me.getValue();
 				Field field = res.getField(id);
 				int drawableId = field.getInt(null);
-				Bitmap chaBmp = BitmapFactory.decodeResource(
-					context.getResources(), drawableId, o);
+				Bitmap chaBmp = BitmapFactory.decodeResource(context
+						.getResources(), drawableId, o);
 				charMap.put(cha, chaBmp);
 			}
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			Log.e(TAG, "Failed to get character ids.", e);
 		}
 	}
@@ -110,7 +113,7 @@ public final class ScanResources {
 	/**
 	 * @return The reference character map to use in the bitmap analysis method.
 	 */
-	public Map<Character,Bitmap> getCharMap() {
+	public Map<Character, Bitmap> getCharMap() {
 		return charMap;
 	}
 

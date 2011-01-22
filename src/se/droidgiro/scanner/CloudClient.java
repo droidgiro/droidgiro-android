@@ -61,10 +61,11 @@ public class CloudClient {
 			Log.v(TAG, "Post to register returned " + sb + " with status "
 					+ res.getStatusLine().getStatusCode());
 			Gson gson = new Gson();
-			Registration registration = gson.fromJson(reader, Registration.class);
+			Registration registration = gson.fromJson(reader,
+					Registration.class);
 			Log.v(TAG, registration.toString());
 			return registration;
-		} else if(res.getStatusLine().getStatusCode() == 401) {
+		} else if (res.getStatusLine().getStatusCode() == 401) {
 			Log.w(TAG, "Unauthorized");
 			return new Registration();
 		} else {
