@@ -1,4 +1,4 @@
-package se.droidgiro.scanner;
+package se.droidgiro.scanner.resultlist;
 
 import se.droidgiro.R;
 import java.util.ArrayList;
@@ -14,7 +14,7 @@ public class ResultListHandler {
 	private ListItem sent;
 	private Boolean newData = false;
 
-	ResultListHandler (Context c) {
+	public ResultListHandler (Context c) {
 		reference = new ListItem();
 		amount = new ListItem();
 		account = new ListItem();

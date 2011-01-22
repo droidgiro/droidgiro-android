@@ -1,4 +1,4 @@
-package se.droidgiro.scanner;
+package se.droidgiro.scanner.resultlist;
 
 import android.content.Context;
 import java.util.List;
@@ -7,7 +7,7 @@ import android.widget.TextView;
 import android.view.View;
 import se.droidgiro.R;
 
-class ResultListAdapter extends TextViewListAdapter<ResultListHandler.ListItem> {
+public class ResultListAdapter extends TextViewListAdapter<ResultListHandler.ListItem> {
 
 	private Context context;
 	private long ownerPartyId;

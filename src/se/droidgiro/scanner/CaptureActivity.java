@@ -23,7 +23,6 @@ package se.droidgiro.scanner;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import org.apache.http.NameValuePair;
@@ -33,6 +32,8 @@ import se.droidgiro.About;
 import se.droidgiro.PreferencesActivity;
 import se.droidgiro.R;
 import se.droidgiro.scanner.camera.CameraManager;
+import se.droidgiro.scanner.resultlist.ResultListAdapter;
+import se.droidgiro.scanner.resultlist.ResultListHandler;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -59,7 +60,6 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
 
 
 /**

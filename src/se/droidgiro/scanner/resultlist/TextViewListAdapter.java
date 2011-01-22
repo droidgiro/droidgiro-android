@@ -4,7 +4,7 @@
  * License unkown.
  */
 
-package se.droidgiro.scanner;
+package se.droidgiro.scanner.resultlist;
 
 import android.content.Context;
 import android.view.LayoutInflater;
