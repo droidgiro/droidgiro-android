@@ -226,7 +226,30 @@ public class Invoice {
 	}
 
 	public String getGiroAccount() {
-		return giroAccount;
+		if (giroAccount == null)
+			return null;
+
+		if (internalDocumentType != null) {
+			if ("41".equals(internalDocumentType)) {
+				if (giroAccount.length() == 8)
+					return giroAccount.substring(0, 4) + "-"
+							+ giroAccount.substring(4);
+				else if (giroAccount.length() == 7)
+					return giroAccount.substring(0, 3) + "-"
+							+ giroAccount.substring(3);
+				else
+					/* Don't know how to handle, can this even occur? */
+					return giroAccount;
+			} else
+				/*
+				 * Naive approach, guessing this is a plusgiro number with
+				 * format XXXXXX-X
+				 */
+				return giroAccount.substring(0, giroAccount.length() - 1) + "-"
+						+ giroAccount.substring(giroAccount.length() - 1);
+		} else 
+			/* Cannot format without internal document type */
+			return giroAccount;
 	}
 
 	public void setGiroAccount(String giroAccount) {
