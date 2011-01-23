@@ -31,6 +31,7 @@ import android.graphics.Canvas;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.Log;
 
@@ -420,7 +421,7 @@ public class Scanner {
 	protected List<Rect> findTargetRects(Bitmap bmp) {
 		/* Scan columns for black pixels */
 		targetRects = new ArrayList<Rect>();
-		List<int[]> cols = new ArrayList<int[]>();
+		List<Point> cols = new ArrayList<Point>();
 		int fullCol = black * targetBmpHeight;
 		int emptyCol = white * targetBmpHeight;
 		int lastFalse = -2;
@@ -444,7 +445,7 @@ public class Scanner {
 			} else if ((lastFalse - 1 == lastTrue)
 					|| (x == targetBmpWidth - 1 && x == lastTrue)) {
 				lastRight = x;
-				int[] c = new int[] { lastLeft, lastRight };
+				Point c = new Point(lastLeft, lastRight);
 				cols.add(c);
 			}
 		}
@@ -457,16 +458,14 @@ public class Scanner {
 		lastTrue = -2;
 		int lastTop = -2;
 		int lastBottom = -2;
-		ListIterator<int[]> li = cols.listIterator();
-		while (li.hasNext()) {
-			int[] leftRight = li.next();
-			int left = leftRight[0];
-			int right = leftRight[1];
-			int sectionWidth = right - left;
+		ListIterator<Point> foundLeftRight = cols.listIterator();
+		while (foundLeftRight.hasNext()) {
+			Point leftRight = foundLeftRight.next();
+			int sectionWidth = leftRight.y - leftRight.x;
 			int emptyRow = sectionWidth * white;
 			for (int y = 0; y < targetBmpHeight; ++y) {
 				int[] rowPixels = new int[sectionWidth];
-				bmp.getPixels(rowPixels, 0, targetBmpWidth, left, y,
+				bmp.getPixels(rowPixels, 0, targetBmpWidth, leftRight.x, y,
 						sectionWidth, 1);
 				int rowSum = 0;
 				for (int p : rowPixels) {
@@ -484,7 +483,7 @@ public class Scanner {
 					lastBottom = y;
 				}
 			}
-			Rect targetRect = new Rect(left, lastTop, right, lastBottom);
+			Rect targetRect = new Rect(leftRight.x, lastTop, leftRight.y, lastBottom);
 			/* Ignore sections of the wrong size or shape */
 			if ((targetRect.width() > charMinWidth)
 					&& (targetRect.width() < charMaxWidth)
@@ -520,9 +519,9 @@ public class Scanner {
 	protected List<Bitmap> uniformBitmapList(Bitmap bmp, List<Rect> coordList,
 			int toWidth, int toHeight, boolean contrast) {
 		List<Bitmap> bmpList = new ArrayList<Bitmap>();
-		ListIterator<Rect> li = coordList.listIterator();
-		while (li.hasNext()) {
-			Rect targetRect = li.next();
+		ListIterator<Rect> coordRects = coordList.listIterator();
+		while (coordRects.hasNext()) {
+			Rect targetRect = coordRects.next();
 			int[] pixels;
 			pixels = new int[targetRect.height() * targetRect.width()];
 			bmp.getPixels(pixels, 0, targetRect.width(), targetRect.left,
@@ -552,8 +551,6 @@ public class Scanner {
 	 */
 	protected Bitmap composeFromBitmapList(List<Bitmap> bmpList,
 			boolean vertical) {
-		// TODO: Probably unnecessary object creations in this method but
-		// not very important since it's only for debug bitmap
 		Bitmap measureBmp = bmpList.get(0);
 		int toWidth = measureBmp.getWidth();
 		int toHeight = measureBmp.getHeight();
@@ -567,10 +564,10 @@ public class Scanner {
 					config);
 		}
 		Canvas canvas = new Canvas(resultBmp);
-		ListIterator<Bitmap> li = bmpList.listIterator();
+		ListIterator<Bitmap> bmpIterator = bmpList.listIterator();
 		int i = 0;
-		while (li.hasNext()) {
-			Bitmap bmp = li.next();
+		while (bmpIterator.hasNext()) {
+			Bitmap bmp = bmpIterator.next();
 			Rect srcRect = new Rect(0, 0, bmp.getWidth(), bmp.getHeight());
 			Rect dstRect = new Rect(srcRect);
 			if (i != 0) {
@@ -611,8 +608,8 @@ public class Scanner {
 	protected int compareColSpacing = 2;
 
 	/**
-	 * @param Number
-	 *            of rows to skip over when comparing character bitmaps.
+	 * @param compareRowSpacing
+	 *            Number of rows to skip over when comparing character bitmaps.
 	 */
 	public void setCompareRowSpacing(int compareRowSpacing) {
 		if (compareRowSpacing <= 0) {
@@ -625,8 +622,8 @@ public class Scanner {
 	}
 
 	/**
-	 * @param Number
-	 *            of columns to skip over when comparing character bitmaps.
+	 * @param compareColSpacing
+	 *            Number of columns to skip over when comparing character bitmaps.
 	 */
 	public void setCompareColumnSpacing(int compareColSpacing) {
 		if (compareColSpacing <= 0) {
@@ -639,19 +636,19 @@ public class Scanner {
 	}
 
 	/**
-	 * @param When
-	 *            iterating through the scanned characters in the comparison
-	 *            loop, if no reference character has a higher match percent
-	 *            than this, the scanned character is translated as an "X",
-	 *            which is invalid.
+	 * @param minInitMatchPercent
+	 *            When iterating through the scanned characters in the
+	 *            comparison loop, if no reference character has a higher
+	 *            match percent than this, the scanned character is
+	 *            translated as an "X", which is invalid.
 	 */
 	public void setMinInitialMatchPercent(float minInitMatchPercent) {
 		this.minInitMatchPercent = minInitMatchPercent;
 	}
 
 	/**
-	 * @param When
-	 *            iterating through the scanned characters in the comparison
+	 * @param matchTolerenceRows
+	 *            When iterating through scanned characters in the comparison
 	 *            loop, ignore this amount of nonmatching rows in the character
 	 *            bitmap when calculating match percentage. If match percentage
 	 *            falls below the minimum initial amount, or the best match
@@ -691,6 +688,7 @@ public class Scanner {
 		ListIterator<Bitmap> li = bmpList.listIterator();
 		Bitmap currentCharBmp;
 		Character currentChar;
+		int midCharRow = refCharHeight/2;
 		/* Iterate over the target bitmap list. */
 		while (li.hasNext()) {
 			Bitmap bmp = li.next();
@@ -707,16 +705,8 @@ public class Scanner {
 				currentCharBmp = (Bitmap) charSetEntry.getValue();
 				/* Iterate over pixels in the target bitmap. */
 				currentCharLoop:
-				/*
-				 * The spacing on y and x will probably not produce faster
-				 * results, it will not have to read the whole bitmap anyway,
-				 * but will make the comparison more spread out before it skips
-				 * to the next character. Possibly this will improve accuracy. I
-				 * have experimented with creating a set path to check but so
-				 * far it has mostly decreased reading speed significantly..
-				 */
-				for (int y = 0; y < bmp.getHeight(); y += compareRowSpacing) {
-					for (int x = 0; x < bmp.getWidth(); x += compareColSpacing) {
+				for (int y = 0; y != -1;) {
+					for (int x = 0; x < refCharWidth; x += compareColSpacing) {
 						int refPixel = currentCharBmp.getPixel(x, y);
 						int foundPixel = bmp.getPixel(x, y);
 						/* Compare pixels between target and reference. */
@@ -730,11 +720,23 @@ public class Scanner {
 							 * left to compare.
 							 */
 							if (nonmatching % 2 == 0) { // check every other
-								percent = ((float) matching / ((float) matching + (float) nonmatching)) * 100;
+								percent = ((float) matching / ((float) matching
+										+ (float) nonmatching)) * 100;
 								if (percent < bestScore) {
 									break currentCharLoop;
 								}
 							}
+						}
+					}
+					/* Alternate reading of top/bottom until middle row. */
+					if (y == midCharRow) {
+						y = -1;
+					} else {
+						if (y < midCharRow) {
+							y++;
+							y = refCharHeight - y;
+						} else {
+							y = refCharHeight - y;
 						}
 					}
 				}
@@ -774,16 +776,22 @@ public class Scanner {
 		Paint paint = new Paint();
 		ColorMatrix cm1 = new ColorMatrix();
 		float scale1 = scaleonly + 1.f;
-		cm1.set(new float[] { scale1, 0, 0, 0, 0, 0, scale1, 0, 0, 0, 0, 0,
-				scale1, 0, 0, 0, 0, 0, 1, 0 });
+		cm1.set(new float[] {
+			scale1, 0, 0, 0, 0,
+			0, scale1, 0, 0, 0,
+			0, 0, scale1, 0, 0,
+			0, 0, 0, 1, 0 });
 		ColorMatrixColorFilter f1 = new ColorMatrixColorFilter(cm1);
 		paint.setColorFilter(f1);
 		c.drawBitmap(bmpOriginal, 0, 0, paint);
 		ColorMatrix cm2 = new ColorMatrix();
 		float scale2 = scaletrans + 1.f;
 		float translate = (-.5f * scale2 + .5f) * 255.f;
-		cm2.set(new float[] { scale2, 0, 0, 0, translate, 0, scale2, 0, 0,
-				translate, 0, 0, scale2, 0, translate, 0, 0, 0, 1, 0 });
+		cm2.set(new float[] {
+			scale2, 0, 0, 0, translate,
+			0, scale2, 0, 0, translate,
+			0, 0, scale2, 0, translate,
+			0, 0, 0, 1, 0 });
 		ColorMatrixColorFilter f2 = new ColorMatrixColorFilter(cm2);
 		paint.setColorFilter(f2);
 		c.drawBitmap(bmpGrayscale, 0, 0, paint);
