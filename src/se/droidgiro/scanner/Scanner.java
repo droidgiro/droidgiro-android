@@ -611,8 +611,8 @@ public class Scanner {
 	protected int compareColSpacing = 2;
 
 	/**
-	 * @param Number
-	 *            of rows to skip over when comparing character bitmaps.
+	 * @param compareRowSpacing
+	 *            Number of rows to skip over when comparing character bitmaps.
 	 */
 	public void setCompareRowSpacing(int compareRowSpacing) {
 		if (compareRowSpacing <= 0) {
@@ -625,8 +625,8 @@ public class Scanner {
 	}
 
 	/**
-	 * @param Number
-	 *            of columns to skip over when comparing character bitmaps.
+	 * @param compareColSpacing
+	 *            Number of columns to skip over when comparing character bitmaps.
 	 */
 	public void setCompareColumnSpacing(int compareColSpacing) {
 		if (compareColSpacing <= 0) {
@@ -639,19 +639,19 @@ public class Scanner {
 	}
 
 	/**
-	 * @param When
-	 *            iterating through the scanned characters in the comparison
-	 *            loop, if no reference character has a higher match percent
-	 *            than this, the scanned character is translated as an "X",
-	 *            which is invalid.
+	 * @param minInitMatchPercent
+	 *            When iterating through the scanned characters in the
+	 *            comparison loop, if no reference character has a higher
+	 *            match percent than this, the scanned character is
+	 *            translated as an "X", which is invalid.
 	 */
 	public void setMinInitialMatchPercent(float minInitMatchPercent) {
 		this.minInitMatchPercent = minInitMatchPercent;
 	}
 
 	/**
-	 * @param When
-	 *            iterating through the scanned characters in the comparison
+	 * @param matchTolerenceRows
+	 *            When iterating through scanned characters in the comparison
 	 *            loop, ignore this amount of nonmatching rows in the character
 	 *            bitmap when calculating match percentage. If match percentage
 	 *            falls below the minimum initial amount, or the best match
@@ -774,16 +774,22 @@ public class Scanner {
 		Paint paint = new Paint();
 		ColorMatrix cm1 = new ColorMatrix();
 		float scale1 = scaleonly + 1.f;
-		cm1.set(new float[] { scale1, 0, 0, 0, 0, 0, scale1, 0, 0, 0, 0, 0,
-				scale1, 0, 0, 0, 0, 0, 1, 0 });
+		cm1.set(new float[] {
+			scale1, 0, 0, 0, 0,
+			0, scale1, 0, 0, 0,
+			0, 0, scale1, 0, 0,
+			0, 0, 0, 1, 0 });
 		ColorMatrixColorFilter f1 = new ColorMatrixColorFilter(cm1);
 		paint.setColorFilter(f1);
 		c.drawBitmap(bmpOriginal, 0, 0, paint);
 		ColorMatrix cm2 = new ColorMatrix();
 		float scale2 = scaletrans + 1.f;
 		float translate = (-.5f * scale2 + .5f) * 255.f;
-		cm2.set(new float[] { scale2, 0, 0, 0, translate, 0, scale2, 0, 0,
-				translate, 0, 0, scale2, 0, translate, 0, 0, 0, 1, 0 });
+		cm2.set(new float[] {
+			scale2, 0, 0, 0, translate,
+			0, scale2, 0, 0, translate,
+			0, 0, scale2, 0, translate,
+			0, 0, 0, 1, 0 });
 		ColorMatrixColorFilter f2 = new ColorMatrixColorFilter(cm2);
 		paint.setColorFilter(f2);
 		c.drawBitmap(bmpGrayscale, 0, 0, paint);
