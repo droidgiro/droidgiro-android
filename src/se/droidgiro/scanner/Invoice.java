@@ -157,23 +157,6 @@ public class Invoice {
 		reference = null;
 	}
 
-	/**
-	 * Verifies the reference number with the check digit and sets them if they
-	 * match.
-	 * 
-	 * The Luhn algorithm or modulus-10 algorithm is used for validation.
-	 * 
-	 * @param reference
-	 *            the complete reference number, including the check digit
-	 */
-	public void setReference(String reference) {
-		if (isValidCC(reference)) {
-			Log.v(TAG, "Got reference. Check digit valid.");
-			this.reference = reference;
-		} else
-			Log.e(TAG, "Got reference. Check digit invalid.");
-	}
-
 	public short getCheckDigitReference() {
 		return Short.parseShort(reference.substring(reference.length() - 1));
 	}
@@ -183,23 +166,8 @@ public class Invoice {
 		amountFractional = -1;
 	}
 
-	public void setAmount(String amount, String amountFractionals,
-			String checkDigit) {
-		if (isValidCC(amount + amountFractionals + checkDigit)) {
-			Log.v(TAG, "Got amount. Check digit valid.");
-			this.amount = Integer.parseInt(amount);
-			this.amountFractional = Short.parseShort(amountFractionals);
-			this.checkDigitAmount = checkDigit;
-		} else
-			Log.e(TAG, "Got amount. Check digit invalid.");
-	}
-
 	public int getAmount() {
 		return amount;
-	}
-
-	public void setAmountFractional(short amountFractional) {
-		this.amountFractional = amountFractional;
 	}
 
 	public short getAmountFractional() {
@@ -268,17 +236,8 @@ public class Invoice {
 			return giroAccount;
 	}
 
-	public void setGiroAccount(String giroAccount) {
-		Log.v(TAG, "Got giro account.");
-		this.giroAccount = giroAccount;
-	}
-
 	public void initDocumentType() {
 		internalDocumentType = -1;
-	}
-
-	public void setInternalDocumentType(short internalDocumentType) {
-		this.internalDocumentType = internalDocumentType;
 	}
 
 	public short getInternalDocumentType() {
@@ -340,22 +299,30 @@ public class Invoice {
 		/* Look for reference number */
 		Matcher m = OCR_PATTERN.matcher(input);
 		if (m.find()) {
-			setReference(m.group(2));
-			fieldsDecoded += REFERENCE_FIELD;
+			if (isValidCC(m.group(2))) {
+				reference = m.group(2);
+				fieldsDecoded += REFERENCE_FIELD;
+			}
 		}
 
 		/* Look for amount */
 		m = AMOUNT_PATTERN.matcher(input);
 		if (m.find()) {
-			setAmount(m.group(2), m.group(3), m.group(4));
-			fieldsDecoded += AMOUNT_FIELD;
+			if (isValidCC(m.group(2) + m.group(3) + m.group(4))) {
+				Log.v(TAG, "Got amount. Check digit valid.");
+				amount = Integer.parseInt(m.group(2));
+				amountFractional = Short.parseShort(m.group(3));
+				checkDigitAmount = m.group(4);
+				fieldsDecoded += AMOUNT_FIELD;
+			} else
+				Log.e(TAG, "Got amount. Check digit invalid.");
 		}
 
 		/* Look for BG/PG number */
 		m = ACCOUNT_PATTERN.matcher(input);
 		if (m.find()) {
-			setGiroAccount(m.group(2));
-			setInternalDocumentType(Short.parseShort(m.group(3)));
+			giroAccount = m.group(2);
+			internalDocumentType = Short.parseShort(m.group(3));
 			fieldsDecoded += GIRO_ACCOUNT_FIELD + DOCUMENT_TYPE_FIELD;
 		}
 		lastFieldsDecoded = fieldsDecoded;
