@@ -18,8 +18,10 @@ package se.droidgiro;
 import se.droidgiro.scanner.CaptureActivity;
 import se.droidgiro.scanner.CloudClient;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Menu;
@@ -27,6 +29,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
 public class PairingActivity extends Activity {
 
@@ -34,6 +37,8 @@ public class PairingActivity extends Activity {
 	private EditText digit2;
 	private EditText digit3;
 	private EditText digit4;
+
+	private final Handler handler = new Handler();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -104,11 +109,40 @@ public class PairingActivity extends Activity {
 				digit4.requestFocus();
 			else {
 				// compose pin
-				String pin = digit1.getText().toString()
+				final String pin = digit1.getText().toString()
 						+ digit2.getText().toString()
 						+ digit3.getText().toString()
 						+ digit4.getText().toString();
-				register(pin);
+
+				final ProgressDialog pd = ProgressDialog.show(
+						PairingActivity.this, null,
+						getString(R.string.pairing_msg));
+
+				new Thread() {
+					public void run() {
+						final Registration registration = register(pin);
+						handler.post(new Runnable() {
+							public void run() {
+								pd.dismiss();
+								if (registration.isSuccessful()) {
+									// Open scanner
+									Intent intent = new Intent(
+											PairingActivity.this,
+											CaptureActivity.class);
+									intent.putExtra("channel", registration
+											.getChannel());
+									startActivity(intent);
+								} else {
+									Toast.makeText(PairingActivity.this,
+											R.string.pairing_failed,
+											Toast.LENGTH_SHORT).show();
+									clear();
+								}
+							}
+						});
+					}
+
+				}.start();
 			}
 		}
 
@@ -129,23 +163,17 @@ public class PairingActivity extends Activity {
 		digit1.requestFocus();
 	}
 
-	public void register(String pin) {
+	public Registration register(String pin) {
 		Registration registration;
 		try {
 			registration = CloudClient.register(pin);
 		} catch (Exception e) {
-			clear();
-			return;
+			return new Registration();
 		}
 		if (!registration.isSuccessful()) {
-			clear();
-			return;
+			return registration;
 		} else {
-			// Open scanner
-			Intent intent = new Intent(PairingActivity.this,
-					CaptureActivity.class);
-			intent.putExtra("channel", registration.getChannel());
-			startActivity(intent);
+			return registration;
 		}
 
 	}

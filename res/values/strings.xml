@@ -27,4 +27,6 @@
 	<string name="scan_state_pause">Pausa</string>
 	<string name="scan_state_scan">Skanna</string>
 	<string name="get_pin">Hämta din PIN-kod från Chrome-tillägget</string>
+	<string name="pairing_msg">Ansluter till webbläsaren</string>
+	<string name="pairing_failed">PIN-koden är inte giltig</string>
 </resources>
