@@ -83,9 +83,7 @@ public final class CaptureActivity extends ListActivity implements
 	private boolean playBeep;
 	private boolean vibrate;
 
-	// Must create a new invoice or the app will crash if buttons are
-	// pressed before anything is scanned.
-	private static Invoice currentInvoice = new Invoice();
+	private static Invoice currentInvoice = null;
 
 	private Button eraseButton;
 	private Button scanButton;
@@ -143,7 +141,7 @@ public final class CaptureActivity extends ListActivity implements
 		this.eraseButton = (Button) this.findViewById(R.id.erase);
 		this.eraseButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				if (currentInvoice.isComplete()) {
+				if (currentInvoice != null && currentInvoice.isComplete()) {
 					scanButton.setText(getString(R.string.scan_state_pause));
 				}
 				if(currentInvoice != null)
@@ -158,7 +156,7 @@ public final class CaptureActivity extends ListActivity implements
 		this.scanButton.setText(getString(R.string.scan_state_pause));
 		this.scanButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				if (currentInvoice.isComplete()) {
+				if (currentInvoice != null && currentInvoice.isComplete()) {
 					paused = false;
 					handler.sendEmptyMessage(R.id.resume);
 					scanButton.setText(getString(R.string.scan_state_scan));
