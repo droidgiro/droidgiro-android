@@ -71,18 +71,21 @@ public final class CaptureActivity extends ListActivity implements
 
 	private static final float BEEP_VOLUME = 0.10f;
 	private static final long VIBRATE_DURATION = 200L;
-	private static final long SCAN_DELAY_MS = 1500L;
+	private static final long SCAN_DELAY_MS = 1000L;
 
 	private CaptureActivityHandler handler;
-
-	private ViewfinderView viewfinderView;
 	private MediaPlayer mediaPlayer;
+	private ResultListHandler resultListHandler;
+	private ViewfinderView viewfinderView;
+
 	private boolean hasSurface;
+	private boolean paused = false;
 	private boolean playBeep;
 	private boolean vibrate;
 
-	private static Invoice currentInvoice = null;
-	private ResultListHandler resultListHandler;
+	// Must create a new invoice or the app will crash if buttons are
+	// pressed before anything is scanned.
+	private static Invoice currentInvoice = new Invoice();
 
 	private Button eraseButton;
 	private Button scanButton;
@@ -140,6 +143,9 @@ public final class CaptureActivity extends ListActivity implements
 		this.eraseButton = (Button) this.findViewById(R.id.erase);
 		this.eraseButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
+				if (currentInvoice.isComplete()) {
+					scanButton.setText(getString(R.string.scan_state_pause));
+				}
 				if(currentInvoice != null)
 					currentInvoice.initFields();
 				resultListHandler.clear();
@@ -148,10 +154,23 @@ public final class CaptureActivity extends ListActivity implements
 			}
 		});
 
-		this.scanButton = (Button) this.findViewById(R.id.scan);
+		this.scanButton = (Button) this.findViewById(R.id.pause);
+		this.scanButton.setText(getString(R.string.scan_state_pause));
 		this.scanButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				handler.sendEmptyMessage(R.id.restart_preview);
+				if (currentInvoice.isComplete()) {
+					paused = false;
+					handler.sendEmptyMessage(R.id.resume);
+					scanButton.setText(getString(R.string.scan_state_scan));
+				} else if (!paused) {
+					paused = true;
+					handler.sendEmptyMessage(R.id.pause);
+					scanButton.setText(getString(R.string.scan_state_scan));
+				} else {
+					paused = false;
+					handler.sendEmptyMessage(R.id.resume);
+					scanButton.setText(getString(R.string.scan_state_pause));
+				}
 			}
 		});
 
@@ -213,7 +232,6 @@ public final class CaptureActivity extends ListActivity implements
 
 	@Override
 	protected void onDestroy() {
-		// inactivityTimer.shutdown();
 		super.onDestroy();
 	}
 
@@ -266,7 +284,6 @@ public final class CaptureActivity extends ListActivity implements
 
 	public void handleDecode(final Invoice invoice, int fieldsFound,
 			Bitmap debugBmp) {
-		// inactivityTimer.onActivity();
 		SharedPreferences prefs = PreferenceManager
 				.getDefaultSharedPreferences(this);
 		ImageView debugImageView = (ImageView) findViewById(R.id.debug_image_view);
@@ -316,7 +333,6 @@ public final class CaptureActivity extends ListActivity implements
 						Log.v(TAG, "Result from posting invoice " + params
 								+ " to channel " + channel + ": " + res);
 						invoice.initFields();
-						// initLocalInvoice();
 						currentInvoice = null;
 					} catch (Exception e) {
 						Log.e(TAG, e.getMessage(), e);
@@ -327,10 +343,12 @@ public final class CaptureActivity extends ListActivity implements
 		}
 		if (invoice.isComplete()) {
 			resultListHandler.setSent(true);
-		} else {
-			handler
-					.sendEmptyMessageDelayed(R.id.restart_preview,
-							SCAN_DELAY_MS);
+			this.scanButton.setText(getString(R.string.scan_state_scan));
+			onContentChanged();
+		} else if (!paused) {
+			handler.sendEmptyMessageDelayed(R.id.restart_preview,
+					SCAN_DELAY_MS);
+			
 		}
 		onContentChanged();
 	}

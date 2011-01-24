@@ -19,12 +19,12 @@
     <TextView android:id="@+id/field_result_data"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
-              android:padding="2dp"
+              android:padding="3dp"
               android:shadowColor="#000000"
               android:shadowDx="2.0"
               android:shadowDy="2.0"
               android:shadowRadius="3.0"
-              android:textSize="8pt"
+              android:textSize="7pt"
               android:textColor="#ffffff"/>
 
 </LinearLayout>

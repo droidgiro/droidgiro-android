@@ -1,56 +1,64 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:layout_width="fill_parent"
-             android:layout_height="fill_parent">
+			android:layout_width="fill_parent"
+			android:layout_height="fill_parent">
 
-<SurfaceView android:id="@+id/preview_view"
-             android:layout_width="fill_parent"
-             android:layout_height="fill_parent"
-             android:layout_centerInParent="true"/>
+	<SurfaceView android:id="@+id/preview_view"
+			android:layout_width="fill_parent"
+			android:layout_height="fill_parent"
+			android:layout_centerInParent="true"/>
 
-<se.droidgiro.scanner.ViewfinderView
-      android:id="@+id/viewfinder_view"
-      android:layout_width="fill_parent"
-      android:layout_height="fill_parent"
-      android:background="@color/transparent"/>
+	<se.droidgiro.scanner.ViewfinderView
+			android:id="@+id/viewfinder_view"
+			android:layout_width="fill_parent"
+			android:layout_height="fill_parent"
+			android:background="@color/transparent"/>
 
-<LinearLayout
-              android:orientation="vertical"
-              android:layout_width="fill_parent"
-              android:layout_height="fill_parent">
+	<LinearLayout
+			android:orientation="vertical"
+			android:layout_width="fill_parent"
+			android:layout_height="fill_parent">
 
-    <ListView android:id="@+id/android:list"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"/>
+		<ListView android:id="@+id/android:list"
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				android:divider="#80FFFFFF"
+				android:dividerHeight="1px"/>
 
-  <FrameLayout
-              android:layout_width="fill_parent" android:layout_height="fill_parent"
-              android:layout_weight="1">
-  </FrameLayout>
+		<FrameLayout
+				android:layout_width="fill_parent"
+				android:layout_height="fill_parent"
+				android:layout_weight="1">
+		</FrameLayout>
 
-  <ImageView android:id="@+id/debug_image_view"
-             android:layout_width="fill_parent"
-             android:layout_height="wrap_content"/>
+		<ImageView android:id="@+id/debug_image_view"
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"/>
 
-  <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content">
+		<LinearLayout
+				android:orientation="horizontal"
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content">
 
-    <Button android:id="@+id/erase"
-            android:layout_weight="1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Radera alla"/>
+			<Button android:id="@+id/erase"
+					android:layout_weight="1"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:gravity="center"
+					android:padding="5dp"
+					android:textSize="6pt"
+					android:text="@string/erase"/>
 
-    <Button android:id="@+id/scan"
-            android:layout_weight="1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Skanna"/>
+			<Button android:id="@+id/pause"
+					android:layout_weight="1"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:gravity="center"
+					android:padding="5dp"
+					android:textSize="6pt"/>
 
-  </LinearLayout>
+		</LinearLayout>
 
-</LinearLayout>
+	</LinearLayout>
 
 </FrameLayout>

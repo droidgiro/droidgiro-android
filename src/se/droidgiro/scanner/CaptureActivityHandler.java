@@ -44,7 +44,7 @@ public final class CaptureActivityHandler extends Handler {
 	private State state;
 
 	private enum State {
-		PREVIEW, SUCCESS, DONE
+		PREVIEW, SUCCESS, DONE, PAUSED
 	}
 
 	CaptureActivityHandler(CaptureActivity activity) {
@@ -77,7 +77,9 @@ public final class CaptureActivityHandler extends Handler {
 			break;
 		case R.id.decode_succeeded:
 			Log.d(TAG, "Got decode succeeded message");
-			state = State.SUCCESS;
+			if (state != State.PAUSED) {
+				state = State.SUCCESS;
+			}
 			Bundle bundle = message.getData();
 			Bitmap debugBmp = bundle == null ? null : (Bitmap) bundle
 					.getParcelable(DecodeThread.DEBUG_BITMAP);
@@ -86,19 +88,23 @@ public final class CaptureActivityHandler extends Handler {
 			activity.handleDecode((Invoice) message.obj, fieldsFound, debugBmp);
 			break;
 		case R.id.decode_failed:
-			state = State.PREVIEW;
-			CameraManager.get().requestPreviewFrame(decodeThread.getHandler(),
-					R.id.decode);
+			if (state != State.PAUSED) {
+				state = State.PREVIEW;
+				CameraManager.get().requestPreviewFrame(decodeThread.getHandler(),
+						R.id.decode);
+			}
 			break;
 		case R.id.new_invoice:
 			state = State.PREVIEW;
 			CameraManager.get().requestPreviewFrame(decodeThread.getHandler(),
 					R.id.new_invoice);
 			break;
-		case R.id.return_scan_result:
-			Log.d(TAG, "Got return scan result message");
-			activity.setResult(Activity.RESULT_OK, (Intent) message.obj);
-			activity.finish();
+		case R.id.pause:
+			state = State.PAUSED;
+			break;
+		case R.id.resume:
+			state = State.SUCCESS;
+			restartPreviewAndDecode();
 			break;
 		}
 	}
