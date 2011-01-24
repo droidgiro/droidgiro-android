@@ -299,7 +299,7 @@ public final class CaptureActivity extends ListActivity implements
 						.getCompleteAmount()));
 			if ((fieldsScanned & Invoice.DOCUMENT_TYPE_FIELD) == Invoice.DOCUMENT_TYPE_FIELD)
 				params.add(new BasicNameValuePair("type", invoice
-						.getInternalDocumentType()));
+						.getType()));
 			if ((fieldsScanned & Invoice.GIRO_ACCOUNT_FIELD) == Invoice.GIRO_ACCOUNT_FIELD)
 				params.add(new BasicNameValuePair("account", invoice
 						.getGiroAccount()));

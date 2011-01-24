@@ -147,7 +147,7 @@ public class Invoice {
 
 	private String giroAccount;
 
-	private String internalDocumentType;
+	private short internalDocumentType;
 
 	public String getReference() {
 		return reference;
@@ -225,30 +225,46 @@ public class Invoice {
 		giroAccount = null;
 	}
 
+	/**
+	 * Will try to figure out whether this invoice is a PlusGiro or BankGiro
+	 * invoice by looking at the internal document type. Until we see some
+	 * describing documents we will have to go for empirical studies.
+	 * 
+	 * @return null if the internal document type equals -1, "BG" if it equals
+	 *         41 or 42 otherwise "PG"
+	 */
+	public String getType() {
+		if (internalDocumentType == -1)
+			return null;
+		if (internalDocumentType == 41 || internalDocumentType == 42)
+			return "BG";
+		else
+			return "PG";
+	}
+
 	public String getGiroAccount() {
 		if (giroAccount == null)
 			return null;
 
-		if (internalDocumentType != null) {
-			if ("41".equals(internalDocumentType)) {
-				if (giroAccount.length() == 8)
-					return giroAccount.substring(0, 4) + "-"
-							+ giroAccount.substring(4);
-				else if (giroAccount.length() == 7)
-					return giroAccount.substring(0, 3) + "-"
-							+ giroAccount.substring(3);
-				else
-					/* Don't know how to handle, can this even occur? */
-					return giroAccount;
-			} else
-				/*
-				 * Naive approach, guessing this is a plusgiro number with
-				 * format XXXXXX-X
-				 */
-				return giroAccount.substring(0, giroAccount.length() - 1) + "-"
-						+ giroAccount.substring(giroAccount.length() - 1);
-		} else 
-			/* Cannot format without internal document type */
+		String type = getType();
+		if ("BG".equals(type)) {
+			if (giroAccount.length() == 8)
+				return giroAccount.substring(0, 4) + "-"
+						+ giroAccount.substring(4);
+			else if (giroAccount.length() == 7)
+				return giroAccount.substring(0, 3) + "-"
+						+ giroAccount.substring(3);
+			else
+				/* Don't know how to handle, can this even occur? */
+				return giroAccount;
+		} else if ("PG".equals(type)) {
+			/*
+			 * Naive approach, guessing this is a plusgiro number with format
+			 * XXXXXX-X
+			 */
+			return giroAccount.substring(0, giroAccount.length() - 1) + "-"
+					+ giroAccount.substring(giroAccount.length() - 1);
+		} else
 			return giroAccount;
 	}
 
@@ -258,14 +274,14 @@ public class Invoice {
 	}
 
 	public void initDocumentType() {
-		internalDocumentType = null;
+		internalDocumentType = -1;
 	}
 
-	public void setInternalDocumentType(String internalDocumentType) {
+	public void setInternalDocumentType(short internalDocumentType) {
 		this.internalDocumentType = internalDocumentType;
 	}
 
-	public String getInternalDocumentType() {
+	public short getInternalDocumentType() {
 		return internalDocumentType;
 	}
 
@@ -289,7 +305,7 @@ public class Invoice {
 	}
 
 	public boolean isDocumentTypeDefined() {
-		return internalDocumentType != null;
+		return internalDocumentType != -1;
 	}
 
 	/**
@@ -339,7 +355,7 @@ public class Invoice {
 		m = ACCOUNT_PATTERN.matcher(input);
 		if (m.find()) {
 			setGiroAccount(m.group(2));
-			setInternalDocumentType(m.group(3));
+			setInternalDocumentType(Short.parseShort(m.group(3)));
 			fieldsDecoded += GIRO_ACCOUNT_FIELD + DOCUMENT_TYPE_FIELD;
 		}
 		lastFieldsDecoded = fieldsDecoded;
@@ -373,7 +389,7 @@ public class Invoice {
 				+ "   " + (checkDigitAmount != null ? checkDigitAmount : "X")
 				+ " >\t\t" + (giroAccount != null ? giroAccount : "NO GIRO")
 				+ "#"
-				+ (internalDocumentType != null ? internalDocumentType : "XX")
+				+ (internalDocumentType != -1 ? internalDocumentType : "XX")
 				+ "#\t"
 				+ (isComplete() ? "Invoice complete" : "Invoice incomplete");
 	}
