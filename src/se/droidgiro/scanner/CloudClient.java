@@ -27,9 +27,9 @@ public class CloudClient {
 
 	public static final String TAG = "DroidGiro.CloudClient";
 
-	private static final String REGISTER_URL = "http://2.latest.agiroapp.appspot.com/register";
+	private static final String REGISTER_URL = "http://cloud.droidgiro.se/register";
 
-	private static final String INVOICES_URL = "http://2.latest.agiroapp.appspot.com/invoices";
+	private static final String INVOICES_URL = "http://cloud.droidgiro.se/invoices";
 
 	/**
 	 * Sends a pair request to the server with the specified pin code.
