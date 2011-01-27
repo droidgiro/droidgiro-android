@@ -37,7 +37,9 @@ import se.droidgiro.scanner.resultlist.ResultListHandler;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.content.res.AssetFileDescriptor;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -88,6 +90,11 @@ public final class CaptureActivity extends ListActivity implements
 	private Button eraseButton;
 	private Button scanButton;
 
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+//		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+	}
 	/**
 	 * When the beep has finished playing, rewind to queue up another one.
 	 */
@@ -301,13 +308,13 @@ public final class CaptureActivity extends ListActivity implements
 		if(invoice.isGiroAccountDefined())
 			resultListHandler.setAccount(invoice.getGiroAccount());
 		if (resultListHandler.hasNewData()) {
-			playBeepSoundAndVibrate();
 			resultListHandler.setNewData(false);
 		}
 
 		Log.v(TAG, "Got invoice " + invoice);
 		int fieldsScanned = invoice.getLastFieldsDecoded();
 		if (fieldsScanned > 0) {
+			playBeepSoundAndVibrate();
 			final List<NameValuePair> params = new ArrayList<NameValuePair>();
 			if ((fieldsScanned & Invoice.AMOUNT_FIELD) == Invoice.AMOUNT_FIELD)
 				params.add(new BasicNameValuePair("amount", invoice
@@ -330,7 +337,6 @@ public final class CaptureActivity extends ListActivity implements
 						boolean res = CloudClient.postFields(params);
 						Log.v(TAG, "Result from posting invoice " + params
 								+ " to channel " + channel + ": " + res);
-						invoice.initFields();
 						currentInvoice = null;
 					} catch (Exception e) {
 						Log.e(TAG, e.getMessage(), e);
