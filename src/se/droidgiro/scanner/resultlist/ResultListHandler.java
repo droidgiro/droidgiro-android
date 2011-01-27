@@ -11,19 +11,16 @@ public class ResultListHandler {
 	private ListItem reference;
 	private ListItem amount;
 	private ListItem account;
-	private ListItem sent;
 	private Boolean newData = false;
 
 	public ResultListHandler(Context c) {
 		reference = new ListItem();
 		amount = new ListItem();
 		account = new ListItem();
-		sent = new ListItem();
 
 		reference.listItemType = c.getString(R.string.reference_field);
 		amount.listItemType = c.getString(R.string.amount_field);
 		account.listItemType = c.getString(R.string.account_field);
-		sent.listItemData = c.getString(R.string.invoice_sent);
 
 		listItemList.add(reference);
 		listItemList.add(amount);
@@ -60,18 +57,6 @@ public class ResultListHandler {
 		}
 	}
 
-	public void setSent(Boolean status) {
-		if (status) {
-			if (!listItemList.contains(sent)) {
-				listItemList.add(sent);
-			}
-		} else {
-			if (listItemList.contains(sent)) {
-				listItemList.remove(sent);
-			}
-		}
-	}
-
 	public List<ListItem> getList() {
 		return listItemList;
 	}
@@ -88,9 +73,6 @@ public class ResultListHandler {
 		reference.listItemData = null;
 		amount.listItemData = null;
 		account.listItemData = null;
-		if (listItemList.contains(sent)) {
-			listItemList.remove(sent);
-		}
 	}
 
 	public class ListItem {

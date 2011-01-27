@@ -35,9 +35,9 @@ import se.droidgiro.scanner.camera.CameraManager;
 import se.droidgiro.scanner.resultlist.ResultListAdapter;
 import se.droidgiro.scanner.resultlist.ResultListHandler;
 import android.app.ListActivity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.ActivityInfo;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -62,6 +62,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 /**
  * The main activity. Draws the views and shows the results in them.
@@ -85,7 +86,7 @@ public final class CaptureActivity extends ListActivity implements
 	private boolean playBeep;
 	private boolean vibrate;
 
-	private static Invoice currentInvoice = null;
+	private static Invoice currentInvoice = new Invoice();
 
 	private Button eraseButton;
 	private Button scanButton;
@@ -93,8 +94,9 @@ public final class CaptureActivity extends ListActivity implements
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
-//		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+		// setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 	}
+
 	/**
 	 * When the beep has finished playing, rewind to queue up another one.
 	 */
@@ -135,7 +137,7 @@ public final class CaptureActivity extends ListActivity implements
 	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
-
+		currentInvoice = new Invoice();
 		Log.d(TAG, "onCreate");
 		channel = getIntent().getStringExtra("channel");
 		if (channel == null)
@@ -145,16 +147,21 @@ public final class CaptureActivity extends ListActivity implements
 		window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		setContentView(R.layout.capture);
 
-		this.eraseButton = (Button) this.findViewById(R.id.erase);
+		this.eraseButton = (Button) this.findViewById(R.id.send_erase);
 		this.eraseButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				if (currentInvoice != null && currentInvoice.isComplete()) {
-					scanButton.setText(getString(R.string.scan_state_pause));
-				}
-				if(currentInvoice != null)
+				if (currentInvoice != null)
+					sendInvoice(CaptureActivity.this, currentInvoice);
+
+				// if (currentInvoice != null && currentInvoice.isComplete()) {
+				scanButton.setText(getString(R.string.scan_state_scan));
+				handler.sendEmptyMessage(R.id.pause);
+				paused = true;
+				// }
+				if (currentInvoice != null)
 					currentInvoice.initFields();
 				resultListHandler.clear();
-				handler.sendEmptyMessage(R.id.new_invoice);
+//				handler.sendEmptyMessage(R.id.new_invoice);
 				onContentChanged();
 			}
 		});
@@ -163,18 +170,14 @@ public final class CaptureActivity extends ListActivity implements
 		this.scanButton.setText(getString(R.string.scan_state_pause));
 		this.scanButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				if (currentInvoice != null && currentInvoice.isComplete()) {
-					paused = false;
-					handler.sendEmptyMessage(R.id.resume);
-					scanButton.setText(getString(R.string.scan_state_scan));
-				} else if (!paused) {
-					paused = true;
-					handler.sendEmptyMessage(R.id.pause);
-					scanButton.setText(getString(R.string.scan_state_scan));
-				} else {
+				if (paused) {
 					paused = false;
 					handler.sendEmptyMessage(R.id.resume);
 					scanButton.setText(getString(R.string.scan_state_pause));
+				} else {
+					paused = true;
+					handler.sendEmptyMessage(R.id.pause);
+					scanButton.setText(getString(R.string.scan_state_scan));
 				}
 			}
 		});
@@ -299,62 +302,149 @@ public final class CaptureActivity extends ListActivity implements
 		} else if (debugImageView.getVisibility() != View.GONE) {
 			debugImageView.setVisibility(View.GONE);
 		}
-		currentInvoice = invoice;
+		int fieldsScanned = invoice.getLastFieldsDecoded();
+		if (fieldsScanned > 0) {
+			boolean scanContainsNewData = false;
 
-		if(invoice.isReferenceDefined())
-			resultListHandler.setReference(invoice.getReference());
-		if(invoice.isAmountDefined())
-			resultListHandler.setAmount(invoice.getCompleteAmount());
-		if(invoice.isGiroAccountDefined())
-			resultListHandler.setAccount(invoice.getGiroAccount());
+			/*
+			 * The following segment will copy data from scanned invoice object
+			 * into our currentInvoice and keep track of new data read.
+			 * Beep/Vibrate will only occur if scan contains new data.
+			 */
+			
+			if ((fieldsScanned & Invoice.AMOUNT_FIELD) == Invoice.AMOUNT_FIELD) {
+				if (!(currentInvoice.getAmount() == invoice.getAmount() && currentInvoice
+						.getAmountFractional() == invoice.getAmountFractional())) {
+					currentInvoice.setAmount(invoice.getAmount(), invoice
+							.getAmountFractional());
+					scanContainsNewData = true;
+				}
+			}
+
+			if ((fieldsScanned & Invoice.DOCUMENT_TYPE_FIELD) == Invoice.DOCUMENT_TYPE_FIELD) {
+				if (currentInvoice.getInternalDocumentType() != invoice
+						.getInternalDocumentType()) {
+					currentInvoice.setDocumentType(invoice
+							.getInternalDocumentType());
+					scanContainsNewData = true;
+				}
+			}
+
+			if ((fieldsScanned & Invoice.GIRO_ACCOUNT_FIELD) == Invoice.GIRO_ACCOUNT_FIELD) {
+				Log.v(TAG, "Giro accout scanned. Current account = " + currentInvoice.getGiroAccount() + ". New invoice giro account = " + invoice.getGiroAccount());
+				if (!invoice.getGiroAccount().equals(currentInvoice.getGiroAccount())) {
+					currentInvoice.setRawGiroAccount(invoice.getRawGiroAccount());
+					Log.v(TAG, "Copied giro account = " + invoice.getGiroAccount());
+					scanContainsNewData = true;
+				}
+			}
+
+			if ((fieldsScanned & Invoice.REFERENCE_FIELD) == Invoice.REFERENCE_FIELD) {
+				if (!invoice.getReference().equals(currentInvoice.getReference())) {
+					currentInvoice.setReference(invoice.getReference());
+					scanContainsNewData = true;
+				}
+			}
+			
+			if(scanContainsNewData)
+				playBeepSoundAndVibrate();
+
+		}
+		Log.v(TAG, "CurrentInvoice = " + currentInvoice);
+		if (currentInvoice.isReferenceDefined())
+			resultListHandler.setReference(currentInvoice.getReference());
+		if (currentInvoice.isAmountDefined())
+			resultListHandler.setAmount(currentInvoice.getCompleteAmount());
+		if (currentInvoice.isGiroAccountDefined())
+			resultListHandler.setAccount(currentInvoice.getGiroAccount());
 		if (resultListHandler.hasNewData()) {
 			resultListHandler.setNewData(false);
 		}
 
 		Log.v(TAG, "Got invoice " + invoice);
-		int fieldsScanned = invoice.getLastFieldsDecoded();
-		if (fieldsScanned > 0) {
-			playBeepSoundAndVibrate();
-			final List<NameValuePair> params = new ArrayList<NameValuePair>();
-			if ((fieldsScanned & Invoice.AMOUNT_FIELD) == Invoice.AMOUNT_FIELD)
-				params.add(new BasicNameValuePair("amount", invoice
-						.getCompleteAmount()));
-			if ((fieldsScanned & Invoice.DOCUMENT_TYPE_FIELD) == Invoice.DOCUMENT_TYPE_FIELD)
-				params.add(new BasicNameValuePair("type", invoice
-						.getType()));
-			if ((fieldsScanned & Invoice.GIRO_ACCOUNT_FIELD) == Invoice.GIRO_ACCOUNT_FIELD)
-				params.add(new BasicNameValuePair("account", invoice
-						.getGiroAccount()));
-			if ((fieldsScanned & Invoice.REFERENCE_FIELD) == Invoice.REFERENCE_FIELD)
-				params.add(new BasicNameValuePair("reference", invoice
-						.getReference()));
 
-			new Thread(new Runnable() {
-				public void run() {
-					params.add(new BasicNameValuePair("channel",
-							CaptureActivity.this.channel));
-					try {
-						boolean res = CloudClient.postFields(params);
-						Log.v(TAG, "Result from posting invoice " + params
-								+ " to channel " + channel + ": " + res);
-						currentInvoice = null;
-					} catch (Exception e) {
-						Log.e(TAG, e.getMessage(), e);
-					}
+		/* If scan on every hit */
 
-				}
-			}).start();
-		}
-		if (invoice.isComplete()) {
-			resultListHandler.setSent(true);
-			this.scanButton.setText(getString(R.string.scan_state_scan));
-			onContentChanged();
-		} else if (!paused) {
-			handler.sendEmptyMessageDelayed(R.id.restart_preview,
-					SCAN_DELAY_MS);
-			
+		// int fieldsScanned = invoice.getLastFieldsDecoded();
+		// if (fieldsScanned > 0) {
+		// playBeepSoundAndVibrate();
+		// final List<NameValuePair> params = new ArrayList<NameValuePair>();
+		// if ((fieldsScanned & Invoice.AMOUNﬁT_FIELD) == Invoice.AMOUNT_FIELD)
+		// params.add(new BasicNameValuePair("amount", invoice
+		// .getCompleteAmount()));
+		// if ((fieldsScanned & Invoice.DOCUMENT_TYPE_FIELD) ==
+		// Invoice.DOCUMENT_TYPE_FIELD)
+		// params.add(new BasicNameValuePair("type", invoice.getType()));
+		// if ((fieldsScanned & Invoice.GIRO_ACCOUNT_FIELD) ==
+		// Invoice.GIRO_ACCOUNT_FIELD)
+		// params.add(new BasicNameValuePair("account", invoice
+		// .getGiroAccount()));
+		// if ((fieldsScanned & Invoice.REFERENCE_FIELD) ==
+		// Invoice.REFERENCE_FIELD)
+		// params.add(new BasicNameValuePair("reference", invoice
+		// .getReference()));
+		// // sendFields(params);
+		//
+		// }
+
+		// if (invoice.isComplete()) {
+		// resultListHandler.setSent(true);
+		// this.scanButton.setText(getString(R.string.scan_state_scan));
+		// onContentChanged();
+		// } else
+		if (!paused) {
+			handler
+					.sendEmptyMessageDelayed(R.id.restart_preview,
+							SCAN_DELAY_MS);
 		}
 		onContentChanged();
+	}
+
+	private void sendInvoice(final Context context, final Invoice invoice) {
+		List<NameValuePair> fields = new ArrayList<NameValuePair>();
+		if (invoice.isAmountDefined())
+			fields.add(new BasicNameValuePair("amount", invoice
+					.getCompleteAmount()));
+		if (invoice.isDocumentTypeDefined())
+			fields.add(new BasicNameValuePair("type", invoice.getType()));
+		if (invoice.isGiroAccountDefined())
+			fields.add(new BasicNameValuePair("account", invoice
+					.getGiroAccount()));
+		if (invoice.isReferenceDefined())
+			fields.add(new BasicNameValuePair("reference", invoice
+					.getReference()));
+
+		if (fields.size() > 0)
+			sendFields(context, fields);
+	}
+
+	private void sendFields(final Context context,
+			final List<NameValuePair> fields) {
+		new Thread(new Runnable() {
+			public void run() {
+				fields.add(new BasicNameValuePair("channel",
+						CaptureActivity.this.channel));
+				try {
+					boolean res = CloudClient.postFields(fields);
+					Log.v(TAG, "Result from posting invoice " + fields
+							+ " to channel " + channel + ": " + res);
+					final String msg = (res ? "Fält har skickats till webbläsaren"
+							: "Kunde inte skicka fält till webbläsaren");
+
+					handler.post(new Runnable() {
+
+						public void run() {
+							Toast.makeText(context, msg, Toast.LENGTH_LONG)
+									.show();
+						}
+					});
+
+				} catch (Exception e) {
+					Log.e(TAG, e.getMessage(), e);
+				}
+
+			}
+		}).start();
 	}
 
 	/**

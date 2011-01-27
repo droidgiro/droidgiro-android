@@ -89,6 +89,7 @@ final class DecodeHandler extends Handler {
 		resultString = scanner.getResultString();
 
 		if (resultString != null) {
+			invoice.initFields();
 			int fieldsFound = invoice.parse(resultString);
 			long end = System.currentTimeMillis();
 			Log.d(TAG, "Found result (" + (end - start) + " ms):\n"

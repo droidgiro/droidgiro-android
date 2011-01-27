@@ -127,12 +127,14 @@ public final class CaptureActivityHandler extends Handler {
 
 	private void restartPreviewAndDecode() {
 		if (state == State.SUCCESS) {
+			Log.v(TAG, "state = " + state);
 			state = State.PREVIEW;
 			CameraManager.get().requestPreviewFrame(decodeThread.getHandler(),
 					R.id.decode);
 			CameraManager.get().requestAutoFocus(this, R.id.auto_focus);
 			activity.drawViewfinder();
-		}
+		} else
+			Log.v(TAG, "state = " + state);
 	}
 
 }

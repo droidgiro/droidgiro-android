@@ -21,9 +21,9 @@
 	<string name="document_type_field">Dokumenttyp:</string>
 	<string name="show_debug_image">Visa debugbild</string>
 	<string name="preferences_name">Inställningar</string>
-	<string name="play_beep">Spela pip</string>
-	<string name="vibrate">Vibrera</string>
-	<string name="erase">Radera alla</string>
+	<string name="play_beep">Pip vid träff</string>
+	<string name="vibrate">Vibrera vid träff</string>
+	<string name="send_erase">Skicka</string>
 	<string name="scan_state_pause">Pausa</string>
 	<string name="scan_state_scan">Skanna</string>
 	<string name="get_pin">Hämta din PIN-kod från Chrome-tillägget</string>

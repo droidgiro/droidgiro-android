@@ -235,6 +235,10 @@ public class Invoice {
 		} else
 			return giroAccount;
 	}
+	
+	public String getRawGiroAccount() {
+		return giroAccount;
+	}
 
 	public void initDocumentType() {
 		internalDocumentType = -1;
@@ -370,6 +374,23 @@ public class Invoice {
 				+ (internalDocumentType != -1 ? internalDocumentType : "XX")
 				+ "#\t"
 				+ (isComplete() ? "Invoice complete" : "Invoice incomplete");
+	}
+
+	public void setAmount(int amount, short amountFractional) {
+		this.amount = amount;
+		this.amountFractional = amountFractional;
+	}
+
+	public void setDocumentType(short documentType) {
+		this.internalDocumentType = documentType;
+	}
+
+	public void setRawGiroAccount(String giroAccount) {
+		this.giroAccount = giroAccount;
+	}
+
+	public void setReference(String reference) {
+		this.reference = reference;
 	}
 
 }
