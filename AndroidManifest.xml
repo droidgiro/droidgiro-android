@@ -16,7 +16,7 @@
  -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          android:versionName="0.5 alpha" android:versionCode="5" package="se.droidgiro">
+          android:versionName="0.9 beta" android:versionCode="6" package="se.droidgiro">
   <uses-sdk android:minSdkVersion="3"
             android:targetSdkVersion="4"/>
   <supports-screens android:largeScreens="true"

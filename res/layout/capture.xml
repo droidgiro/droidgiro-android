@@ -40,14 +40,14 @@
 				android:layout_width="fill_parent"
 				android:layout_height="wrap_content">
 
-			<Button android:id="@+id/erase"
+			<Button android:id="@+id/send_erase"
 					android:layout_weight="1"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
 					android:gravity="center"
 					android:padding="5dp"
 					android:textSize="6pt"
-					android:text="@string/erase"/>
+					android:text="@string/send_erase"/>
 
 			<Button android:id="@+id/pause"
 					android:layout_weight="1"

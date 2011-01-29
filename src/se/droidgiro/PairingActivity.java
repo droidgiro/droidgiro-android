@@ -33,6 +33,8 @@ import android.widget.Toast;
 
 public class PairingActivity extends Activity {
 
+	private static final String TAG = "DroidGiro.PairingActivity";
+
 	private EditText digit1;
 	private EditText digit2;
 	private EditText digit3;

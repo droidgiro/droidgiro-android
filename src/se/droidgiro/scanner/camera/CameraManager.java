@@ -145,7 +145,7 @@ public final class CameraManager {
 			// Parameters ps = camera.getParameters();
 			// ps.setFlashMode(Camera.Parameters.FLASH_MODE_ON);
 			// camera.setParameters(ps);
-
+//			camera.setDisplayOrientation(90);
 			Log.d(TAG, "camera open");
 			if (camera == null) {
 				throw new IOException();

@@ -235,6 +235,10 @@ public class Invoice {
 		} else
 			return giroAccount;
 	}
+	
+	public String getRawGiroAccount() {
+		return giroAccount;
+	}
 
 	public void initDocumentType() {
 		internalDocumentType = -1;
@@ -292,7 +296,8 @@ public class Invoice {
 	 * 
 	 * @param input
 	 *            the {@code String} to parse for invoice fields.
-	 * @return the fields found in the specified input.
+	 * @return the fields found in the specified input. A field is not
+	 *         considered "found" if its value has already been read.
 	 */
 	public int parse(String input) {
 		int fieldsDecoded = 0;
@@ -300,8 +305,10 @@ public class Invoice {
 		Matcher m = OCR_PATTERN.matcher(input);
 		if (m.find()) {
 			if (isValidCC(m.group(2))) {
-				reference = m.group(2);
-				fieldsDecoded += REFERENCE_FIELD;
+				if (!m.group(2).equals(reference)) {
+					reference = m.group(2);
+					fieldsDecoded += REFERENCE_FIELD;
+				}
 			}
 		}
 
@@ -310,10 +317,14 @@ public class Invoice {
 		if (m.find()) {
 			if (isValidCC(m.group(2) + m.group(3) + m.group(4))) {
 				Log.v(TAG, "Got amount. Check digit valid.");
-				amount = Integer.parseInt(m.group(2));
-				amountFractional = Short.parseShort(m.group(3));
-				checkDigitAmount = m.group(4);
-				fieldsDecoded += AMOUNT_FIELD;
+				if (!(Integer.parseInt(m.group(2)) == amount
+						&& Short.parseShort(m.group(3)) == amountFractional && m
+						.group(4).equals(checkDigitAmount))) {
+					amount = Integer.parseInt(m.group(2));
+					amountFractional = Short.parseShort(m.group(3));
+					checkDigitAmount = m.group(4);
+					fieldsDecoded += AMOUNT_FIELD;
+				}
 			} else
 				Log.e(TAG, "Got amount. Check digit invalid.");
 		}
@@ -321,11 +332,15 @@ public class Invoice {
 		/* Look for BG/PG number */
 		m = ACCOUNT_PATTERN.matcher(input);
 		if (m.find()) {
-			giroAccount = m.group(2);
-			internalDocumentType = Short.parseShort(m.group(3));
-			fieldsDecoded += GIRO_ACCOUNT_FIELD + DOCUMENT_TYPE_FIELD;
+			if (!(m.group(2).equals(giroAccount) && Short
+					.parseShort(m.group(3)) == internalDocumentType)) {
+				giroAccount = m.group(2);
+				internalDocumentType = Short.parseShort(m.group(3));
+				fieldsDecoded += GIRO_ACCOUNT_FIELD + DOCUMENT_TYPE_FIELD;
+			}
 		}
 		lastFieldsDecoded = fieldsDecoded;
+		Log.v(TAG, "Fields decoded: " + fieldsDecoded);
 		return fieldsDecoded;
 	}
 
@@ -359,6 +374,23 @@ public class Invoice {
 				+ (internalDocumentType != -1 ? internalDocumentType : "XX")
 				+ "#\t"
 				+ (isComplete() ? "Invoice complete" : "Invoice incomplete");
+	}
+
+	public void setAmount(int amount, short amountFractional) {
+		this.amount = amount;
+		this.amountFractional = amountFractional;
+	}
+
+	public void setDocumentType(short documentType) {
+		this.internalDocumentType = documentType;
+	}
+
+	public void setRawGiroAccount(String giroAccount) {
+		this.giroAccount = giroAccount;
+	}
+
+	public void setReference(String reference) {
+		this.reference = reference;
 	}
 
 }
