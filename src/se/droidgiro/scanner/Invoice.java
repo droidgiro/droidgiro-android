@@ -89,7 +89,8 @@ public class Invoice {
 	 * </ul>
 	 */
 	private static final Pattern OCR_PATTERN = Pattern
-			.compile("^(H#|#?)(\\d{1,24}(\\d))#(?!\\d{2}#)");
+//			.compile("^(H#|#?)(\\d{1,24}(\\d))#(?!\\d{2}#)");
+			.compile("^(H#|#?\\s*)(\\d{1,24}(\\d))\\s#(?!\\d{2}\\s#)");
 
 	/**
 	 * AMOUNT PATTERN
@@ -111,7 +112,8 @@ public class Invoice {
 	 * </ul>
 	 */
 	private static final Pattern AMOUNT_PATTERN = Pattern
-			.compile("(^|#)(\\d{1,8})(\\d{2})(\\d)>");
+//			.compile("(^|#)(\\d{1,8})(\\d{2})(\\d)>");
+			.compile("(^|#\\s*)(\\d{1,8})\\s(\\d{2})\\s*(\\d)\\s*>");
 
 	/**
 	 * BG/PG NUMBER PATTERN<br/>
@@ -135,7 +137,8 @@ public class Invoice {
 	 * </ul>
 	 */
 	private static final Pattern ACCOUNT_PATTERN = Pattern
-			.compile("(^|>)(\\d{7,8})#(\\d{2})#$");
+//			.compile("(^|>)(\\d{7,8})#(\\d{2})#$");
+			.compile("(^|>)\\s*(\\d{7,8})#(\\d{2})#\\s*$");
 
 	private String reference;
 
