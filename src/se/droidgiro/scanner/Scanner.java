@@ -31,14 +31,14 @@ import android.graphics.Canvas;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.Log;
 
 /**
- * A scanner object with methods to determine coordinates of black pixels in the
- * provided bitmap and compare sections of those black pixels to a list of
- * reference bitmaps.
+ * The bitmap analyzer for DroidGiro.
+ * Provides methods to determine coordinates of black and white sections in a
+ * bitmap, compare valid black sections to a list of reference bitmaps, and
+ * calculate whitespace amount based on the mean width of valid black sections.
  * 
  * @author wulax
  */
@@ -239,9 +239,8 @@ public class Scanner {
 	 */
 	protected List<Bitmap> foundNonContrastedBmps;
 	/**
-	 * The coordinates of the cound black pixel sections, as Rects.
+	 * A list of Section objects.
 	 */
-	protected List<Rect> targetRects;
 	protected List<Section> sectionList;
 	/**
 	 * The reference character bitmaps in a Map.
@@ -297,7 +296,7 @@ public class Scanner {
 	 */
 	public void scan() {
 		contrastBmp = setContrast(targetBmp, colorScale, colorScaleTranslate);
-		sectionList = findTargetRects(contrastBmp);
+		sectionList = getSections(contrastBmp);
 		if (sectionList != null) {
 			/*
 			 * It seems best to use the original bitmap for this method and
@@ -306,23 +305,12 @@ public class Scanner {
 			 * Scanner's bitmap comparison. It impacts performance, but it will
 			 * have to do for now.
 			 */
-//			foundContrastedBmps = uniformBitmapList(targetBmp, targetRects,
-//					refCharWidth, refCharHeight, true);
 			sectionList = uniformBitmapList(targetBmp, sectionList,
-					refCharWidth, refCharHeight, true);
-//			resultString = referenceCompare(foundContrastedBmps, charMap);
-			resultString = referenceCompare(sectionList, charMap);
+					refCharWidth, refCharHeight);
+			resultString = bitmapSectionComparison(sectionList, charMap);
 		} else {
 			resultString = null;
 		}
-	}
-
-	/**
-	 * @return A list containing coordinates of the black pixels expressed as
-	 *         Rect types.
-	 */
-	public List<Rect> getTargetPixels() {
-		return targetRects;
 	}
 
 	/**
@@ -357,27 +345,32 @@ public class Scanner {
 	 *         scanned bitmap.
 	 */
 	public Bitmap getDebugBitmap() {
-/*		debugBmps = new ArrayList<Bitmap>();
+		debugBmps = new ArrayList<Bitmap>();
 		debugBmps.add(getMatchingReferenceBitmap());
 		debugBmps.add(getContrastedDebugBitmap());
 		debugBmps.add(getNonContrastedDebugBitmap());
 		debugBmp = composeFromBitmapList(debugBmps, true);
-		return debugBmp; */
-		return targetBmp;
+		return debugBmp;
 	}
-/*
+
 	/**
-	 * @return A bitmap composed of all the character bitmaps that was found,
+	 * @return A bitmap composed of all the character bitmaps that were found,
 	 *         contrasted.
-	 *
+	 */
 	public Bitmap getContrastedDebugBitmap() {
+		foundContrastedBmps = new ArrayList<Bitmap>();
+		for (Section section : sectionList) {
+			if (section.valid && !section.whitespace) {
+				foundContrastedBmps.add(section.scaledContrastedBmp);
+			}
+		}
 		contrastedDebugBmp = composeFromBitmapList(foundContrastedBmps, false);
 		return contrastedDebugBmp;
 	}
 
 	/**
 	 * @return A bitmap composed of all the character reference bitmaps.
-	 *
+	 */
 	public Bitmap getReferenceBitmap() {
 		List<Bitmap> charList = new ArrayList<Bitmap>(charMap.values());
 		referenceBmp = composeFromBitmapList(charList, false);
@@ -387,7 +380,7 @@ public class Scanner {
 	/**
 	 * @return A bitmap composed of all the character reference bitmaps ordered
 	 *         to match the resulting string.
-	 *
+	 */
 	public Bitmap getMatchingReferenceBitmap() {
 		List<Bitmap> matchingBmpList = new ArrayList<Bitmap>();
 		if (resultString != null) {
@@ -406,15 +399,24 @@ public class Scanner {
 	/**
 	 * @return A bitmap composed of all the character bitmaps that was found,
 	 *         noncontrasted.
-	 *
+	 */
 	public Bitmap getNonContrastedDebugBitmap() {
-		foundNonContrastedBmps = uniformBitmapList(targetBmp, targetRects,
-				refCharWidth, refCharHeight, false);
+		foundNonContrastedBmps = new ArrayList<Bitmap>();
+		for (Section section : sectionList) {
+			if (section.valid && !section.whitespace) {
+				foundNonContrastedBmps.add(section.scaledBmp);
+			}
+		}
 		nonContrastedDebugBmp = composeFromBitmapList(foundNonContrastedBmps,
 				false);
 		return nonContrastedDebugBmp;
 	}
-*/
+
+	/**
+	 * Section objects holds the coordinates, corresponding bitmaps from the
+	 * target bitmap section analysis, and the resulting character from the
+	 * reference comparison.
+	 */
 	public class Section {
 		private Rect position;
 		public Boolean whitespace;
@@ -427,6 +429,7 @@ public class Scanner {
 		private int height;
 		private int width;
 		public Bitmap scaledBmp;
+		public Bitmap scaledContrastedBmp;
 		public Character bestChar;
 
 		public Section(Boolean whitespace, int left, int right) {
@@ -459,14 +462,15 @@ public class Scanner {
 	}
 
 	/**
-	 * Scans a bitmap for continuous black pixels and lists their coordinates in
-	 * the bitmap as Rects.
+	 * Determines coordinates of valid black and white sections, checks if
+	 * black sections are valid and calculates whitespace amount based on the
+	 * mean width of valid black sections.
 	 * 
 	 * @param bmp
 	 *            The bitmap to be scanned.
-	 * @return A List of coordinates in types Rect.
+	 * @return A list of Section objects or null if no valid sections were found.
 	 */
-	protected List<Section> findTargetRects(Bitmap bmp) {
+	protected List<Section> getSections(Bitmap bmp) {
 		/* Scan columns */
 		List<Section> sectionList = new ArrayList<Section>();
 		long fullCol = black * targetBmpHeight;
@@ -526,17 +530,15 @@ public class Scanner {
 			return null;
 		}
 		/* Scan rows of gathered cols containing black pixels */
-		ListIterator<Section> columnIter = sectionList.listIterator();
-		while (columnIter.hasNext()) {
+		for (Section section : sectionList) {
 			lastFalse = -2;
 			lastTrue = -2;
 			lastTopBlack = -2;
 			lastBottomBlack = -2;
 			lastTopWhite = -2;
 			lastBottomWhite = -2;
-			Section section = columnIter.next();
 			if (!section.whitespace) {
-				List<Rect> rowRects = new ArrayList<Rect>();
+				List<Rect> verticalRects = new ArrayList<Rect>();
 				int sectionWidth = section.getWidth();
 				int emptyRow = sectionWidth * white;
 				for (int y = 0; y < targetBmpHeight; ++y) {
@@ -555,7 +557,7 @@ public class Scanner {
 							lastBottomBlack = y;
 							Rect r = new Rect(section.left, lastTopBlack,
 									section.right, lastBottomBlack);
-							rowRects.add(r);
+							verticalRects.add(r);
 						} else if ((y - 1 == lastFalse)) {
 							lastTopBlack = y;
 							lastBottomWhite = y -1;
@@ -573,15 +575,13 @@ public class Scanner {
 							lastTopWhite = y;
 							Rect r = new Rect(section.left, lastTopBlack,
 									section.right, lastBottomBlack);
-							rowRects.add(r);
+							verticalRects.add(r);
 						}
 					}
 				}
 				/* Check if list of rects in nonblank section contains valid */
 				int validRects = 0;
-				ListIterator<Rect> rowRectIter = rowRects.listIterator();
-				while (rowRectIter.hasNext()) {
-					Rect r = rowRectIter.next();
+				for (Rect r : verticalRects) {
 					if (isValidCharRect(r)) {
 						validRects++;
 						section.valid = true;
@@ -602,6 +602,7 @@ public class Scanner {
 			int sectionIndex = sectionIter.nextIndex();
 			if (!section.whitespace) {
 				if (!section.valid) {
+				/* Set invalid nonblank section to whitespace */
 					section.whitespace = true;
 				} else if (section.valid && sectionIndex != 1) {
 					int prevSectionIndex = sectionIndex -2;
@@ -636,10 +637,8 @@ public class Scanner {
 				}
 			}
 		}
-		/* Split whitespace sections */
-		ListIterator<Section> whiteSplitIter = sectionList.listIterator();
-		while (whiteSplitIter.hasNext()) {
-			Section section = whiteSplitIter.next();
+		/* Calculate whitespace amount */
+		for (Section section : sectionList) {
 			if (section.whitespace && section.getWidth() > meanValidBlackWidth) {
 				section.valid = true;
 				section.whitespaceCount = section.getWidth() / whitespaceWidth;
@@ -648,6 +647,10 @@ public class Scanner {
 		return sectionList;
 	}
 
+	/**
+	 * Determines whether a Rect has the correct dimensions for a character.
+	 * @param rect The Rect to be validated.
+	 */
 	protected Boolean isValidCharRect(Rect rect) {
 		if ((rect.width() > charMinWidth)
 			&& (rect.width() < charMaxWidth)
@@ -665,48 +668,40 @@ public class Scanner {
 	}
 
 	/**
-	 * Creates a List of bitmaps and scales them uniformly.
+	 * Adds uniformly scaled bitmaps to the Section list based on their
+	 * coordinates.
 	 * 
-	 * @param bmp
-	 *            The source bitmap.
-	 * @param coordList
-	 *            A list containing coordinates expressed as Rects
+	 * @param targetBmp
+	 *            The target bitmap.
+	 * @param sectionList
+	 *            The list of Section objects.
 	 * @param toWidth
 	 *            The target width to scale the bitmaps into.
 	 * @param toHeight
 	 *            The target height to scale the bitmaps into.
-	 * @param contrast
-	 *            True if bitmap should be contrasted.
-	 * @return The list of scaled bitmaps.
+	 * @return The list of Section objects with bitmaps added.
 	 */
-	protected List<Section> uniformBitmapList(Bitmap bmp, List<Section> coordList,
-			int toWidth, int toHeight, boolean contrast) {
-//		List<Bitmap> bmpList = new ArrayList<Bitmap>();
-//		ListIterator<Rect> coordRects = coordList.listIterator();
-		ListIterator<Section> coordRects = coordList.listIterator();
-		while (coordRects.hasNext()) {
-//			Rect targetRect = coordRects.next();
-			Section section = coordRects.next();
+	protected List<Section> uniformBitmapList(Bitmap targetBmp,
+			List<Section> sectionList, int toWidth, int toHeight) {
+		for (Section section : sectionList) {
 			if (!section.whitespace && section.valid) {
 				Rect targetRect = section.getRect();
 				int[] pixels;
 				pixels = new int[targetRect.height() * targetRect.width()];
-				bmp.getPixels(pixels, 0, targetRect.width(), targetRect.left,
+				targetBmp.getPixels(pixels, 0, targetRect.width(), targetRect.left,
 						targetRect.top, targetRect.width(), targetRect.height());
 				Bitmap nonscaledBmp = Bitmap.createBitmap(pixels, 0, targetRect
 						.width(), targetRect.width(), targetRect.height(),
 						Bitmap.Config.RGB_565);
 				Bitmap scaledBmp = Bitmap.createScaledBitmap(nonscaledBmp, toWidth,
 						toHeight, true);
-				if (contrast) {
-					scaledBmp = setContrast(scaledBmp, colorScale,
-							colorScaleTranslate);
-				}
-//			bmpList.add(scaledBmp);
 				section.scaledBmp = scaledBmp;
+				Bitmap scaledContrastedBmp = setContrast(scaledBmp, colorScale,
+						colorScaleTranslate);
+				section.scaledContrastedBmp = scaledContrastedBmp;
 			}
 		}
-		return coordList;
+		return sectionList;
 	}
 
 	/**
@@ -844,27 +839,23 @@ public class Scanner {
 	 * Compare the list of collected bitmaps to the reference bitmaps and
 	 * interpret the best matching reference to a string.
 	 * 
-	 * @param bmpList
-	 *            The list of bitmaps to compare.
+	 * @param sectionList
+	 *            The list of Section objects.
 	 * @param charMap
 	 *            A map with character as key and corresponding bitmap as value.
 	 * @return The resulting string
 	 */
-	protected String referenceCompare(List<Section> bmpList,
+	protected String bitmapSectionComparison(List<Section> sectionList,
 			Map<Character, Bitmap> charMap) {
 		calculateMatchTolerencePixels();
 		StringBuffer result = new StringBuffer();
-//		ListIterator<Bitmap> li = bmpList.listIterator();
-		ListIterator<Section> li = bmpList.listIterator();
 		Bitmap currentCharBmp;
 		Character currentChar;
 		int midCharRow = refCharHeight/2;
-		/* Iterate over the target bitmap list. */
-		while (li.hasNext()) {
-			Section section = li.next();
-//			Bitmap bmp = li.next();
+		/* Iterate over the Section list. */
+		for (Section section : sectionList) {
 			if (!section.whitespace && section.valid) {
-				Bitmap bmp = section.scaledBmp;
+				Bitmap bmp = section.scaledContrastedBmp;
 				Character bestChar = (char) 88;
 				float bestScore = minInitMatchPercent;
 				Iterator<Entry<Character, Bitmap>> it = charSet.iterator();
@@ -876,7 +867,7 @@ public class Scanner {
 					Map.Entry<Character, Bitmap> charSetEntry = it.next();
 					currentChar = (Character) charSetEntry.getKey();
 					currentCharBmp = (Bitmap) charSetEntry.getValue();
-					/* Iterate over pixels in the target bitmap. */
+					/* Iterate over pixels in the target section. */
 					currentCharLoop:
 					for (int y = 0; y != -1;) {
 						for (int x = 0; x < refCharWidth; x += compareColSpacing) {
@@ -924,19 +915,16 @@ public class Scanner {
 						bestChar = currentChar;
 					}
 				}
-//			result.append(bestChar);
 			section.bestChar = bestChar;
 			}
 		}
-		ListIterator<Section> sectionIter = bmpList.listIterator();
-		while (sectionIter.hasNext()) {
-			Section section = sectionIter.next();
+		for (Section section : sectionList) {
 			if (section.valid) {
 				if (!section.whitespace) {
 					result.append(section.bestChar);
 				} else {
 					for(int i=0; i < section.whitespaceCount; i++) {
-						result.append(" ");
+						result.append((char)32);
 					}
 				}
 			}
