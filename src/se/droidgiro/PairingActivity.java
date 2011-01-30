@@ -20,15 +20,20 @@ import se.droidgiro.scanner.CloudClient;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
+import android.text.SpannableString;
 import android.text.TextWatcher;
+import android.text.util.Linkify;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class PairingActivity extends Activity {
@@ -59,6 +64,19 @@ public class PairingActivity extends Activity {
 		digit2.addTextChangedListener(dw);
 		digit3.addTextChangedListener(dw);
 		digit4.addTextChangedListener(dw);
+		
+		TextView serverLinkTextView = (TextView) findViewById(R.id.pairHelp);
+		SpannableString str = SpannableString.valueOf(serverLinkTextView
+				.getText());
+		Linkify.addLinks(str, Linkify.ALL);
+		serverLinkTextView.setText(str);
+		serverLinkTextView.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				Intent myIntent = new Intent(Intent.ACTION_VIEW, Uri
+						.parse("http://droidgiro.se"));
+				startActivity(myIntent);
+			}
+		});
 	}
 
 	@Override

@@ -27,6 +27,9 @@
 	<string name="scan_state_pause">Pausa</string>
 	<string name="scan_state_scan">Skanna</string>
 	<string name="get_pin">Hämta din PIN-kod från Chrome-tillägget</string>
+	<string name="pair_help">För hjälp, besök http://droidgiro.se. Där kan du
+		också se vilka banker som stöds och hur du kan hjälpa till med stöd för
+		nya banker.</string>
 	<string name="pairing_msg">Ansluter till webbläsaren</string>
 	<string name="pairing_failed">PIN-koden är inte giltig</string>
 </resources>

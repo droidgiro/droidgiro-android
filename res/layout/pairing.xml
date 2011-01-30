@@ -1,11 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_height="wrap_content" android:layout_width="wrap_content"
-	android:id="@+id/pairLayout" android:layout_gravity="center_horizontal">
+	android:id="@+id/pairLayout" android:layout_gravity="center_horizontal"
+	android:orientation="vertical">
+	<!-- 
+	<Button android:layout_width="wrap_content"
+		android:layout_height="wrap_content" android:id="@+id/debugBypass"
+		android:text="Debug bypass" android:layout_centerHorizontal="true"
+		android:onClick="bypass"></Button>
+	-->
 	<LinearLayout android:layout_width="fill_parent"
 		android:layout_height="wrap_content" android:id="@+id/pinLayout"
 		android:layout_alignParentLeft="true" android:layout_centerVertical="true"
-		android:gravity="center_horizontal" android:paddingTop="50dp">
+		android:gravity="center_horizontal" android:layout_marginTop="50dp">
 
 		<EditText android:id="@+id/pairDigit1"
 			android:layout_alignParentLeft="true" android:layout_height="wrap_content"
@@ -30,14 +37,18 @@
 
 	</LinearLayout>
 	<TextView android:id="@+id/pairDescription"
-		android:layout_width="wrap_content" android:layout_height="wrap_content"
-		android:layout_below="@+id/pinLayout" android:layout_centerHorizontal="true"
-		android:paddingTop="15dp" android:text="@string/get_pin"></TextView>
+		android:layout_height="wrap_content" android:layout_below="@+id/pinLayout"
+		android:layout_centerHorizontal="true" android:text="@string/get_pin"
+		android:layout_width="fill_parent" android:gravity="center_horizontal"></TextView>
 
 
-<!--  
-	<Button android:layout_width="wrap_content"
-		android:layout_height="wrap_content" android:id="@+id/debugBypass"
-		android:text="Debug bypass" android:layout_centerHorizontal="true" android:onClick="bypass"></Button>
--->
-</RelativeLayout>
+
+	<TextView android:layout_below="@+id/pairDescription"
+		android:layout_height="wrap_content" android:layout_width="wrap_content"
+		android:layout_centerHorizontal="true" android:id="@+id/pairHelp"
+		android:text="@string/pair_help" android:layout_marginTop="35dp"></TextView>
+	
+
+
+
+</LinearLayout>
