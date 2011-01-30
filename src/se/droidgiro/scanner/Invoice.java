@@ -71,12 +71,16 @@ public class Invoice {
 	 * OCR PATTERN
 	 * <ul>
 	 * <li>Start of string</li>
-	 * <li>followed by H# OR</li>
-	 * <li>&nbsp;&nbsp;&nbsp;&nbsp;followed by an optional #
+	 * <li>followed by H, one or more spaces and # OR</li>
+	 * <li>&nbsp;&nbsp;&nbsp;&nbsp;followed by an optional # and one or more
+	 * spaces
 	 * <em>(optional because the user might not have included the # left to the OCR
 	 * number)</em></li>
 	 * <li>followed by 2 to 25 digits <em>(the OCR number)</em></li>
+	 * <li>followed by one to three spaces,
 	 * <li>followed by a #</li>
+	 * <li>followed by one or more spaces (this means you MUST include at least
+	 * one space after the OCR reference!)</li>
 	 * <li><strong>NOT</strong> followed by two digits and #
 	 * <em>(because in that case we have read the BG/PG
 	 * account number)</em></li>
@@ -89,18 +93,20 @@ public class Invoice {
 	 * </ul>
 	 */
 	private static final Pattern OCR_PATTERN = Pattern
-//			.compile("^(H#|#?)(\\d{1,24}(\\d))#(?!\\d{2}#)");
-			.compile("^(H#|#?\\s*)(\\d{1,24}(\\d))\\s#(?!\\d{2}\\s#)");
+			.compile("^(H\\s+#|#?\\s+)(\\d{1,24}(\\d))\\s{1,3}#\\s+(?!\\d{2}#)");
 
 	/**
 	 * AMOUNT PATTERN
 	 * <ul>
-	 * <li>Start of string OR</li>
-	 * <li>&nbsp;&nbsp;&nbsp;&nbsp;#</li>
+	 * <li>Start of string and zero or more spaces OR</li>
+	 * <li>&nbsp;&nbsp;&nbsp;&nbsp;# and one or more spaces</li>
 	 * <li>followed by 1 to 8 digits <em>(the
-	 * amount) followed by 2 digits (šre, the fractional part of total amount)</em>
-	 * </li>
+	 * amount)</li>
+	 * <li>followed by one or more spaces</li>
+	 * <li> followed by 2 digits (šre, the fractional part of total amount)</em></li>
+	 * <li>followed by one to three spaces</li>
 	 * <li>followed by 1 digit <em>(check)</em></li>
+	 * <li>followed by zero or more spaces</li>
 	 * <li>followed by a ></li>
 	 * </ul>
 	 * Result:<br/>
@@ -112,20 +118,21 @@ public class Invoice {
 	 * </ul>
 	 */
 	private static final Pattern AMOUNT_PATTERN = Pattern
-//			.compile("(^|#)(\\d{1,8})(\\d{2})(\\d)>");
-			.compile("(^|#\\s*)(\\d{1,8})\\s(\\d{2})\\s*(\\d)\\s*>");
+			.compile("(^\\s*|#\\s+)(\\d{1,8})\\s+(\\d{2})\\s{1,3}(\\d)\\s>");
 
 	/**
 	 * BG/PG NUMBER PATTERN<br/>
 	 * <ul>
-	 * <li>Start of string OR</li>
-	 * <li>&nbsp;&nbsp;&nbsp;&nbsp;></li>
+	 * <li>Start of string and zero or more spaces OR</li>
+	 * <li>&nbsp;&nbsp;&nbsp;&nbsp;> and one or more spaces</li>
 	 * <li>followed by 7 to 8 digits <em>(the
 	 * BG/PG account number)</em></li>
+	 * <li>followed by an optional space</li>
 	 * <li>followed by a #</li>
 	 * <li>followed by 2 digits <em>(the internal
 	 * document type)</em></li>
 	 * <li>followed by a #</li>
+	 * <li>followed by zero or more spaces</li>
 	 * <li>followed by end of string</li>
 	 * </ul>
 	 * 
@@ -137,8 +144,7 @@ public class Invoice {
 	 * </ul>
 	 */
 	private static final Pattern ACCOUNT_PATTERN = Pattern
-//			.compile("(^|>)(\\d{7,8})#(\\d{2})#$");
-			.compile("(^|>)\\s*(\\d{7,8})#(\\d{2})#\\s*$");
+			.compile("(^\\s*|>\\s+)(\\d{7,8})\\s?#(\\d{2})#\\s*$");
 
 	private String reference;
 
@@ -238,7 +244,7 @@ public class Invoice {
 		} else
 			return giroAccount;
 	}
-	
+
 	public String getRawGiroAccount() {
 		return giroAccount;
 	}
@@ -303,6 +309,7 @@ public class Invoice {
 	 *         considered "found" if its value has already been read.
 	 */
 	public int parse(String input) {
+		Log.v(TAG, "Parsing " + input);
 		int fieldsDecoded = 0;
 		/* Look for reference number */
 		Matcher m = OCR_PATTERN.matcher(input);
@@ -343,7 +350,6 @@ public class Invoice {
 			}
 		}
 		lastFieldsDecoded = fieldsDecoded;
-		Log.v(TAG, "Fields decoded: " + fieldsDecoded);
 		return fieldsDecoded;
 	}
 
