@@ -138,7 +138,6 @@ public final class CaptureActivity extends ListActivity implements
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
 		currentInvoice = new Invoice();
-		Log.d(TAG, "onCreate");
 		channel = getIntent().getStringExtra("channel");
 		if (channel == null)
 			finish();
@@ -199,7 +198,6 @@ public final class CaptureActivity extends ListActivity implements
 	protected void onResume() {
 		super.onResume();
 		resetStatusView();
-		Log.d(TAG, "onResume");
 
 		SurfaceView surfaceView = (SurfaceView) findViewById(R.id.preview_view);
 		SurfaceHolder surfaceHolder = surfaceView.getHolder();
@@ -280,6 +278,10 @@ public final class CaptureActivity extends ListActivity implements
 			hasSurface = true;
 			initCamera(holder);
 		}
+	}
+
+	public boolean isPaused() {
+		return paused;
 	}
 
 	public void surfaceDestroyed(SurfaceHolder holder) {
