@@ -33,8 +33,10 @@
     </activity>
     <activity android:name=".About"
               android:screenOrientation="portrait"
+              android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
               android:configChanges="orientation"
-              android:windowSoftInputMode="stateAlwaysVisible">              
+              android:windowSoftInputMode="stateAlwaysHidden">
+<!--          android:windowSoftInputMode="stateAlwaysVisible"              -->
     </activity>
     
     <activity android:name=".PairingActivity"
@@ -48,6 +50,7 @@
             </intent-filter>
     </activity>
     <activity android:name=".PreferencesActivity"
+              android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
               android:label="@string/preferences_name">
     </activity>
   </application>

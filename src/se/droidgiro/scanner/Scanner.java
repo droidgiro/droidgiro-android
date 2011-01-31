@@ -115,8 +115,8 @@ public class Scanner {
 	 */
 	protected boolean charAlwaysPortrait = true;
 	/**
-	 * The minimum lenght the interpreted string must have for the scanner to
-	 * produce a result.
+	 * The minimum amount of characters the resulting string must have for the
+	 * scanner to return the string.
 	 */
 	protected int minResultLength = 4;
 	/**
@@ -438,6 +438,7 @@ public class Scanner {
 			this.right = right;
 		}
 
+		// TODO: Must check if Rect needs to be recalculated each time.
 		public Rect getRect() {
 			position = new Rect(left, top, right, bottom);
 			return position;
@@ -497,12 +498,13 @@ public class Scanner {
 				lastTrue = x;
 				if (x == 0) {
 					lastLeftBlack = x;
-				} else if ((x - 1 == lastFalse)) {
+				} else if (x - 1 == lastFalse) {
 					lastLeftBlack = x;
 					lastRightWhite = x -1;
 					Section s = new Section(true, lastLeftWhite, lastRightWhite);
 					sectionList.add(s);
-				} else if (x == targetBmpWidth - 1) {
+				} else if (x == targetBmpWidth - 1
+						&& lastLeftBlack != -2) {
 					lastRightBlack = x;
 					Section s = new Section(false, lastLeftBlack, lastRightBlack);
 					sectionList.add(s);
@@ -512,13 +514,14 @@ public class Scanner {
 				lastFalse = x;
 				if (x == 0) {
 					lastLeftWhite = x;
-				} else if ((x - 1 == lastTrue)) {
+				} else if (x - 1 == lastTrue) {
 					lastRightBlack = x -1;
 					lastLeftWhite = x;
 					Section s = new Section(false, lastLeftBlack, lastRightBlack);
 					sectionList.add(s);
 					blackSections++;
-				} else if (x == targetBmpWidth - 1) {
+				} else if (x == targetBmpWidth - 1
+						&& lastLeftWhite != -2) {
 					lastRightWhite = x;
 					Section s = new Section(true, lastLeftWhite, lastRightWhite);
 					sectionList.add(s);
@@ -553,12 +556,13 @@ public class Scanner {
 						lastTrue = y;
 						if (y == 0) {
 							lastTopBlack = y;
-						} else if (y == targetBmpHeight - 1) {
+						} else if (y == targetBmpHeight - 1 &&
+								lastTopBlack != -2) {
 							lastBottomBlack = y;
 							Rect r = new Rect(section.left, lastTopBlack,
 									section.right, lastBottomBlack);
 							verticalRects.add(r);
-						} else if ((y - 1 == lastFalse)) {
+						} else if (y - 1 == lastFalse) {
 							lastTopBlack = y;
 							lastBottomWhite = y -1;
 							//ignore vertical whitespace
@@ -567,10 +571,11 @@ public class Scanner {
 						lastFalse = y;
 						if (y == 0) {
 							lastTopWhite = y;
-						} else if (y == targetBmpHeight - 1) {
+						} else if (y == targetBmpHeight - 1 &&
+								lastTopWhite != -2) {
 							lastBottomWhite = y;
 							//ignore vertical whitespace
-						} else if ((y - 1 == lastTrue)) {
+						} else if (y - 1 == lastTrue) {
 							lastBottomBlack = y -1;
 							lastTopWhite = y;
 							Rect r = new Rect(section.left, lastTopBlack,
@@ -622,7 +627,7 @@ public class Scanner {
 			return null;
 		}
 		/* Calculate whitespace width */
-		int whitespaceWidth =  validBlackPlusInvalidWhiteSum / validBlack;
+		int whitespaceWidth = validBlackPlusInvalidWhiteSum / validBlack;
 		int meanValidBlackWidth = validBlackWidthSum / validBlack;
 		/* Join consecutive whitespace sections */
 		ListIterator<Section> whitespaceIter = sectionList.listIterator();
