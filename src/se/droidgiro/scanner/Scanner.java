@@ -438,9 +438,11 @@ public class Scanner {
 			this.right = right;
 		}
 
-		// TODO: Must check if Rect needs to be recalculated each time.
+		// TODO: Not sure why +1 is needed for right and bottom, probably I have
+		// confused bitmap size vs pixel coordinates somewhere. This will do for
+		// now though it seems.
 		public Rect getRect() {
-			position = new Rect(left, top, right, bottom);
+			position = new Rect(left, top, right+1, bottom+1);
 			return position;
 		}
 
@@ -452,7 +454,7 @@ public class Scanner {
 		}
 
 		public int getWidth() {
-			width = right - left;
+			width = right - left +1;
 			return width;
 		}
 
@@ -477,8 +479,8 @@ public class Scanner {
 		long fullCol = black * targetBmpHeight;
 		long emptyCol = white * targetBmpHeight;
 		int blackSections = 0;
-		int lastFalse = -2;
-		int lastTrue = -2;
+		int lastWhite = -2;
+		int lastBlack = -2;
 		int lastLeftBlack = -2;
 		int lastRightBlack = -2;
 		int lastLeftWhite = -2;
@@ -495,12 +497,12 @@ public class Scanner {
 				colSum += p;
 			}
 			if (colSum < emptyCol && colSum > fullCol) {
-				lastTrue = x;
+				lastBlack = x;
 				if (x == 0) {
 					lastLeftBlack = x;
-				} else if (x - 1 == lastFalse) {
+				} else if (x - 1 == lastWhite) {
 					lastLeftBlack = x;
-					lastRightWhite = x -1;
+					lastRightWhite = x - 1;
 					Section s = new Section(true, lastLeftWhite, lastRightWhite);
 					sectionList.add(s);
 				} else if (x == targetBmpWidth - 1
@@ -511,11 +513,11 @@ public class Scanner {
 					blackSections++;
 				}
 			} else {
-				lastFalse = x;
+				lastWhite = x;
 				if (x == 0) {
 					lastLeftWhite = x;
-				} else if (x - 1 == lastTrue) {
-					lastRightBlack = x -1;
+				} else if (x - 1 == lastBlack) {
+					lastRightBlack = x - 1;
 					lastLeftWhite = x;
 					Section s = new Section(false, lastLeftBlack, lastRightBlack);
 					sectionList.add(s);
@@ -534,8 +536,8 @@ public class Scanner {
 		}
 		/* Scan rows of gathered cols containing black pixels */
 		for (Section section : sectionList) {
-			lastFalse = -2;
-			lastTrue = -2;
+			lastWhite = -2;
+			lastBlack = -2;
 			lastTopBlack = -2;
 			lastBottomBlack = -2;
 			lastTopWhite = -2;
@@ -553,7 +555,7 @@ public class Scanner {
 						rowSum += p;
 					}
 					if (rowSum < emptyRow) {
-						lastTrue = y;
+						lastBlack = y;
 						if (y == 0) {
 							lastTopBlack = y;
 						} else if (y == targetBmpHeight - 1 &&
@@ -562,20 +564,20 @@ public class Scanner {
 							Rect r = new Rect(section.left, lastTopBlack,
 									section.right, lastBottomBlack);
 							verticalRects.add(r);
-						} else if (y - 1 == lastFalse) {
+						} else if (y - 1 == lastWhite) {
 							lastTopBlack = y;
 							lastBottomWhite = y -1;
 							//ignore vertical whitespace
 						}
 					} else {
-						lastFalse = y;
+						lastWhite = y;
 						if (y == 0) {
 							lastTopWhite = y;
 						} else if (y == targetBmpHeight - 1 &&
 								lastTopWhite != -2) {
 							lastBottomWhite = y;
 							//ignore vertical whitespace
-						} else if (y - 1 == lastTrue) {
+						} else if (y - 1 == lastBlack) {
 							lastBottomBlack = y -1;
 							lastTopWhite = y;
 							Rect r = new Rect(section.left, lastTopBlack,
@@ -598,6 +600,7 @@ public class Scanner {
 				}
 			}
 		}
+		int minValidBlack = 2;
 		int validBlack = 0;
 		int validBlackWidthSum = 0;
 		int validBlackPlusInvalidWhiteSum = 0;
@@ -622,8 +625,9 @@ public class Scanner {
 				}
 			}
 		}
-		/* Stop if no valid black sections are found */
-		if (validBlack < minResultLength) {
+		/* Stop if not enough valid black sections are found for calculating
+		** whitespace */
+		if (validBlack < minValidBlack) {
 			return null;
 		}
 		/* Calculate whitespace width */
