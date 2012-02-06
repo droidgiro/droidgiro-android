@@ -371,7 +371,7 @@ public final class CaptureActivity extends ListActivity implements
 		// if (fieldsScanned > 0) {
 		// playBeepSoundAndVibrate();
 		// final List<NameValuePair> params = new ArrayList<NameValuePair>();
-		// if ((fieldsScanned & Invoice.AMOUNﬁT_FIELD) == Invoice.AMOUNT_FIELD)
+		// if ((fieldsScanned & Invoice.AMOUNÔøΩT_FIELD) == Invoice.AMOUNT_FIELD)
 		// params.add(new BasicNameValuePair("amount", invoice
 		// .getCompleteAmount()));
 		// if ((fieldsScanned & Invoice.DOCUMENT_TYPE_FIELD) ==
@@ -430,8 +430,8 @@ public final class CaptureActivity extends ListActivity implements
 					boolean res = CloudClient.postFields(fields);
 					Log.v(TAG, "Result from posting invoice " + fields
 							+ " to channel " + channel + ": " + res);
-					final String msg = (res ? "Fält har skickats till webbläsaren"
-							: "Kunde inte skicka fält till webbläsaren");
+					final String msg = (res ? "F√§lt har skickats till webbl√§saren"
+							: "Kunde inte skicka f√§lt till webbl√§saren");
 
 					handler.post(new Runnable() {
 

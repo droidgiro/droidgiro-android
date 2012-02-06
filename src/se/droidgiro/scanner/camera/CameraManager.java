@@ -145,7 +145,7 @@ public final class CameraManager {
 			// Parameters ps = camera.getParameters();
 			// ps.setFlashMode(Camera.Parameters.FLASH_MODE_ON);
 			// camera.setParameters(ps);
-//			camera.setDisplayOrientation(90);
+			// camera.setDisplayOrientation(90);
 			Log.d(TAG, "camera open");
 			if (camera == null) {
 				throw new IOException();
@@ -229,9 +229,13 @@ public final class CameraManager {
 	 */
 	public void requestAutoFocus(Handler handler, int message) {
 		if (camera != null && previewing) {
-			autoFocusCallback.setHandler(handler, message);
-			// Log.d(TAG, "Requesting auto-focus callback");
-			camera.autoFocus(autoFocusCallback);
+			try {
+				autoFocusCallback.setHandler(handler, message);
+				// Log.d(TAG, "Requesting auto-focus callback");
+				camera.autoFocus(autoFocusCallback);
+			} catch (RuntimeException e) {
+				Log.e(TAG, e.getMessage());
+			}
 		}
 	}
 
